@@ -38,10 +38,10 @@
     <strong>Helf’ uns, dieses Gefühl sichtbar zu machen!</strong>
   </div>
   <div id="map"></div>
-  <div class="hint">Klicke auf die Karte, um dein Licht zu setzen ✨ (Testfunktion)</div>
+  <div class="hint">Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)</div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // Initialisiere die Karte
+    // Karte initialisieren
     var map = L.map('map').setView([20, 0], 2);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -49,9 +49,31 @@
       maxZoom: 18,
     }).addTo(map);
 
-    // Klicken auf die Karte: Marker setzen (Testmodus!)
+    // Funktion zum Marker speichern/lesen im Browser (localStorage)
+    function saveLight(latlng) {
+      localStorage.setItem('myLight', JSON.stringify(latlng));
+    }
+    function loadLight() {
+      const data = localStorage.getItem('myLight');
+      return data ? JSON.parse(data) : null;
+    }
+
+    // Nur ein Marker pro Nutzer
+    var myMarker = null;
+    var saved = loadLight();
+    if(saved) {
+      myMarker = L.marker(saved).addTo(map).bindPopup('Das ist dein Licht!').openPopup();
+      map.setView(saved, 3);
+    }
+
+    // Klick: Marker neu setzen/verschieben
     map.on('click', function(e) {
-      L.marker(e.latlng).addTo(map).bindPopup('Hier leuchtet jetzt dein Licht!').openPopup();
+      if(myMarker) {
+        myMarker.setLatLng(e.latlng).openPopup();
+      } else {
+        myMarker = L.marker(e.latlng).addTo(map).bindPopup('Das ist dein Licht!').openPopup();
+      }
+      saveLight(e.latlng);
     });
   </script>
 </body>
