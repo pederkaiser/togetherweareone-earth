@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Weltkarte – togetherweareone.earth</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-sA+z0ymHEk1tZmK5f+IC1Ga5hhpEC5L1d36P6ow5Q0M="
+    crossorigin=""
+  />
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #map { width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-QVbX2heNhcW5Zdd7QitEJflSPc1Luq+QTtuvN3XoSxw="
+    crossorigin=""
+  ></script>
+  <script>
+    // Weltkarte anzeigen
+    var map = L.map('map').setView([20, 0], 2);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19,
+    }).addTo(map);
+
+    // Beispielpunkt (kann später dynamisch ergänzt werden)
+    // L.marker([51.5, -0.09]).addTo(map).bindPopup('Hier leuchtet ein Licht!');
+  </script>
+</body>
+</html>
