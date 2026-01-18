@@ -75,17 +75,14 @@
       margin:0;
       padding:8px 10px 10px 10px;
       min-height:3.2em;
-      hyphens: none;
     }
     /* Zeilenumbruch: aktiv */
     .tp-word{
-  color: var(--ghost);
-  transition: color 160ms ease, filter 160ms ease;
-  white-space: normal;
-  hyphens: none;            /* keine Silbentrennung */
-  overflow-wrap: normal;    /* nicht mitten im Wort umbrechen */
-  word-break: keep-all;     /* Wörter zusammenhalten (für Sprachen mit Leerzeichen) */
-}
+      color: var(--ghost);
+      transition: color 160ms ease, filter 160ms ease;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
     .tp-space{ white-space: pre; }
     .tp-word.done{
       color: var(--warm);
@@ -486,6 +483,43 @@ const map = L.map('map', {
   maxBounds: WORLD_BOUNDS,
   maxBoundsViscosity: 1.0
 }).setView(WORLD_VIEW.center, WORLD_VIEW.zoom);
+
+  // Ghost-Light: folgt dem Cursor, zeigt "hier wird das Licht gesetzt"
+const ghost = L.circleMarker([0,0], {
+  renderer: canvasRenderer,
+  radius: 10,
+  stroke: false,
+  fill: true,
+  fillOpacity: 0.10,
+  fillColor: "rgba(255,220,170,1)",
+  interactive: false
+}).addTo(map);
+
+const ghostCore = L.circleMarker([0,0], {
+  renderer: canvasRenderer,
+  radius: 2.2,
+  stroke: false,
+  fill: true,
+  fillOpacity: 0.75,
+  fillColor: "rgba(255,250,245,1)",
+  interactive: false
+}).addTo(map);
+
+// nur anzeigen, wenn Maus über der Karte ist
+map.on("mouseover", () => {
+  ghost.setStyle({ fillOpacity: 0.10 });
+  ghostCore.setStyle({ fillOpacity: 0.75 });
+});
+map.on("mouseout", () => {
+  ghost.setStyle({ fillOpacity: 0.0 });
+  ghostCore.setStyle({ fillOpacity: 0.0 });
+});
+
+// Cursor-Bewegung
+map.on("mousemove", (e) => {
+  ghost.setLatLng(e.latlng);
+  ghostCore.setLatLng(e.latlng);
+});
 
 /* Tile layers (mit/ohne Labels) */
 const tileUrlLabels   = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
