@@ -75,19 +75,23 @@
       min-height: 3.2em;
     }
 
-    /* Voller Satz immer sichtbar ("ghost"), nur Highlight wandert */
+    /* Voller Satz immer sichtbar ("ghost") */
     .tp-word{
       color: var(--ghost);
       transition: color 160ms ease, filter 160ms ease, opacity 160ms ease;
-      white-space: pre; /* Leerzeichen exakt beibehalten */
+      white-space: pre;
     }
-    .tp-word.active{
-      color: var(--text);
-      filter: drop-shadow(0 0 14px rgba(255,255,255,0.14));
-    }
-    .tp-word.active.warm{
+
+    /* Bereits "aufgebaut" (bleibt warm/hell) */
+    .tp-word.done{
       color: var(--warm);
-      filter: drop-shadow(0 0 18px rgba(255,210,140,0.22));
+      filter: drop-shadow(0 0 12px rgba(255,210,140,0.18));
+    }
+
+    /* Aktives Wort (ein Tick heller als done) */
+    .tp-word.active{
+      color: rgba(255,245,235,0.98);
+      filter: drop-shadow(0 0 18px rgba(255,210,140,0.26));
     }
 
     .tp-meta{
@@ -143,13 +147,10 @@
     }
     #map{ width: 100%; height: min(62vh, 520px); }
 
-    /* “Night”-Mood ohne Kontinente zu verlieren:
-       -> Tiles nur leicht abdunkeln + Kontrast etwas hoch */
     .leaflet-tile{
       filter: brightness(0.88) contrast(1.10) saturate(0.95);
     }
 
-    /* Subtiles dunkles Overlay (Kontinente bleiben sichtbar) */
     .mapShade{
       pointer-events:none;
       position:absolute; inset:0;
@@ -190,7 +191,6 @@
       font-size: 14px;
     }
 
-    /* kleine Statuszeile */
     .status{
       text-align:center;
       color: rgba(255,255,255,0.70);
@@ -226,7 +226,7 @@
     <!-- MAP -->
     <div class="mapWrap">
       <div class="hud">
-        <button id="btnWorld" title="Ganz herauszoomen und alle Lichter zeigen">Weltansicht</button>
+        <button id="btnWorld" title="Alle Lichter zeigen">Weltansicht</button>
         <button id="btnCard" title="PNG der Weltansicht erzeugen">Karte generieren</button>
       </div>
       <div id="map"></div>
@@ -239,7 +239,7 @@
 
 <script>
 /* -------------------------
-   1) PROMPTER: Ghost-Satz + Wort-Highlight
+   1) PROMPTER: Satz bleibt sichtbar, Wörter bauen sich in Highlight-Farbe auf
 -------------------------- */
 const tpTexts = [
   "Manchmal schauen wir in den Himmel.",
@@ -255,8 +255,8 @@ const tpTexts = [
   "Helf’ uns, dieses Gefühl sichtbar zu machen!"
 ];
 
-const WORD_MS = 240;          // Highlight-Wechsel pro Wort
-const SENTENCE_PAUSE = 900;   // Pause am Satzende
+const WORD_MS = 240;
+const SENTENCE_PAUSE = 900;
 
 let tpIndex = 0;
 let tpWordIdx = 0;
@@ -266,20 +266,26 @@ const tpTextEl = document.getElementById("tp-text");
 const tpBarEl  = document.getElementById("tp-bar");
 
 function renderSentence(sentence){
-  // Tokens inkl. Leerzeichen behalten
-  const tokens = sentence.split(/(\s+)/);
+  const tokens = sentence.split(/(\s+)/); // inkl. Spaces
   tpTextEl.innerHTML = tokens.map(t => {
     if (/^\s+$/.test(t)) return `<span class="tp-word space">${t}</span>`;
     return `<span class="tp-word">${t}</span>`;
   }).join("");
 }
 
-function setActiveWord(wordIdx){
-  const words = Array.from(tpTextEl.querySelectorAll(".tp-word"))
+function markProgress(activeWordIdx){
+  const wordSpans = Array.from(tpTextEl.querySelectorAll(".tp-word"))
     .filter(s => !s.classList.contains("space"));
 
-  words.forEach(w => w.classList.remove("active","warm"));
-  if (words[wordIdx]) words[wordIdx].classList.add("active","warm");
+  // Alles bis inkl. activeWordIdx bleibt "done"
+  wordSpans.forEach((w, i) => {
+    w.classList.remove("active");
+    if (i <= activeWordIdx) w.classList.add("done");
+    else w.classList.remove("done");
+  });
+
+  // Aktuelles Wort zusätzlich als "active" (heller)
+  if (wordSpans[activeWordIdx]) wordSpans[activeWordIdx].classList.add("active");
 }
 
 function updateProgress(){
@@ -294,16 +300,16 @@ function playSentence(idx, auto=true){
   updateProgress();
 
   const words = tpTexts[tpIndex].split(/\s+/).filter(Boolean);
-  setActiveWord(0);
+  markProgress(0);
 
   tpTimer = setInterval(() => {
     tpWordIdx++;
     if (tpWordIdx < words.length){
-      setActiveWord(tpWordIdx);
+      markProgress(tpWordIdx);
     } else {
       clearInterval(tpTimer);
-      // am Ende bleibt letztes Wort kurz warm
-      setActiveWord(words.length - 1);
+      // Satz komplett "gebaut"
+      markProgress(words.length - 1);
       if(auto){
         setTimeout(() => {
           if(tpIndex < tpTexts.length - 1) playSentence(tpIndex + 1, true);
@@ -324,6 +330,7 @@ playSentence(0, true);
 
 /* -------------------------
    2) MAP + SUPABASE
+   Änderung: Klick soll NICHT zoomen. Kein Auto-fit nach Klick.
 -------------------------- */
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -352,20 +359,17 @@ const map = L.map('map', {
   preferCanvas: true
 }).setView([20, 0], 2);
 
-/* Tiles: heller als "dark", aber mit Night-Overlay oben drauf.
-   Damit bleiben Kontinente/Umrisse sichtbar. */
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
   maxZoom: 18,
 }).addTo(map);
 
-// Lichter als „Straßenlaternen vom All“: Glow + Kern
+// Lichter: Glow + Kern
 const canvasRenderer = L.canvas({ padding: 0.5 });
 const lightsLayer = L.layerGroup().addTo(map);
 
 function addGlowLight(latlng, isMine=false){
-  // Glow
-  const glow = L.circleMarker(latlng, {
+  L.circleMarker(latlng, {
     renderer: canvasRenderer,
     radius: isMine ? 12 : 10,
     stroke: false,
@@ -375,8 +379,7 @@ function addGlowLight(latlng, isMine=false){
     interactive: false
   }).addTo(lightsLayer);
 
-  // Core
-  const core = L.circleMarker(latlng, {
+  L.circleMarker(latlng, {
     renderer: canvasRenderer,
     radius: isMine ? 4.0 : 3.2,
     stroke: false,
@@ -386,7 +389,6 @@ function addGlowLight(latlng, isMine=false){
     interactive: isMine
   }).addTo(lightsLayer);
 
-  // Kurz „aufatmen“ bei eigenem Licht (sehr subtil)
   if(isMine){
     const pulse = L.circleMarker(latlng, {
       renderer: canvasRenderer,
@@ -406,11 +408,10 @@ function addGlowLight(latlng, isMine=false){
       if (r > 14) { clearInterval(t); lightsLayer.removeLayer(pulse); }
     }, 55);
   }
-
-  return { glow, core };
 }
 
-let allLightPoints = []; // [{lat,lng,session}]
+let allLightPoints = [];
+
 async function loadLights() {
   try{
     setStatus("Lichter laden…");
@@ -418,7 +419,6 @@ async function loadLights() {
     if(error) throw error;
 
     allLightPoints = data || [];
-
     lightsLayer.clearLayers();
 
     let mine = null;
@@ -444,6 +444,7 @@ async function loadMyLight() {
   return data;
 }
 
+/* WICHTIG: Kein auto-zoom/flyTo/fitBounds nach Klick! */
 map.on('click', async function(e) {
   try{
     const existing = await loadMyLight();
@@ -456,10 +457,8 @@ map.on('click', async function(e) {
         .insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
     }
 
+    // nur neu zeichnen, Zoom bleibt unverändert
     await loadLights();
-
-    // nach Setzen: kurzer, ruhiger Zoom-out auf Gesamtbild
-    setTimeout(() => fitToLights(true), 650);
   } catch(err){
     console.error(err);
     setStatus("Speichern fehlgeschlagen. Prüfe Supabase-Rechte (RLS/Policies).");
@@ -468,7 +467,7 @@ map.on('click', async function(e) {
 
 function fitToLights(animate=true){
   if(!allLightPoints || allLightPoints.length === 0){
-    map.flyTo([20,0], 2, { duration: 0.9 });
+    map.setView([20,0], 2, { animate });
     return;
   }
   const bounds = L.latLngBounds(allLightPoints.map(p => [p.lat, p.lng]));
@@ -480,7 +479,7 @@ document.getElementById("btnWorld").addEventListener("click", () => {
 });
 
 document.getElementById("btnCard").addEventListener("click", () => {
-  // erst Weltansicht, dann PNG
+  // Erst Weltansicht (nur wenn gewünscht), dann PNG
   fitToLights(true);
   setTimeout(() => {
     leafletImage(map, function(err, canvas) {
