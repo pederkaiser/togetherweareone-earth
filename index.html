@@ -5,13 +5,11 @@
   <title>Together We Are One</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
     body { margin: 0; font-family: system-ui, sans-serif; background: #111; color: #fafafa;}
-    .banner {
-      text-align: center; max-width: 540px; margin: 40px auto 16px auto; padding: 16px;
-      background: rgba(30,30,30,0.85); border-radius: 14px;
-      box-shadow: 0 2px 24px rgba(0,0,0,0.18);
-    }
+    .banner { text-align: center; max-width: 540px; margin: 40px auto 16px auto; padding: 16px;
+      background: rgba(30,30,30,0.85); border-radius: 14px; box-shadow: 0 2px 24px rgba(0,0,0,0.18);}
     .banner h1 { margin-top: 0; font-size: 2em; }
     .banner p { margin: 1em 0; }
     #map { width: 100vw; height: 60vh; max-height: 420px; border-radius: 18px; box-shadow: 0 2px 14px rgba(0,0,0,0.25);}
@@ -40,41 +38,85 @@
   <div id="map"></div>
   <div class="hint">Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)</div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/uuid@9.0.0/dist/umd/uuidv4.min.js"></script>
   <script>
-    // Karte initialisieren
+    // SUPABASE: Deine Daten einfügen
+    const SUPABASE_URL = 'https://gwfqdukbcgtcefqtgnbl.supabase.co';  // <-- DEIN Project URL aus Supabase!
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3ZnFkdWtiY2d0Y2VmcXRnbmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MDU2MTMsImV4cCI6MjA4NDI4MTYxM30.ePyuDxhVoc1ol5lQ8JbRKaybgpEPozBR3Wf71oFj040';              // <-- DEIN anon public key!
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Nutzer-ID für "ein Licht pro Browser"
+    let session = localStorage.getItem('myLightSession');
+    if(!session) {
+      session = uuidv4();
+      localStorage.setItem('myLightSession', session);
+    }
+
     var map = L.map('map').setView([20, 0], 2);
 
+    // Kerzen-Icon als Marker
+    var candleIcon = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/2897/2897679.png',
+      iconSize: [36, 36],
+      iconAnchor: [18, 35],
+      popupAnchor: [0, -32]
+    });
+
+    // Alle Marker auf der Karte
+    let allMarkers = [];
+    let myMarker = null;
+
+    // 1. Alle Lichter laden und anzeigen
+    async function loadLights() {
+      // Bestehende Marker löschen
+      allMarkers.forEach(m => map.removeLayer(m));
+      allMarkers = [];
+
+      let { data, error } = await supabase.from('lights').select('*');
+      if(data) {
+        data.forEach(row => {
+          const marker = L.marker([row.lat, row.lng], {icon: candleIcon}).addTo(map);
+          if(row.session === session) {
+            marker.bindPopup('Das ist dein Licht!').openPopup();
+            myMarker = marker;
+          } else {
+            marker.bindPopup('Hier leuchtet ein Licht!');
+          }
+          allMarkers.push(marker);
+        });
+      }
+    }
+
+    // 2. Licht für eigenen Browser finden
+    async function loadMyLight() {
+      let { data, error } = await supabase.from('lights').select('*').eq('session', session).maybeSingle();
+      return data;
+    }
+
+    // 3. Licht setzen/verschieben
+    map.on('click', async function(e) {
+      // Licht in DB setzen/aktualisieren (immer pro Session)
+      let existing = await loadMyLight();
+      if(existing) {
+        // Update
+        await supabase.from('lights').update({lat: e.latlng.lat, lng: e.latlng.lng}).eq('session', session);
+      } else {
+        // Neues Licht
+        await supabase.from('lights').insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
+      }
+      await loadLights();
+    });
+
+    // Initial Map
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 18,
     }).addTo(map);
 
-    // Funktion zum Marker speichern/lesen im Browser (localStorage)
-    function saveLight(latlng) {
-      localStorage.setItem('myLight', JSON.stringify(latlng));
-    }
-    function loadLight() {
-      const data = localStorage.getItem('myLight');
-      return data ? JSON.parse(data) : null;
-    }
+    loadLights();
 
-    // Nur ein Marker pro Nutzer
-    var myMarker = null;
-    var saved = loadLight();
-    if(saved) {
-      myMarker = L.marker(saved).addTo(map).bindPopup('Das ist dein Licht!').openPopup();
-      map.setView(saved, 3);
-    }
-
-    // Klick: Marker neu setzen/verschieben
-    map.on('click', function(e) {
-      if(myMarker) {
-        myMarker.setLatLng(e.latlng).openPopup();
-      } else {
-        myMarker = L.marker(e.latlng).addTo(map).bindPopup('Das ist dein Licht!').openPopup();
-      }
-      saveLight(e.latlng);
-    });
+    // Optional: regelmäßig aktualisieren (alle 30 Sekunden)
+    setInterval(loadLights, 30000);
   </script>
 </body>
 </html>
