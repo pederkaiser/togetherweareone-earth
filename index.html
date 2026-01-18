@@ -10,7 +10,13 @@
   <!-- Supabase JS -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <!-- UUID für Session -->
-  <script src="https://cdn.jsdelivr.net/npm/uuid@9.0.0/dist/umd/uuidv4.min.js"></script>
+  function uuidv4() {
+  // https://stackoverflow.com/a/2117523/1293256
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
   <!-- Leaflet.heat für Heatmap (nur bei Bedarf, unten auskommentiert) -->
   <!-- <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script> -->
   <style>
@@ -105,7 +111,7 @@
     // Nutzer-ID für ein Licht pro Browser
     let session = localStorage.getItem('myLightSession');
     if(!session) {
-      session = uuid.v4();
+      session = uuidv4();
       localStorage.setItem('myLightSession', session);
     }
 
