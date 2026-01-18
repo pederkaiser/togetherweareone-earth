@@ -224,7 +224,7 @@
 
 <script>
 /* -------------------------
-   PROMPTER
+   1) PROMPTER (unverändert, mit Zeilenumbruch)
 -------------------------- */
 const tpTexts = [
   "Manchmal schauen wir in den Himmel.",
@@ -294,7 +294,7 @@ document.getElementById("tp-prev").onclick = () => { if(tpIndex > 0) playSentenc
 playSentence(0, true);
 
 /* -------------------------
-   SUPABASE
+   2) SUPABASE
 -------------------------- */
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -315,13 +315,25 @@ let session = localStorage.getItem('myLightSession');
 if(!session) { session = uuidv4(); localStorage.setItem('myLightSession', session); }
 
 /* -------------------------
-   MAP: ein Erdball, kein Wrap, keine doppelten Kontinente
+   3) MAP (WICHTIG: zuerst map initialisieren!)
 -------------------------- */
 const WORLD_BOUNDS = L.latLngBounds(L.latLng(-60, -180), L.latLng(85, 180));
-const WORLD_VIEW = { center: [20, 0], zoom: 2.0 };  // "ein Erdball" (2D) — ruhig & weit
-const tileUrlLabels = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+const WORLD_VIEW = { center: [20, 0], zoom: 2.0 };
+
+const map = L.map('map', {
+  zoomControl: true,
+  preferCanvas: true,
+  worldCopyJump: false,
+  zoomSnap: 0.25,
+  zoomDelta: 0.25,
+  maxBounds: WORLD_BOUNDS,
+  maxBoundsViscosity: 1.0
+}).setView(WORLD_VIEW.center, WORLD_VIEW.zoom);
+
+/* Tile layers (mit/ohne Labels) */
+const tileUrlLabels   = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 const tileUrlNoLabels = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
-// Alternative (heller): 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
+// Alternative heller: 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
 
 const baseWithLabels = L.tileLayer(tileUrlLabels, {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
@@ -329,7 +341,7 @@ const baseWithLabels = L.tileLayer(tileUrlLabels, {
   noWrap: true,
   bounds: WORLD_BOUNDS,
   crossOrigin: true
-});
+}).addTo(map);
 
 const baseNoLabels = L.tileLayer(tileUrlNoLabels, {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
@@ -339,47 +351,13 @@ const baseNoLabels = L.tileLayer(tileUrlNoLabels, {
   crossOrigin: true
 });
 
-// Standard: mit Labels
-baseWithLabels.addTo(map);
-const map = L.map('map', {
-  zoomControl: true,
-  worldCopyJump: false,      // wichtig: nicht springen/wrappen
-  preferCanvas: true,
-  zoomSnap: 0.25,
-  zoomDelta: 0.25,
-  maxBounds: WORLD_BOUNDS,
-  maxBoundsViscosity: 1.0
-}).setView(WORLD_VIEW.center, WORLD_VIEW.zoom);
-
-L.tileLayer(tileUrl, {
-  attribution: '&copy; OpenStreetMap &copy; CARTO',
-  maxZoom: 18,
-  noWrap: true,             // wichtig: keine zweite Welt zeichnen
-  bounds: WORLD_BOUNDS,
-  crossOrigin: true
-}).addTo(map);
-
+/* Lights layer */
 const canvasRenderer = L.canvas({ padding: 0.5 });
 const lightsLayer = L.layerGroup().addTo(map);
 
-/* Punkt-Design:
-   - andere: sehr klein (nur Orientierung)
-   - mein Punkt: etwas größer, deutlicher Glow
-*/
+/* sehr kleine Punkte für andere */
 function addLight(latlng, isMine=false){
   if(!isMine){
-    // minimaler Glow
-    L.circleMarker(latlng, {
-      renderer: canvasRenderer,
-      radius: 3.2,
-      stroke: false,
-      fill: true,
-      fillOpacity: 0.06,
-      fillColor: "rgba(255,220,170,1)",
-      interactive: false
-    }).addTo(lightsLayer);
-
-    // winziger Kern
     L.circleMarker(latlng, {
       renderer: canvasRenderer,
       radius: 1.35,
@@ -391,31 +369,10 @@ function addLight(latlng, isMine=false){
     }).addTo(lightsLayer);
     return;
   }
-
-  // mein Glow (sichtbarer)
+  // mein Punkt minimal größer
   L.circleMarker(latlng, {
     renderer: canvasRenderer,
-    radius: 10,
-    stroke: false,
-    fill: true,
-    fillOpacity: 0.14,
-    fillColor: "rgba(255,210,150,1)",
-    interactive: false
-  }).addTo(lightsLayer);
-
-  L.circleMarker(latlng, {
-    renderer: canvasRenderer,
-    radius: 6.2,
-    stroke: false,
-    fill: true,
-    fillOpacity: 0.16,
-    fillColor: "rgba(255,235,200,1)",
-    interactive: false
-  }).addTo(lightsLayer);
-
-  L.circleMarker(latlng, {
-    renderer: canvasRenderer,
-    radius: 2.8,
+    radius: 2.6,
     stroke: false,
     fill: true,
     fillOpacity: 0.95,
@@ -426,6 +383,7 @@ function addLight(latlng, isMine=false){
 
 let allLightPoints = [];
 
+/* Load */
 async function loadLights(){
   try{
     const { data, error } = await sb.from('lights').select('*');
@@ -452,7 +410,7 @@ async function loadMyLight(){
   return data;
 }
 
-/* Klick speichert/verschiebt, Zoom bleibt wie gewählt */
+/* Click: speichern, Zoom bleibt */
 map.on('click', async (e) => {
   try{
     const existing = await loadMyLight();
@@ -468,130 +426,17 @@ map.on('click', async (e) => {
   }
 });
 
+/* Weltansicht Button */
 document.getElementById("btnWorld").addEventListener("click", () => {
   map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
 });
 
-/* -------------------------
-   EXPORT: Zoom auf "ein Erdball" -> leafletImage -> Canvas Postprocess
-   (Graustufe + dunkel + Vignette + Globus-Maske)
--------------------------- */
-
-/* Diese Werte bestimmen die Export-Dunkelheit (soll wie Anzeige wirken).
-   Du kannst hier noch dunkler gehen, ohne UI zu ändern: */
-const EXPORT_BRIGHTNESS = 0.55; // < 0.55 = dunkler
-const EXPORT_CONTRAST   = 1.25;
-const EXPORT_VIGNETTE   = 0.65; // 0..1
-const EXPORT_GLOBE_FILL = 0;    // Hintergrund (schwarz)
-
-function clamp(v){ return Math.max(0, Math.min(255, v)); }
-
-function applyNightGlobeLook(srcCanvas){
-  const w = srcCanvas.width, h = srcCanvas.height;
-  const out = document.createElement('canvas');
-  out.width = w; out.height = h;
-  const octx = out.getContext('2d');
-
-  // draw source
-  octx.drawImage(srcCanvas, 0, 0);
-
-  const img = octx.getImageData(0, 0, w, h);
-  const d = img.data;
-
-  const cx = w * 0.5;
-  const cy = h * 0.5;
-  const r = Math.min(w, h) * 0.46;           // Globus-Radius
-  const r2 = r * r;
-  const vignStart = r * 0.55;               // ab hier Vignette stärker
-  const vignRange = r - vignStart;
-
-  // Contrast helper
-  const contrast = EXPORT_CONTRAST;
-  const b = EXPORT_BRIGHTNESS;
-
-  for(let y=0; y<h; y++){
-    for(let x=0; x<w; x++){
-      const i = (y*w + x)*4;
-      const dx = x - cx;
-      const dy = y - cy;
-      const dist2 = dx*dx + dy*dy;
-
-      if(dist2 > r2){
-        // außerhalb: schwarz (runde Globus-Maske)
-        d[i] = EXPORT_GLOBE_FILL;
-        d[i+1] = EXPORT_GLOBE_FILL;
-        d[i+2] = EXPORT_GLOBE_FILL;
-        d[i+3] = 255;
-        continue;
-      }
-
-      // rgb -> gray
-      const R = d[i], G = d[i+1], B = d[i+2];
-      let gray = 0.2126*R + 0.7152*G + 0.0722*B;
-
-      // Dunkelheit
-      gray = gray * b;
-
-      // Kontrast (um Lichter abzuheben)
-      gray = (gray - 128) * contrast + 128;
-
-      // Vignette (zum Rand dunkler)
-      const dist = Math.sqrt(dist2);
-      if(dist > vignStart){
-        const t = (dist - vignStart) / Math.max(1, vignRange);
-        const v = 1 - (EXPORT_VIGNETTE * t * t);
-        gray *= v;
-      }
-
-      // "Lichter" etwas poppen lassen (helles bleibt hell)
-      if(gray > 160) gray = Math.min(255, gray * 1.12);
-
-      gray = clamp(gray);
-      d[i] = d[i+1] = d[i+2] = gray;
-      d[i+3] = 255;
-    }
-  }
-
-  octx.putImageData(img, 0, 0);
-
-  // sanfter "Atmosphärenrand" (grau) – optional, aber macht Globus echter
-  octx.save();
-  octx.globalCompositeOperation = 'lighter';
-  const grad = octx.createRadialGradient(cx, cy, r*0.92, cx, cy, r*1.02);
-  grad.addColorStop(0, 'rgba(255,255,255,0)');
-  grad.addColorStop(1, 'rgba(255,255,255,0.10)');
-  octx.fillStyle = grad;
-  octx.beginPath();
-  octx.arc(cx, cy, r*1.01, 0, Math.PI*2);
-  octx.fill();
-  octx.restore();
-
-  return out;
-}
-
-function waitForMapSettled(tileLayer){
-  return new Promise(resolve => {
-    let moved = false, tiles = false;
-
-    const done = () => {
-      if(moved && tiles){
-        requestAnimationFrame(() => requestAnimationFrame(resolve));
-      }
-    };
-
-    map.once('moveend', () => { moved = true; done(); });
-    tileLayer.once('load', () => { tiles = true; done(); });
-
-    // Fallback falls Cache/Events komisch: nach 1.2s weiter
-    setTimeout(() => { moved = true; tiles = true; done(); }, 1200);
-  });
-}
-
+/* Export: Screenshot der Weltansicht, kurz ohne Labels */
 function waitTiles(layer){
   return new Promise(resolve => {
     let done = false;
     const finish = () => {
-      if (done) return;
+      if(done) return;
       done = true;
       requestAnimationFrame(() => requestAnimationFrame(resolve));
     };
@@ -604,45 +449,39 @@ document.getElementById("btnCard").addEventListener("click", async () => {
   try{
     setStatus("Erzeuge Screenshot…");
 
-    // 1) auf Weltansicht (genau wie dein Button)
+    // 1) auf Weltansicht
     map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
 
-    // 2) kurz auf "no labels" umschalten
-    if (map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
+    // 2) no-labels Layer rein
+    if(map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
     baseNoLabels.addTo(map);
 
-    // 3) warten bis Tiles da sind
+    // 3) warten bis Tiles geladen
     await waitTiles(baseNoLabels);
 
     // 4) Screenshot
-    leafletImage(map, function(err, canvas) {
+    leafletImage(map, function(err, canvas){
       // 5) Layer zurück
       map.removeLayer(baseNoLabels);
       baseWithLabels.addTo(map);
 
       if(err){
         console.error(err);
-        alert("Export fehlgeschlagen.");
         setStatus("Export fehlgeschlagen.");
+        alert("Export fehlgeschlagen.");
         return;
       }
-
-      // Optional: exakt dein Night-Look auch im Export erzwingen
-      // (wenn du CSS Filter/Overlays nutzt, kann Export abweichen)
-      // -> Hier könnte man, falls nötig, noch eine kleine Postprocessing-Stufe machen.
-
       const png = canvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = png;
       a.download = "weltansicht-ohne-labels.png";
       a.click();
-
       setStatus("Fertig.");
     });
-  } catch (e){
+  } catch(e){
     console.error(e);
-    alert("Export fehlgeschlagen.");
     setStatus("Export fehlgeschlagen.");
+    alert("Export fehlgeschlagen.");
   }
 });
 
