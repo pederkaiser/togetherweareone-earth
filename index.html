@@ -288,6 +288,13 @@ function pickLanguage() {
 }
 
 const LANG = pickLanguage();
+document.documentElement.lang = LANG;
+
+// ... erst später:
+const tpTextEl = document.getElementById("tp-text");
+const tpBarEl  = document.getElementById("tp-bar");
+
+// ERST JETZT ist tpTextEl sicher verfügbar:
 if (LANG === "zh" || LANG === "ja") {
   tpTextEl.style.hyphens = "none";
 }
