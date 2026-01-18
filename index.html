@@ -193,63 +193,70 @@
 
     const map = L.map('map', { zoomControl: true }).setView([20, 0], 2);
 
+    // Dark-Map-Theme (OpenStreetMap CartoDB DarkMatter)
+    //L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    //  attribution: '&copy; OpenStreetMap contributors & CartoDB',
+    //  maxZoom: 18,
+    //}).addTo(map);
+
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap contributors & CartoDB',
-      maxZoom: 18,
-    }).addTo(map);
+  attribution: '&copy; OpenStreetMap contributors & CartoDB',
+  maxZoom: 18,
+}).addTo(map);
 
     let allMarkers = [];
     let myMarker = null;
 
-    // Lade und rendere alle Marker, dabei wird nur EIN Marker für deinen User benutzt
     async function loadLights() {
-      // Entferne alte Marker
-      allMarkers.forEach(m => map.removeLayer(m));
-      allMarkers = [];
-      myMarker = null;
-
-      let { data, error } = await sb.from('lights').select('*');
-      if(data) {
-        data.forEach(row => {
-          const icon = candleIcon;
-          if(row.session === session) {
-            // Dein Marker
-            if(myMarker) map.removeLayer(myMarker);
-            myMarker = L.marker([row.lat, row.lng], {icon, interactive: true});
-            myMarker.bindPopup(getLang().call);
-            myMarker.addTo(map);
-            allMarkers.push(myMarker);
-          } else {
-            // Andere Marker
-            const marker = L.marker([row.lat, row.lng], {icon, interactive: false});
-            allMarkers.push(marker);
-            marker.addTo(map);
-          }
-        });
-        // Optional: Zeige sofort dein Popup nach Reload
-        if(myMarker) myMarker.openPopup();
+  // Entferne alte Marker
+  allMarkers.forEach(m => map.removeLayer(m));
+  allMarkers = [];
+  myMarker = null; // <- Wichtig, damit es nicht doppelt wird!
+  let { data, error } = await sb.from('lights').select('*');
+  if(data) {
+    data.forEach(row => {
+      const icon = candleIcon;
+      const marker = L.marker([row.lat, row.lng], {icon, interactive: row.session === session});
+      if(row.session === session) {
+        marker.bindPopup(getLang().call).openPopup();
+        myMarker = marker; // <- Speichere den Marker für spätere Updates
       }
+      allMarkers.push(marker);
+      marker.addTo(map);
+    });
+  }
+      // // --- HEATMAP, falls du sie aktivieren willst ---
+      // let points = data.map(row => [row.lat, row.lng, 1]);
+      // if(window.heat) { map.removeLayer(window.heat); }
+      // window.heat = L.heatLayer(points, {radius: 18, blur: 24, minOpacity: 0.5}).addTo(map);
     }
 
-    // Hole ggf. das eigene Licht aus der DB
     async function loadMyLight() {
       let { data } = await sb.from('lights').select('*').eq('session', session).maybeSingle();
       return data;
     }
 
-    // Klick auf Karte: Setze oder verschiebe dein Licht
     map.on('click', async function(e) {
-      let existing = await loadMyLight();
-      if(existing) {
-        await sb.from('lights').update({lat: e.latlng.lat, lng: e.latlng.lng}).eq('session', session);
-      } else {
-        await sb.from('lights').insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
-      }
-      await loadLights();
-    });
+  let existing = await loadMyLight();
+  if(existing) {
+    // Update in der DB
+    await sb.from('lights').update({lat: e.latlng.lat, lng: e.latlng.lng}).eq('session', session);
 
-    // Initialer Load + regelmäßiges Aktualisieren
+    // Marker auf der Karte verschieben (sofort)
+    if(myMarker) {
+      myMarker.setLatLng(e.latlng);
+      myMarker.openPopup();
+    }
+  } else {
+    // Neues Licht eintragen
+    await sb.from('lights').insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
+  }
+  await loadLights(); // Re-Load für alle Marker
+});
+
+    // Initial Map
     loadLights();
+    // Optional: regelmäßig alle 30 Sek. aktualisieren
     setInterval(loadLights, 30000);
 
   </script>
