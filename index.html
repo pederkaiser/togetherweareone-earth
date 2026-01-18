@@ -9,15 +9,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <!-- Supabase JS -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <!-- UUID für Session -->
-  function uuidv4() {
-  // https://stackoverflow.com/a/2117523/1293256
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
-  <!-- Leaflet.heat für Heatmap (nur bei Bedarf, unten auskommentiert) -->
+  <!-- Leaflet.heat für Heatmap (optional, unten auskommentiert) -->
   <!-- <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script> -->
   <style>
     body { margin: 0; font-family: system-ui, sans-serif; background: #101014; color: #fafafa;}
@@ -41,14 +33,23 @@
   <div id="map"></div>
   <div class="hint" id="hint"></div>
   <script>
+    // -------- UUID v4 Funktion (für Session-ID) ----------
+    function uuidv4() {
+      // https://stackoverflow.com/a/2117523/1293256
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
     // ------------- KONFIGURATION -------------
     // Supabase-Projektinfos eintragen:
     const SUPABASE_URL = 'https://gwfqdukbcgtcefqtgnbl.supabase.co';  // <-- DEIN Project URL aus Supabase!
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3ZnFkdWtiY2d0Y2VmcXRnbmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MDU2MTMsImV4cCI6MjA4NDI4MTYxM30.ePyuDxhVoc1ol5lQ8JbRKaybgpEPozBR3Wf71oFj040';              // <-- DEIN anon public key!
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3ZnFkdWtiY2d0Y2VmcXRnbmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MDU2MTMsImV4cCI6MjA4NDI4MTYxM30.ePyuDxhVoc1ol5lQ8JbRKaybgpEPozBR3Wf71oFj040';  // <-- DEIN anon public key!
 
     // Kerzen-/Licht-Icon
     const candleIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/2897/2897679.png', // Ersetze ggf. durch ein eigenes!
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/2897/2897679.png', // Ggf. eigenes Icon verwenden
       iconSize: [28, 28],
       iconAnchor: [14, 27],
       popupAnchor: [0, -24]
