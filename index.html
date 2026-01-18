@@ -24,21 +24,32 @@
       letter-spacing: 0.01em;
       line-height: 1.5;
     }
-    .tp-text { min-height: 1.8em; transition: color 0.2s;text-align: left;}
+    .tp-text {
+  min-height: 2.2em;
+  text-align: left;
+  white-space: normal;        /* jetzt automatischer Umbruch */}
     .tp-word {
   opacity: 0.35;
   color: #ffe9c2;
   font-weight: 400;
   transition: opacity 0.18s, color 0.18s, background 0.18s;
-  white-space: pre;          /* hält Leerzeichen stabil */
+  padding: 0 0.06em;
+  white-space: normal;        /* damit Umbruch pro Wort möglich bleibt */
+}
+    .tp-word.done {
+  opacity: 0.88;
+  color: #ffe9c2;
+  font-weight: 500;
+  background: linear-gradient(90deg, #ffe9c2 50%, #ffe6a4 120%);
+  border-radius: 5px;
 }
 .tp-word.active {
   opacity: 1;
   color: #fff9e4;
-  font-weight: 600;
-  background: rgba(255, 230, 164, 0.18);
+  font-weight: 700;
+  background: linear-gradient(90deg, #fff9e4 70%, #ffe6a4 120%);
   border-radius: 6px;
-  /* KEIN font-size hier! */
+  box-shadow: 0 1px 6px #fff3bb30;
 }
     .tp-controls {
       display: flex; align-items: center; justify-content: center;
