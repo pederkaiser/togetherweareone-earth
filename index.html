@@ -49,7 +49,7 @@
 
     // Kerzen-/Licht-Icon
     const candleIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/2897/2897679.png', // Ggf. eigenes Icon verwenden
+      iconUrl: 'https://openmoji.org/data/color/svg/1F56F.svg', // Ggf. eigenes Icon verwenden
       iconSize: [28, 28],
       iconAnchor: [14, 27],
       popupAnchor: [0, -24]
@@ -119,10 +119,15 @@
     const map = L.map('map', { zoomControl: true }).setView([20, 0], 2);
 
     // Dark-Map-Theme (OpenStreetMap CartoDB DarkMatter)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap contributors & CartoDB',
-      maxZoom: 18,
-    }).addTo(map);
+    //L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    //  attribution: '&copy; OpenStreetMap contributors & CartoDB',
+    //  maxZoom: 18,
+    //}).addTo(map);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OpenStreetMap contributors & CartoDB',
+  maxZoom: 18,
+}).addTo(map);
 
     let allMarkers = [];
     let myMarker = null;
