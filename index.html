@@ -27,15 +27,15 @@
       --text: rgba(255,255,255,0.92);
       --warm: rgba(255,220,170,0.95);
 
-      /* === MAP TUNING (manuell + per Slider) ===
-         Start entspricht ungefähr deinem bisherigen "dunkelsten" Zustand,
-         und der Slider kann noch deutlich dunkler werden. */
-      --map-brightness: 0.74;     /* kleiner = dunkler */
-      --map-contrast: 1.18;
-      --map-saturate: 0.90;
-
-      --shade-opacity: 0.72;      /* Vignette/Film: 0..1 */
-      --ocean-tint: rgba(0,0,0,0.22); /* zusätzlicher "Night"-Film */
+      /* =========================
+         FIX: "dunkelste" Einstellung fest verdrahtet
+         (kein Slider mehr, User kann es nicht verändern)
+         ========================= */
+      --map-brightness: 0.56;   /* dunkler als vorher */
+      --map-contrast: 1.25;
+      --map-saturate: 0.00;     /* 0 = Graustufe */
+      --shade-opacity: 0.90;    /* starker Night-Film */
+      --ocean-tint: rgba(0,0,0,0.42);
     }
 
     html,body { height:100%; }
@@ -81,19 +81,28 @@
       min-height: 3.2em;
     }
 
-    /* WICHTIG: Zeilenumbruch erlauben */
+    /* Zeilenumbruch: aktiv */
     .tp-word{
       color: var(--ghost);
       transition: color 160ms ease, filter 160ms ease;
-      white-space: normal;      /* <-- Umbrechen erlauben */
+      white-space: normal;
       overflow-wrap: anywhere;
     }
-    .tp-space{ white-space: pre; } /* Leerzeichen exakt */
+    .tp-space{ white-space: pre; }
 
-    .tp-word.done{ color: var(--warm); filter: drop-shadow(0 0 12px rgba(255,210,140,0.18)); }
-    .tp-word.active{ color: rgba(255,245,235,0.98); filter: drop-shadow(0 0 18px rgba(255,210,140,0.26)); }
+    .tp-word.done{
+      color: var(--warm);
+      filter: drop-shadow(0 0 12px rgba(255,210,140,0.18));
+    }
+    .tp-word.active{
+      color: rgba(255,245,235,0.98);
+      filter: drop-shadow(0 0 18px rgba(255,210,140,0.26));
+    }
 
-    .tp-meta{ display:flex; align-items:center; justify-content:center; gap: 10px; margin-top: 8px; user-select:none; }
+    .tp-meta{
+      display:flex; align-items:center; justify-content:center;
+      gap: 10px; margin-top: 8px; user-select:none;
+    }
     .tp-btn{
       width: 42px; height: 42px; border-radius: 14px;
       border: 1px solid rgba(255,255,255,0.10);
@@ -104,8 +113,21 @@
       font-size: 18px; font-weight: 700;
     }
     .tp-btn:hover{ background: rgba(255,255,255,0.10); transform: translateY(-1px); }
-    .tp-progress{ width: min(520px, 62vw); height: 8px; border-radius: 8px; overflow:hidden; background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.08); }
-    .tp-progress-bar{ height:100%; width: 0%; background: linear-gradient(90deg, rgba(255,220,170,0.65), rgba(255,255,255,0.55)); transition: width 220ms ease; }
+
+    .tp-progress{
+      width: min(520px, 62vw);
+      height: 8px;
+      border-radius: 8px;
+      overflow:hidden;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .tp-progress-bar{
+      height:100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(255,220,170,0.65), rgba(255,255,255,0.55));
+      transition: width 220ms ease;
+    }
 
     /* --- Map --- */
     .mapWrap{
@@ -118,12 +140,15 @@
     }
     #map{ width: 100%; height: min(62vh, 520px); }
 
-    /* Dunkelheit über Variablen steuerbar */
+    /* FIX: Graustufe + Helligkeit/Look sind fest (wie Export) */
     .leaflet-tile{
-      filter: brightness(var(--map-brightness)) contrast(var(--map-contrast)) saturate(var(--map-saturate));
+      filter:
+        grayscale(1)
+        brightness(var(--map-brightness))
+        contrast(var(--map-contrast))
+        saturate(var(--map-saturate));
     }
 
-    /* zusätzlicher Night-Tint (macht Ozeane/Flächen "weltraumiger") */
     .mapTint{
       pointer-events:none;
       position:absolute; inset:0;
@@ -131,15 +156,14 @@
       mix-blend-mode: multiply;
       opacity: 1;
     }
-
     .mapShade{
       pointer-events:none;
       position:absolute; inset:0;
       opacity: var(--shade-opacity);
       background:
-        radial-gradient(900px 420px at 50% 10%, rgba(0,0,0,0.12), rgba(0,0,0,0.78) 65%),
-        radial-gradient(700px 520px at 10% 80%, rgba(0,0,0,0.10), rgba(0,0,0,0.70) 72%),
-        linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0.60));
+        radial-gradient(900px 420px at 50% 10%, rgba(0,0,0,0.18), rgba(0,0,0,0.86) 65%),
+        radial-gradient(700px 520px at 10% 80%, rgba(0,0,0,0.12), rgba(0,0,0,0.78) 72%),
+        linear-gradient(180deg, rgba(0,0,0,0.14), rgba(0,0,0,0.70));
       mix-blend-mode: multiply;
     }
 
@@ -157,7 +181,7 @@
       padding: 10px 12px;
       border-radius: 14px;
       border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.22);
+      background: rgba(0,0,0,0.24);
       color: rgba(255,255,255,0.92);
       cursor: pointer;
       backdrop-filter: blur(10px);
@@ -165,34 +189,45 @@
       font-weight: 650;
       letter-spacing: 0.2px;
     }
-    .hud button:hover{ background: rgba(0,0,0,0.30); transform: translateY(-1px); }
-
-    .hud .sliderBox{
-      display:flex; align-items:center; gap:8px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.22);
-      backdrop-filter: blur(10px);
-      color: rgba(255,255,255,0.85);
-      font-weight: 650;
-    }
-    .hud input[type="range"]{ width: 150px; }
+    .hud button:hover{ background: rgba(0,0,0,0.32); transform: translateY(-1px); }
 
     .hint{ text-align:center; margin: 4px 0 0 0; color: rgba(255,255,255,0.60); font-size: 14px; }
     .status{ text-align:center; color: rgba(255,255,255,0.70); font-size: 13px; margin-top: 6px; }
 
-    /* Export-Look: macht die Karte im PNG noch "space night" */
-    .exporting .mapShade{ opacity: 0.88 !important; }
-    .exporting .mapTint{ background: rgba(0,0,0,0.30) !important; }
-    .exporting .leaflet-tile{ filter: brightness(0.62) contrast(1.25) saturate(0.85) !important; }
+    /* Offscreen Export Map (unsichtbar, unabhängig von Browser-Ansicht) */
+    #exportStage{
+      position: fixed;
+      left: -99999px;
+      top: 0;
+      width: 1800px;     /* Export-Auflösung */
+      height: 1000px;    /* Export-Auflösung */
+      background: #000;
+      z-index: -1;
+      overflow: hidden;
+      border-radius: 24px;
+    }
+    #exportMap{
+      width: 1800px;
+      height: 1000px;
+    }
+    #exportStage .mapTint,
+    #exportStage .mapShade{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+    }
+    #exportStage .mapTint{ background: var(--ocean-tint); mix-blend-mode: multiply; }
+    #exportStage .mapShade{ opacity: var(--shade-opacity); background:
+      radial-gradient(1200px 700px at 50% 10%, rgba(0,0,0,0.18), rgba(0,0,0,0.90) 70%),
+      linear-gradient(180deg, rgba(0,0,0,0.16), rgba(0,0,0,0.72));
+      mix-blend-mode: multiply;
+    }
 
     @media (max-width: 600px){
       .wrap{ padding: 12px 10px; }
       .teleprompter{ padding: 14px 12px 12px 12px; border-radius: 18px; }
       .tp-btn{ width: 40px; height: 40px; border-radius: 14px; }
       #map{ height: 52vh; }
-      .hud input[type="range"]{ width: 120px; }
     }
   </style>
 </head>
@@ -209,30 +244,31 @@
       </div>
     </div>
 
-    <div class="mapWrap" id="mapWrap">
+    <div class="mapWrap">
       <div class="hud">
-        <button id="btnWorld" title="Alle Lichter zeigen (ohne zu nah reinzuzoomen)">Weltansicht</button>
-        <button id="btnCard" title="PNG als Weltansicht erzeugen">Karte generieren</button>
-
-        <!-- Dunkel-Regler -->
-        <div class="sliderBox" title="Dunkelheit der Karte (kann jetzt deutlich dunkler werden)">
-          Dunkel
-          <input id="shadeSlider" type="range" min="0" max="100" value="35" />
-        </div>
+        <button id="btnWorld" title="Weltansicht (ohne reinzuzoomen)">Weltansicht</button>
+        <button id="btnCard" title="PNG als Weltkarte generieren (unabhängig vom Browser-Zoom)">Karte generieren</button>
       </div>
 
       <div id="map"></div>
-      <div class="mapTint" id="mapTint"></div>
-      <div class="mapShade" id="mapShade"></div>
+      <div class="mapTint"></div>
+      <div class="mapShade"></div>
     </div>
 
     <p class="hint">Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)</p>
     <p class="status" id="status"></p>
   </div>
 
+  <!-- Offscreen Export Stage -->
+  <div id="exportStage">
+    <div id="exportMap"></div>
+    <div class="mapTint"></div>
+    <div class="mapShade"></div>
+  </div>
+
 <script>
 /* -------------------------
-   PROMPTER: Wörter bleiben nach Highlight warm ("bauen sich auf")
+   PROMPTER
 -------------------------- */
 const tpTexts = [
   "Manchmal schauen wir in den Himmel.",
@@ -259,7 +295,7 @@ const tpTextEl = document.getElementById("tp-text");
 const tpBarEl  = document.getElementById("tp-bar");
 
 function renderSentence(sentence){
-  const tokens = sentence.split(/(\s+)/); // Worte + Leerzeichen behalten
+  const tokens = sentence.split(/(\s+)/);
   tpTextEl.innerHTML = tokens.map(t => {
     if (/^\s+$/.test(t)) return `<span class="tp-space">${t}</span>`;
     return `<span class="tp-word">${t}</span>`;
@@ -315,37 +351,6 @@ document.getElementById("tp-prev").onclick = () => {
 playSentence(0, true);
 
 /* -------------------------
-   MAP "von Hand" dunkler machen: Slider steuert CSS Vars
-   Wunsch: "es soll beim jetzigen dunkelsten anfangen und noch dunkler werden"
-   -> Slider 0 startet bei "alt dunkel", Slider 100 wird deutlich dunkler.
--------------------------- */
-const shadeSlider = document.getElementById("shadeSlider");
-
-// Startwerte entsprechen etwa deinem bisherigen Maximum (alt):
-//   shadeOpacity ~0.85, brightness ~0.74
-// Jetzt erweitern wir nach unten bis ~0.48 brightness & ~0.97 shade
-function applyDarkness(v){
-  const t = v / 100;
-
-  // Dunkel-Film: 0.72 .. 0.97
-  const shadeOpacity = 0.72 + t * 0.25;
-
-  // Tiles: 0.74 .. 0.48 (deutlich dunkler möglich)
-  const brightness = 0.74 - t * 0.26;
-
-  // Ozean-Tint: 0.22 .. 0.38
-  const ocean = 0.22 + t * 0.16;
-
-  document.documentElement.style.setProperty("--shade-opacity", shadeOpacity.toFixed(2));
-  document.documentElement.style.setProperty("--map-brightness", brightness.toFixed(2));
-  document.documentElement.style.setProperty("--ocean-tint", `rgba(0,0,0,${ocean.toFixed(2)})`);
-}
-
-// Slider-Default 35 = schon dunkel, aber nicht maximal
-applyDarkness(parseInt(shadeSlider.value, 10));
-shadeSlider.addEventListener("input", (e) => applyDarkness(parseInt(e.target.value, 10)));
-
-/* -------------------------
    MAP + SUPABASE
 -------------------------- */
 function uuidv4() {
@@ -366,35 +371,48 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let session = localStorage.getItem('myLightSession');
 if(!session) { session = uuidv4(); localStorage.setItem('myLightSession', session); }
 
+/* World framing:
+   Wir erzwingen für "Welt" ein Bounds, das wirklich die ganze Welt zeigt.
+   (Leaflet schneidet sonst je nach Aspect Ratio.) */
+const WORLD_BOUNDS = L.latLngBounds(
+  L.latLng(-60, -180),
+  L.latLng( 85,  180)
+);
+const WORLD_FIT_OPTS = { animate: true, duration: 0.9, padding: [20,20], maxZoom: 2 };
+
 const map = L.map('map', {
   zoomControl: true,
   worldCopyJump: true,
   preferCanvas: true
-}).setView([20, 0], 2);
+}).fitBounds(WORLD_BOUNDS, { animate:false, padding:[20,20], maxZoom: 2 });
 
-// Basemap: Voyager (Kontinente sichtbar), Space-Look entsteht per Tint/Shader/Export-Mode
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+/* Tiles: Voyager (Kontinente/Umrisse).
+   Wichtig für leaflet-image: crossOrigin setzen. */
+const tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+L.tileLayer(tileUrl, {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
   maxZoom: 18,
+  crossOrigin: true
 }).addTo(map);
 
-// Lichter: Glow + Kern; für "Straßenlaternen aus dem All" verstärken wir Glow leicht
+/* Lichter: wie "Straßenlaternen aus dem All" */
 const canvasRenderer = L.canvas({ padding: 0.5 });
 const lightsLayer = L.layerGroup().addTo(map);
 
-function addGlowLight(latlng, isMine=false){
-  // Glow außen
+function addGlowLight(layerGroup, latlng, isMine=false){
+  // großer weicher Glow
   L.circleMarker(latlng, {
     renderer: canvasRenderer,
     radius: isMine ? 14 : 12,
     stroke: false,
     fill: true,
-    fillOpacity: 0.16,
-    fillColor: "rgba(255,215,160,1)",
+    fillOpacity: 0.14,
+    fillColor: "rgba(255,210,150,1)",
     interactive: false
-  }).addTo(lightsLayer);
+  }).addTo(layerGroup);
 
-  // Glow innen
+  // mittlerer Glow
   L.circleMarker(latlng, {
     renderer: canvasRenderer,
     radius: isMine ? 8 : 7,
@@ -403,25 +421,24 @@ function addGlowLight(latlng, isMine=false){
     fillOpacity: 0.18,
     fillColor: "rgba(255,230,190,1)",
     interactive: false
-  }).addTo(lightsLayer);
+  }).addTo(layerGroup);
 
-  // Kernpunkt
+  // Kern
   L.circleMarker(latlng, {
     renderer: canvasRenderer,
-    radius: isMine ? 3.8 : 3.0,
+    radius: isMine ? 3.6 : 2.8,
     stroke: false,
     fill: true,
     fillOpacity: 0.96,
     fillColor: "rgba(255,250,245,1)",
     interactive: isMine
-  }).addTo(lightsLayer);
+  }).addTo(layerGroup);
 }
 
 let allLightPoints = [];
 
 async function loadLights() {
   try{
-    setStatus("Lichter laden…");
     const { data, error } = await sb.from('lights').select('*');
     if(error) throw error;
 
@@ -432,7 +449,7 @@ async function loadLights() {
     for (const row of allLightPoints){
       const isMine = (row.session === session);
       if(isMine) mine = row;
-      addGlowLight([row.lat, row.lng], isMine);
+      addGlowLight(lightsLayer, [row.lat, row.lng], isMine);
     }
 
     setStatus(mine ? "Dein Licht ist gesetzt. Du kannst es durch Klicken verschieben." : "Setze dein Licht mit einem Klick auf die Karte.");
@@ -447,7 +464,7 @@ async function loadMyLight() {
   return data;
 }
 
-// Klick verändert NICHT den Zoom
+/* Klick verändert NICHT den Zoom */
 map.on('click', async function(e) {
   try{
     const existing = await loadMyLight();
@@ -463,72 +480,99 @@ map.on('click', async function(e) {
   }
 });
 
-/* -------------------------
-   WELTANSICHT & EXPORT (Fix)
-   Problem vorher: fitBounds zoomt bei wenigen Lichtern stark rein.
-   Lösung:
-   - Weltansicht-Button: zeigt alle Lichter, aber NIE näher als maxZoom.
-   - Export: IMMER feste Weltansicht (kein fitBounds), wartet auf moveend/idle, dann rendert.
--------------------------- */
-const WORLD_VIEW = { center: [20, 0], zoom: 2 };
-const MAX_ZOOM_WORLD_FIT = 2.2;
+/* Weltansicht Button: wirklich ganze Welt */
+document.getElementById("btnWorld").addEventListener("click", () => {
+  map.fitBounds(WORLD_BOUNDS, WORLD_FIT_OPTS);
+});
 
-function showWorldView(){
-  map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
+/* -------------------------
+   EXPORT: unabhängige Offscreen-Map
+   -> immer ganze Welt, immer derselbe Look, unabhängig vom Browser-Zoom
+-------------------------- */
+let exportMap = null;
+let exportTiles = null;
+let exportLayer = null;
+
+function ensureExportMap(){
+  if(exportMap) return;
+
+  exportMap = L.map('exportMap', {
+    zoomControl: false,
+    attributionControl: false,
+    preferCanvas: true,
+    zoomSnap: 0.25,
+    zoomDelta: 0.25,
+    fadeAnimation: false
+  });
+
+  // Ganze Welt in den Export-Rahmen passend
+  exportMap.fitBounds(WORLD_BOUNDS, { animate:false, padding:[40,40], maxZoom: 2 });
+
+  exportTiles = L.tileLayer(tileUrl, {
+    maxZoom: 18,
+    crossOrigin: true
+  }).addTo(exportMap);
+
+  exportLayer = L.layerGroup().addTo(exportMap);
 }
 
-function fitToLightsWorldish(){
-  if(!allLightPoints || allLightPoints.length === 0){
-    showWorldView();
-    return;
-  }
-  const bounds = L.latLngBounds(allLightPoints.map(p => [p.lat, p.lng]));
-  map.fitBounds(bounds.pad(0.35), {
-    animate: true,
-    duration: 0.9,
-    maxZoom: MAX_ZOOM_WORLD_FIT
+function waitForTilesToLoad(tileLayer){
+  return new Promise(resolve => {
+    // tileLayer fires 'load' when all visible tiles are loaded
+    tileLayer.once('load', () => {
+      // 2 frames extra, damit Canvas/Marker sicher drin sind
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+
+    // Falls Cache blitzschnell: minimaler Fallback
+    setTimeout(resolve, 1200);
   });
 }
 
-document.getElementById("btnWorld").addEventListener("click", () => fitToLightsWorldish());
+async function generateWorldPng(){
+  setStatus("Generiere Weltkarte…");
 
-function waitForNextFrame(){
-  return new Promise(r => requestAnimationFrame(() => r()));
-}
-function waitForMapSettled(){
-  return new Promise(resolve => {
-    // moveend fired after setView/fitBounds finishes
-    map.once("moveend", () => {
-      // one extra frame so tiles/canvas settle
-      requestAnimationFrame(() => requestAnimationFrame(resolve));
+  // 1) Immer neueste Daten holen, damit Export aktuell ist
+  await loadLights();
+
+  // 2) Offscreen-Map initialisieren / re-use
+  ensureExportMap();
+
+  // 3) Offscreen-Map: Weltansicht erzwingen
+  exportMap.fitBounds(WORLD_BOUNDS, { animate:false, padding:[40,40], maxZoom: 2 });
+
+  // 4) Marker neu setzen
+  exportLayer.clearLayers();
+  for (const row of allLightPoints){
+    const isMine = (row.session === session);
+    addGlowLight(exportLayer, [row.lat, row.lng], isMine);
+  }
+
+  // 5) Warten bis Tiles da sind
+  await waitForTilesToLoad(exportTiles);
+
+  // 6) Rendern
+  return new Promise((resolve, reject) => {
+    leafletImage(exportMap, function(err, canvas) {
+      if (err) return reject(err);
+      resolve(canvas.toDataURL("image/png"));
     });
   });
 }
 
 document.getElementById("btnCard").addEventListener("click", async () => {
-  const mapWrap = document.getElementById("mapWrap");
-
-  // 1) Export-Look aktivieren (mehr "Earth at night")
-  mapWrap.classList.add("exporting");
-
-  // 2) Fixe Weltansicht setzen (niemals fitBounds!)
-  showWorldView();
-
-  // 3) Warten bis die Weltansicht wirklich steht
-  await waitForMapSettled();
-
-  // 4) Export rendern
-  leafletImage(map, function(err, canvas) {
-    // Export-Look wieder zurück
-    mapWrap.classList.remove("exporting");
-
-    if (err) { alert("Export fehlgeschlagen."); return; }
-    const png = canvas.toDataURL("image/png");
+  try{
+    const png = await generateWorldPng();
     const a = document.createElement("a");
     a.href = png;
     a.download = "eine-menschheit-erde-nacht.png";
     a.click();
-  });
+    setStatus("Fertig. PNG wurde erstellt.");
+  } catch (e){
+    console.error(e);
+    alert("Export fehlgeschlagen.");
+    setStatus("Export fehlgeschlagen.");
+  }
 });
 
 // Start
