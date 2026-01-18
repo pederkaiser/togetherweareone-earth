@@ -24,22 +24,21 @@
       letter-spacing: 0.01em;
       line-height: 1.5;
     }
-    .tp-text { min-height: 1.8em; transition: color 0.2s;}
+    .tp-text { min-height: 1.8em; transition: color 0.2s;text-align: left;}
     .tp-word {
-  opacity: 0.45;
+  opacity: 0.35;
   color: #ffe9c2;
   font-weight: 400;
-  transition: all 0.23s;
-  padding: 0 0.06em;
+  transition: opacity 0.18s, color 0.18s, background 0.18s;
+  white-space: pre;          /* hält Leerzeichen stabil */
 }
 .tp-word.active {
   opacity: 1;
   color: #fff9e4;
   font-weight: 600;
-  background: linear-gradient(90deg, #fff9e4 70%, #ffe6a4 120%);
+  background: rgba(255, 230, 164, 0.18);
   border-radius: 6px;
-  box-shadow: 0 1px 6px #fff3bb30;
-  font-size: 1.06em;
+  /* KEIN font-size hier! */
 }
     .tp-controls {
       display: flex; align-items: center; justify-content: center;
@@ -94,73 +93,90 @@
   <script>
     // -------- Teleprompter-Text-Array (nur Deutsch, beliebig anpassbar) ----
     const tpTexts = [
-      "Manchmal schauen wir in den Himmel.",
-      "Vielleicht sehen wir einen Stern, den Mond, ferne Galaxien.",
-      "Für einen Moment wird uns bewusst, wie klein unser Planet ist.",
-      "Wie selten – vielleicht sogar einzigartig – das Leben hier ist.",
-      "Auf diesem winzigen Punkt im Weltall teilen wir unser Leben.",
-      "Jeder von uns mit einer eigenen Geschichte, aber doch alle miteinander verbunden.",
-      "Nicht durch Herkunft, Sprache oder Grenzen – sondern durch das Glück, gemeinsam hier zu sein.",
-      "Manche Menschen spüren in solchen Momenten, dass wir eigentlich eine einzige Gemeinschaft sind.",
-      "Dass uns mehr verbindet als trennt.",
-      "Hast du das auch schon einmal gefühlt?",
-      "Helf’ uns, dieses Gefühl sichtbar zu machen!"
-    ];
-    // Geschwindigkeit pro Wort (ms)
-    const WORD_MS = 100;    // ca. 2,5 Wörter pro Sekunde
-    const SENTENCE_PAUSE = 1200; // Satz komplett sichtbar, dann nächste
+  "Manchmal schauen wir in den Himmel.",
+  "Vielleicht sehen wir einen Stern, den Mond, ferne Galaxien.",
+  "Für einen Moment wird uns bewusst, wie klein unser Planet ist.",
+  "Wie selten – vielleicht sogar einzigartig – das Leben hier ist.",
+  "Auf diesem winzigen Punkt im Weltall teilen wir unser Leben.",
+  "Jeder von uns mit einer eigenen Geschichte, aber doch alle miteinander verbunden.",
+  "Nicht durch Herkunft, Sprache oder Grenzen – sondern durch das Glück, gemeinsam hier zu sein.",
+  "Manche Menschen spüren in solchen Momenten, dass wir eigentlich eine einzige Gemeinschaft sind.",
+  "Dass uns mehr verbindet als trennt.",
+  "Hast du das auch schon einmal gefühlt?",
+  "Helf’ uns, dieses Gefühl sichtbar zu machen!"
+];
 
-    let tpIndex = 0, tpInterval = null, tpWordInterval = null, isPaused = false;
-    const tpTextEl = document.getElementById('tp-text');
-    const tpProgress = document.getElementById('tp-progress');
-    const btnNext = document.getElementById('tp-next');
-    const btnPrev = document.getElementById('tp-prev');
+const WORD_MS = 340;
+const SENTENCE_PAUSE = 1100;
 
-    function showTeleprompterStep(idx, auto=true) {
-      if(idx < 0) idx = 0;
-      if(idx >= tpTexts.length) idx = tpTexts.length-1;
-      tpIndex = idx;
-      // Progress bar
-      tpProgress.innerHTML = `<div class="tp-progress-bar" style="width:${100*(tpIndex+1)/tpTexts.length}%"></div>`;
-      // Wort für Wort anzeigen
-      const words = tpTexts[tpIndex].split(" ");
-      tpTextEl.innerHTML = ""; // Reset
-      clearInterval(tpWordInterval);
-      let i = 0;
-      function showWord() {
-        if(i < words.length) {
-          const span = document.createElement('span');
-          span.textContent = (i>0 ? " " : "") + words[i];
-          span.style.animationDelay = (i*0.07)+'s';
-          tpTextEl.appendChild(span);
-          i++;
-        } else {
-          clearInterval(tpWordInterval);
-          // Nach kurzer Pause weiter
-          if(auto && !isPaused) setTimeout(() => { nextTeleprompter(true); }, SENTENCE_PAUSE);
-        }
-      }
-      showWord();
-      tpWordInterval = setInterval(showWord, WORD_MS);
+let tpIndex = 0;
+let tpWordIdx = 0;
+let tpTimer = null;
+
+const tpTextEl = document.getElementById("tp-text");
+const tpProgress = document.getElementById("tp-progress");
+
+function renderSentence(sentence){
+  // Wichtig: Wir rendern ALLE Wörter sofort, damit nichts "wandert"
+  const parts = sentence.split(" ");
+
+  tpTextEl.innerHTML = parts.map((w,i) => {
+    // Leerzeichen bewusst als Text drin lassen, damit Layout stabil bleibt
+    const trailingSpace = (i < parts.length - 1) ? " " : "";
+    return `<span class="tp-word" data-i="${i}">${w}${trailingSpace}</span>`;
+  }).join("");
+
+  tpWordIdx = 0;
+  highlightWord();
+}
+
+function highlightWord(){
+  const words = tpTextEl.querySelectorAll(".tp-word");
+  words.forEach((el,i) => el.classList.toggle("active", i === tpWordIdx));
+}
+
+function updateProgress(){
+  tpProgress.innerHTML =
+    `<div class="tp-progress-bar" style="width:${100*(tpIndex+1)/tpTexts.length}%"></div>`;
+}
+
+function step(){
+  const words = tpTextEl.querySelectorAll(".tp-word");
+  if(tpWordIdx < words.length - 1){
+    tpWordIdx++;
+    highlightWord();
+    return;
+  }
+
+  // Satz fertig -> Pause -> nächster Satz
+  clearInterval(tpTimer);
+  setTimeout(() => {
+    if(tpIndex < tpTexts.length - 1){
+      tpIndex++;
+      show(tpIndex);
     }
-    function nextTeleprompter(auto) {
-      if(tpIndex < tpTexts.length-1) {
-        showTeleprompterStep(tpIndex+1, auto);
-      }
-    }
-    function prevTeleprompter() {
-      if(tpIndex > 0) {
-        showTeleprompterStep(tpIndex-1, false);
-      }
-    }
-    btnNext.onclick = () => { isPaused=false; nextTeleprompter(false); };
-    btnPrev.onclick = () => { isPaused=false; prevTeleprompter(); };
+  }, SENTENCE_PAUSE);
+}
 
-    // Optional: Pause/Play (kannst du noch als Button einbauen)
-    // document.getElementById('tp-pause').onclick = () => { isPaused = !isPaused; };
+function show(idx){
+  tpIndex = idx;
+  updateProgress();
+  renderSentence(tpTexts[tpIndex]);
 
-    // Autoplay-Start
-    showTeleprompterStep(0, true);
+  clearInterval(tpTimer);
+  tpTimer = setInterval(step, WORD_MS);
+}
+
+// Buttons
+document.getElementById("tp-next").onclick = () => {
+  if(tpIndex < tpTexts.length - 1) show(tpIndex + 1);
+};
+document.getElementById("tp-prev").onclick = () => {
+  if(tpIndex > 0) show(tpIndex - 1);
+};
+
+// Start
+show(0);
 
     // --------- Der Rest: Map und Supabase wie gehabt ----------
 
