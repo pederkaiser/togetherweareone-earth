@@ -12,7 +12,7 @@
   <!-- Supabase -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-  <!-- PNG Export -->
+  <!-- PNG Export helper -->
   <script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
 
   <style>
@@ -27,60 +27,55 @@
       --text: rgba(255,255,255,0.92);
       --warm: rgba(255,220,170,0.95);
 
-      /* =========================
-         FIX: "dunkelste" Einstellung fest verdrahtet
-         (kein Slider mehr, User kann es nicht verändern)
-         ========================= */
-      --map-brightness: 0.56;   /* dunkler als vorher */
+      /* Anzeige-Look (fix, ohne User-Regler) */
+      --map-brightness: 0.64;
       --map-contrast: 1.25;
-      --map-saturate: 0.00;     /* 0 = Graustufe */
-      --shade-opacity: 0.90;    /* starker Night-Film */
-      --ocean-tint: rgba(0,0,0,0.42);
+      --map-saturate: 0.0;   /* Graustufe */
+      --shade-opacity: 0.90;
+      --ocean-tint: rgba(0,0,0,0.38);
     }
 
     html,body { height:100%; }
     body{
-      margin: 0;
+      margin:0;
       color: var(--text);
       background:
         radial-gradient(1200px 700px at 50% 12%, rgba(40,60,110,0.35) 0%, rgba(0,0,0,0) 55%),
         radial-gradient(900px 520px at 20% 8%, rgba(130,90,40,0.18) 0%, rgba(0,0,0,0) 55%),
         linear-gradient(180deg, var(--bg1), var(--bg0));
       font-family: ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "Inter", "Segoe UI", Arial, sans-serif;
-      overflow-x: hidden;
+      overflow-x:hidden;
     }
 
     .wrap{
-      min-height: 100%;
-      display: grid;
-      grid-template-rows: auto auto 1fr auto;
-      gap: 14px;
-      padding: 18px 14px 18px 14px;
-      box-sizing: border-box;
-      max-width: 1100px;
-      margin: 0 auto;
+      min-height:100%;
+      display:grid;
+      grid-template-rows:auto auto 1fr auto;
+      gap:14px;
+      padding:18px 14px;
+      box-sizing:border-box;
+      max-width:1100px;
+      margin:0 auto;
     }
 
     /* --- Prompter --- */
     .teleprompter{
-      padding: 18px 18px 14px 18px;
-      border-radius: 20px;
+      padding:18px 18px 14px 18px;
+      border-radius:20px;
       background: linear-gradient(180deg, var(--card2), var(--card));
       border: 1px solid var(--stroke);
       box-shadow: 0 16px 60px rgba(0,0,0,0.35);
       backdrop-filter: blur(10px);
     }
-
     .tp-text{
-      text-align: center;
+      text-align:center;
       font-size: clamp(18px, 2.5vw, 30px);
-      line-height: 1.45;
-      letter-spacing: 0.2px;
-      margin: 0;
-      padding: 8px 10px 10px 10px;
-      min-height: 3.2em;
+      line-height:1.45;
+      letter-spacing:0.2px;
+      margin:0;
+      padding:8px 10px 10px 10px;
+      min-height:3.2em;
     }
-
     /* Zeilenumbruch: aktiv */
     .tp-word{
       color: var(--ghost);
@@ -89,7 +84,6 @@
       overflow-wrap: anywhere;
     }
     .tp-space{ white-space: pre; }
-
     .tp-word.done{
       color: var(--warm);
       filter: drop-shadow(0 0 12px rgba(255,210,140,0.18));
@@ -101,46 +95,46 @@
 
     .tp-meta{
       display:flex; align-items:center; justify-content:center;
-      gap: 10px; margin-top: 8px; user-select:none;
+      gap:10px; margin-top:8px; user-select:none;
     }
     .tp-btn{
-      width: 42px; height: 42px; border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.10);
+      width:42px; height:42px; border-radius:14px;
+      border:1px solid rgba(255,255,255,0.10);
       background: rgba(255,255,255,0.06);
       color: rgba(255,255,255,0.85);
-      cursor: pointer;
+      cursor:pointer;
       transition: background 140ms ease, transform 140ms ease;
-      font-size: 18px; font-weight: 700;
+      font-size:18px; font-weight:700;
     }
     .tp-btn:hover{ background: rgba(255,255,255,0.10); transform: translateY(-1px); }
 
     .tp-progress{
       width: min(520px, 62vw);
-      height: 8px;
-      border-radius: 8px;
+      height:8px;
+      border-radius:8px;
       overflow:hidden;
       background: rgba(255,255,255,0.10);
-      border: 1px solid rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.08);
     }
     .tp-progress-bar{
       height:100%;
-      width: 0%;
+      width:0%;
       background: linear-gradient(90deg, rgba(255,220,170,0.65), rgba(255,255,255,0.55));
       transition: width 220ms ease;
     }
 
     /* --- Map --- */
     .mapWrap{
-      position: relative;
-      border-radius: 20px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.10);
+      position:relative;
+      border-radius:20px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,0.10);
       box-shadow: 0 16px 60px rgba(0,0,0,0.35);
-      background: #0a0b10;
+      background:#0a0b10;
     }
-    #map{ width: 100%; height: min(62vh, 520px); }
+    #map{ width:100%; height: min(62vh, 520px); }
 
-    /* FIX: Graustufe + Helligkeit/Look sind fest (wie Export) */
+    /* On-screen: Graustufe + dunkler */
     .leaflet-tile{
       filter:
         grayscale(1)
@@ -154,7 +148,7 @@
       position:absolute; inset:0;
       background: var(--ocean-tint);
       mix-blend-mode: multiply;
-      opacity: 1;
+      opacity:1;
     }
     .mapShade{
       pointer-events:none;
@@ -169,65 +163,34 @@
 
     .hud{
       position:absolute;
-      left: 12px;
-      top: 12px;
-      display:flex;
-      gap: 10px;
-      z-index: 500;
-      flex-wrap: wrap;
-      align-items: center;
+      left:12px; top:12px;
+      display:flex; gap:10px;
+      z-index:500;
+      flex-wrap:wrap;
+      align-items:center;
     }
     .hud button{
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.10);
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.10);
       background: rgba(0,0,0,0.24);
       color: rgba(255,255,255,0.92);
-      cursor: pointer;
+      cursor:pointer;
       backdrop-filter: blur(10px);
       transition: background 140ms ease, transform 140ms ease;
-      font-weight: 650;
-      letter-spacing: 0.2px;
+      font-weight:650;
+      letter-spacing:0.2px;
     }
     .hud button:hover{ background: rgba(0,0,0,0.32); transform: translateY(-1px); }
 
-    .hint{ text-align:center; margin: 4px 0 0 0; color: rgba(255,255,255,0.60); font-size: 14px; }
-    .status{ text-align:center; color: rgba(255,255,255,0.70); font-size: 13px; margin-top: 6px; }
+    .hint{ text-align:center; margin:4px 0 0 0; color: rgba(255,255,255,0.60); font-size:14px; }
+    .status{ text-align:center; color: rgba(255,255,255,0.70); font-size:13px; margin-top:6px; }
 
-    /* Offscreen Export Map (unsichtbar, unabhängig von Browser-Ansicht) */
-    #exportStage{
-      position: fixed;
-      left: -99999px;
-      top: 0;
-      width: 1800px;     /* Export-Auflösung */
-      height: 1000px;    /* Export-Auflösung */
-      background: #000;
-      z-index: -1;
-      overflow: hidden;
-      border-radius: 24px;
-    }
-    #exportMap{
-      width: 1800px;
-      height: 1000px;
-    }
-    #exportStage .mapTint,
-    #exportStage .mapShade{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-    }
-    #exportStage .mapTint{ background: var(--ocean-tint); mix-blend-mode: multiply; }
-    #exportStage .mapShade{ opacity: var(--shade-opacity); background:
-      radial-gradient(1200px 700px at 50% 10%, rgba(0,0,0,0.18), rgba(0,0,0,0.90) 70%),
-      linear-gradient(180deg, rgba(0,0,0,0.16), rgba(0,0,0,0.72));
-      mix-blend-mode: multiply;
-    }
-
-    @media (max-width: 600px){
-      .wrap{ padding: 12px 10px; }
-      .teleprompter{ padding: 14px 12px 12px 12px; border-radius: 18px; }
-      .tp-btn{ width: 40px; height: 40px; border-radius: 14px; }
-      #map{ height: 52vh; }
+    @media (max-width:600px){
+      .wrap{ padding:12px 10px; }
+      .teleprompter{ padding:14px 12px 12px 12px; border-radius:18px; }
+      .tp-btn{ width:40px; height:40px; border-radius:14px; }
+      #map{ height:52vh; }
     }
   </style>
 </head>
@@ -244,10 +207,10 @@
       </div>
     </div>
 
-    <div class="mapWrap">
+    <div class="mapWrap" id="mapWrap">
       <div class="hud">
-        <button id="btnWorld" title="Weltansicht (ohne reinzuzoomen)">Weltansicht</button>
-        <button id="btnCard" title="PNG als Weltkarte generieren (unabhängig vom Browser-Zoom)">Karte generieren</button>
+        <button id="btnWorld" title="Ein Erdball (ohne Wrap / ohne doppelte Kontinente)">Weltansicht</button>
+        <button id="btnCard" title="Screenshot vom Erdball (Graustufe, dunkel, mit Lichtern)">Karte generieren</button>
       </div>
 
       <div id="map"></div>
@@ -257,13 +220,6 @@
 
     <p class="hint">Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)</p>
     <p class="status" id="status"></p>
-  </div>
-
-  <!-- Offscreen Export Stage -->
-  <div id="exportStage">
-    <div id="exportMap"></div>
-    <div class="mapTint"></div>
-    <div class="mapShade"></div>
   </div>
 
 <script>
@@ -287,10 +243,7 @@ const tpTexts = [
 const WORD_MS = 240;
 const SENTENCE_PAUSE = 900;
 
-let tpIndex = 0;
-let tpWordIdx = 0;
-let tpTimer = null;
-
+let tpIndex = 0, tpWordIdx = 0, tpTimer = null;
 const tpTextEl = document.getElementById("tp-text");
 const tpBarEl  = document.getElementById("tp-bar");
 
@@ -301,7 +254,6 @@ function renderSentence(sentence){
     return `<span class="tp-word">${t}</span>`;
   }).join("");
 }
-
 function markProgress(activeWordIdx){
   const wordSpans = Array.from(tpTextEl.querySelectorAll(".tp-word"));
   wordSpans.forEach((w, i) => {
@@ -311,15 +263,12 @@ function markProgress(activeWordIdx){
   });
   if (wordSpans[activeWordIdx]) wordSpans[activeWordIdx].classList.add("active");
 }
-
 function updateProgress(){
   tpBarEl.style.width = `${100 * (tpIndex + 1) / tpTexts.length}%`;
 }
-
 function playSentence(idx, auto=true){
   clearInterval(tpTimer);
-  tpIndex = idx;
-  tpWordIdx = 0;
+  tpIndex = idx; tpWordIdx = 0;
   renderSentence(tpTexts[tpIndex]);
   updateProgress();
 
@@ -328,9 +277,8 @@ function playSentence(idx, auto=true){
 
   tpTimer = setInterval(() => {
     tpWordIdx++;
-    if (tpWordIdx < words.length){
-      markProgress(tpWordIdx);
-    } else {
+    if (tpWordIdx < words.length) markProgress(tpWordIdx);
+    else {
       clearInterval(tpTimer);
       markProgress(words.length - 1);
       if(auto){
@@ -341,17 +289,12 @@ function playSentence(idx, auto=true){
     }
   }, WORD_MS);
 }
-
-document.getElementById("tp-next").onclick = () => {
-  if(tpIndex < tpTexts.length - 1) playSentence(tpIndex + 1, false);
-};
-document.getElementById("tp-prev").onclick = () => {
-  if(tpIndex > 0) playSentence(tpIndex - 1, false);
-};
+document.getElementById("tp-next").onclick = () => { if(tpIndex < tpTexts.length - 1) playSentence(tpIndex + 1, false); };
+document.getElementById("tp-prev").onclick = () => { if(tpIndex > 0) playSentence(tpIndex - 1, false); };
 playSentence(0, true);
 
 /* -------------------------
-   MAP + SUPABASE
+   SUPABASE
 -------------------------- */
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -371,73 +314,99 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let session = localStorage.getItem('myLightSession');
 if(!session) { session = uuidv4(); localStorage.setItem('myLightSession', session); }
 
-/* World framing:
-   Wir erzwingen für "Welt" ein Bounds, das wirklich die ganze Welt zeigt.
-   (Leaflet schneidet sonst je nach Aspect Ratio.) */
-const WORLD_BOUNDS = L.latLngBounds(
-  L.latLng(-60, -180),
-  L.latLng( 85,  180)
-);
-const WORLD_FIT_OPTS = { animate: true, duration: 0.9, padding: [20,20], maxZoom: 2 };
+/* -------------------------
+   MAP: ein Erdball, kein Wrap, keine doppelten Kontinente
+-------------------------- */
+const WORLD_BOUNDS = L.latLngBounds(L.latLng(-60, -180), L.latLng(85, 180));
+const WORLD_VIEW = { center: [20, 0], zoom: 2.0 };  // "ein Erdball" (2D) — ruhig & weit
+const tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 
 const map = L.map('map', {
   zoomControl: true,
-  worldCopyJump: true,
-  preferCanvas: true
-}).fitBounds(WORLD_BOUNDS, { animate:false, padding:[20,20], maxZoom: 2 });
-
-/* Tiles: Voyager (Kontinente/Umrisse).
-   Wichtig für leaflet-image: crossOrigin setzen. */
-const tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+  worldCopyJump: false,      // wichtig: nicht springen/wrappen
+  preferCanvas: true,
+  zoomSnap: 0.25,
+  zoomDelta: 0.25,
+  maxBounds: WORLD_BOUNDS,
+  maxBoundsViscosity: 1.0
+}).setView(WORLD_VIEW.center, WORLD_VIEW.zoom);
 
 L.tileLayer(tileUrl, {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
   maxZoom: 18,
+  noWrap: true,             // wichtig: keine zweite Welt zeichnen
+  bounds: WORLD_BOUNDS,
   crossOrigin: true
 }).addTo(map);
 
-/* Lichter: wie "Straßenlaternen aus dem All" */
 const canvasRenderer = L.canvas({ padding: 0.5 });
 const lightsLayer = L.layerGroup().addTo(map);
 
-function addGlowLight(layerGroup, latlng, isMine=false){
-  // großer weicher Glow
+/* Punkt-Design:
+   - andere: sehr klein (nur Orientierung)
+   - mein Punkt: etwas größer, deutlicher Glow
+*/
+function addLight(latlng, isMine=false){
+  if(!isMine){
+    // minimaler Glow
+    L.circleMarker(latlng, {
+      renderer: canvasRenderer,
+      radius: 3.2,
+      stroke: false,
+      fill: true,
+      fillOpacity: 0.06,
+      fillColor: "rgba(255,220,170,1)",
+      interactive: false
+    }).addTo(lightsLayer);
+
+    // winziger Kern
+    L.circleMarker(latlng, {
+      renderer: canvasRenderer,
+      radius: 1.35,
+      stroke: false,
+      fill: true,
+      fillOpacity: 0.70,
+      fillColor: "rgba(255,250,245,1)",
+      interactive: false
+    }).addTo(lightsLayer);
+    return;
+  }
+
+  // mein Glow (sichtbarer)
   L.circleMarker(latlng, {
     renderer: canvasRenderer,
-    radius: isMine ? 14 : 12,
+    radius: 10,
     stroke: false,
     fill: true,
     fillOpacity: 0.14,
     fillColor: "rgba(255,210,150,1)",
     interactive: false
-  }).addTo(layerGroup);
+  }).addTo(lightsLayer);
 
-  // mittlerer Glow
   L.circleMarker(latlng, {
     renderer: canvasRenderer,
-    radius: isMine ? 8 : 7,
+    radius: 6.2,
     stroke: false,
     fill: true,
-    fillOpacity: 0.18,
-    fillColor: "rgba(255,230,190,1)",
+    fillOpacity: 0.16,
+    fillColor: "rgba(255,235,200,1)",
     interactive: false
-  }).addTo(layerGroup);
+  }).addTo(lightsLayer);
 
-  // Kern
   L.circleMarker(latlng, {
     renderer: canvasRenderer,
-    radius: isMine ? 3.6 : 2.8,
+    radius: 2.8,
     stroke: false,
     fill: true,
-    fillOpacity: 0.96,
+    fillOpacity: 0.95,
     fillColor: "rgba(255,250,245,1)",
-    interactive: isMine
-  }).addTo(layerGroup);
+    interactive: true
+  }).addTo(lightsLayer);
 }
 
 let allLightPoints = [];
 
-async function loadLights() {
+async function loadLights(){
   try{
     const { data, error } = await sb.from('lights').select('*');
     if(error) throw error;
@@ -446,32 +415,31 @@ async function loadLights() {
     lightsLayer.clearLayers();
 
     let mine = null;
-    for (const row of allLightPoints){
+    for(const row of allLightPoints){
       const isMine = (row.session === session);
       if(isMine) mine = row;
-      addGlowLight(lightsLayer, [row.lat, row.lng], isMine);
+      addLight([row.lat, row.lng], isMine);
     }
-
     setStatus(mine ? "Dein Licht ist gesetzt. Du kannst es durch Klicken verschieben." : "Setze dein Licht mit einem Klick auf die Karte.");
-  } catch (e){
+  } catch(e){
     console.error(e);
     setStatus("Konnte Lichter nicht laden. Prüfe Supabase URL/Key und Tabelle „lights“.");
   }
 }
 
-async function loadMyLight() {
+async function loadMyLight(){
   const { data } = await sb.from('lights').select('*').eq('session', session).maybeSingle();
   return data;
 }
 
-/* Klick verändert NICHT den Zoom */
-map.on('click', async function(e) {
+/* Klick speichert/verschiebt, Zoom bleibt wie gewählt */
+map.on('click', async (e) => {
   try{
     const existing = await loadMyLight();
-    if(existing) {
-      await sb.from('lights').update({lat: e.latlng.lat, lng: e.latlng.lng}).eq('session', session);
+    if(existing){
+      await sb.from('lights').update({ lat: e.latlng.lat, lng: e.latlng.lng }).eq('session', session);
     } else {
-      await sb.from('lights').insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
+      await sb.from('lights').insert({ lat: e.latlng.lat, lng: e.latlng.lng, session });
     }
     await loadLights();
   } catch(err){
@@ -480,102 +448,172 @@ map.on('click', async function(e) {
   }
 });
 
-/* Weltansicht Button: wirklich ganze Welt */
 document.getElementById("btnWorld").addEventListener("click", () => {
-  map.fitBounds(WORLD_BOUNDS, WORLD_FIT_OPTS);
+  map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
 });
 
 /* -------------------------
-   EXPORT: unabhängige Offscreen-Map
-   -> immer ganze Welt, immer derselbe Look, unabhängig vom Browser-Zoom
+   EXPORT: Zoom auf "ein Erdball" -> leafletImage -> Canvas Postprocess
+   (Graustufe + dunkel + Vignette + Globus-Maske)
 -------------------------- */
-let exportMap = null;
-let exportTiles = null;
-let exportLayer = null;
 
-function ensureExportMap(){
-  if(exportMap) return;
+/* Diese Werte bestimmen die Export-Dunkelheit (soll wie Anzeige wirken).
+   Du kannst hier noch dunkler gehen, ohne UI zu ändern: */
+const EXPORT_BRIGHTNESS = 0.55; // < 0.55 = dunkler
+const EXPORT_CONTRAST   = 1.25;
+const EXPORT_VIGNETTE   = 0.65; // 0..1
+const EXPORT_GLOBE_FILL = 0;    // Hintergrund (schwarz)
 
-  exportMap = L.map('exportMap', {
-    zoomControl: false,
-    attributionControl: false,
-    preferCanvas: true,
-    zoomSnap: 0.25,
-    zoomDelta: 0.25,
-    fadeAnimation: false
-  });
+function clamp(v){ return Math.max(0, Math.min(255, v)); }
 
-  // Ganze Welt in den Export-Rahmen passend
-  exportMap.fitBounds(WORLD_BOUNDS, { animate:false, padding:[40,40], maxZoom: 2 });
+function applyNightGlobeLook(srcCanvas){
+  const w = srcCanvas.width, h = srcCanvas.height;
+  const out = document.createElement('canvas');
+  out.width = w; out.height = h;
+  const octx = out.getContext('2d');
 
-  exportTiles = L.tileLayer(tileUrl, {
-    maxZoom: 18,
-    crossOrigin: true
-  }).addTo(exportMap);
+  // draw source
+  octx.drawImage(srcCanvas, 0, 0);
 
-  exportLayer = L.layerGroup().addTo(exportMap);
-}
+  const img = octx.getImageData(0, 0, w, h);
+  const d = img.data;
 
-function waitForTilesToLoad(tileLayer){
-  return new Promise(resolve => {
-    // tileLayer fires 'load' when all visible tiles are loaded
-    tileLayer.once('load', () => {
-      // 2 frames extra, damit Canvas/Marker sicher drin sind
-      requestAnimationFrame(() => requestAnimationFrame(resolve));
-    });
+  const cx = w * 0.5;
+  const cy = h * 0.5;
+  const r = Math.min(w, h) * 0.46;           // Globus-Radius
+  const r2 = r * r;
+  const vignStart = r * 0.55;               // ab hier Vignette stärker
+  const vignRange = r - vignStart;
 
-    // Falls Cache blitzschnell: minimaler Fallback
-    setTimeout(resolve, 1200);
-  });
-}
+  // Contrast helper
+  const contrast = EXPORT_CONTRAST;
+  const b = EXPORT_BRIGHTNESS;
 
-async function generateWorldPng(){
-  setStatus("Generiere Weltkarte…");
+  for(let y=0; y<h; y++){
+    for(let x=0; x<w; x++){
+      const i = (y*w + x)*4;
+      const dx = x - cx;
+      const dy = y - cy;
+      const dist2 = dx*dx + dy*dy;
 
-  // 1) Immer neueste Daten holen, damit Export aktuell ist
-  await loadLights();
+      if(dist2 > r2){
+        // außerhalb: schwarz (runde Globus-Maske)
+        d[i] = EXPORT_GLOBE_FILL;
+        d[i+1] = EXPORT_GLOBE_FILL;
+        d[i+2] = EXPORT_GLOBE_FILL;
+        d[i+3] = 255;
+        continue;
+      }
 
-  // 2) Offscreen-Map initialisieren / re-use
-  ensureExportMap();
+      // rgb -> gray
+      const R = d[i], G = d[i+1], B = d[i+2];
+      let gray = 0.2126*R + 0.7152*G + 0.0722*B;
 
-  // 3) Offscreen-Map: Weltansicht erzwingen
-  exportMap.fitBounds(WORLD_BOUNDS, { animate:false, padding:[40,40], maxZoom: 2 });
+      // Dunkelheit
+      gray = gray * b;
 
-  // 4) Marker neu setzen
-  exportLayer.clearLayers();
-  for (const row of allLightPoints){
-    const isMine = (row.session === session);
-    addGlowLight(exportLayer, [row.lat, row.lng], isMine);
+      // Kontrast (um Lichter abzuheben)
+      gray = (gray - 128) * contrast + 128;
+
+      // Vignette (zum Rand dunkler)
+      const dist = Math.sqrt(dist2);
+      if(dist > vignStart){
+        const t = (dist - vignStart) / Math.max(1, vignRange);
+        const v = 1 - (EXPORT_VIGNETTE * t * t);
+        gray *= v;
+      }
+
+      // "Lichter" etwas poppen lassen (helles bleibt hell)
+      if(gray > 160) gray = Math.min(255, gray * 1.12);
+
+      gray = clamp(gray);
+      d[i] = d[i+1] = d[i+2] = gray;
+      d[i+3] = 255;
+    }
   }
 
-  // 5) Warten bis Tiles da sind
-  await waitForTilesToLoad(exportTiles);
+  octx.putImageData(img, 0, 0);
 
-  // 6) Rendern
-  return new Promise((resolve, reject) => {
-    leafletImage(exportMap, function(err, canvas) {
-      if (err) return reject(err);
-      resolve(canvas.toDataURL("image/png"));
-    });
+  // sanfter "Atmosphärenrand" (grau) – optional, aber macht Globus echter
+  octx.save();
+  octx.globalCompositeOperation = 'lighter';
+  const grad = octx.createRadialGradient(cx, cy, r*0.92, cx, cy, r*1.02);
+  grad.addColorStop(0, 'rgba(255,255,255,0)');
+  grad.addColorStop(1, 'rgba(255,255,255,0.10)');
+  octx.fillStyle = grad;
+  octx.beginPath();
+  octx.arc(cx, cy, r*1.01, 0, Math.PI*2);
+  octx.fill();
+  octx.restore();
+
+  return out;
+}
+
+function waitForMapSettled(tileLayer){
+  return new Promise(resolve => {
+    let moved = false, tiles = false;
+
+    const done = () => {
+      if(moved && tiles){
+        requestAnimationFrame(() => requestAnimationFrame(resolve));
+      }
+    };
+
+    map.once('moveend', () => { moved = true; done(); });
+    tileLayer.once('load', () => { tiles = true; done(); });
+
+    // Fallback falls Cache/Events komisch: nach 1.2s weiter
+    setTimeout(() => { moved = true; tiles = true; done(); }, 1200);
   });
 }
 
 document.getElementById("btnCard").addEventListener("click", async () => {
   try{
-    const png = await generateWorldPng();
-    const a = document.createElement("a");
-    a.href = png;
-    a.download = "eine-menschheit-erde-nacht.png";
-    a.click();
-    setStatus("Fertig. PNG wurde erstellt.");
-  } catch (e){
+    setStatus("Erzeuge Erdball…");
+
+    // View merken, danach wiederherstellen
+    const prevCenter = map.getCenter();
+    const prevZoom = map.getZoom();
+
+    // 1) auf "ein Erdball" rauszoomen
+    map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
+
+    // 2) warten bis Tiles + Move fertig
+    const tileLayer = map._layers[Object.keys(map._layers).find(k => map._layers[k] instanceof L.TileLayer)];
+    if(tileLayer) await waitForMapSettled(tileLayer);
+
+    // 3) Canvas snapshot
+    leafletImage(map, function(err, canvas) {
+      // View zurück
+      map.setView(prevCenter, prevZoom, { animate: true });
+
+      if(err){
+        console.error(err);
+        alert("Export fehlgeschlagen.");
+        setStatus("Export fehlgeschlagen.");
+        return;
+      }
+
+      // 4) Postprocess: Globus-Maske + Night-Look
+      const out = applyNightGlobeLook(canvas);
+
+      // 5) Download
+      const png = out.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = png;
+      a.download = "erde-bei-nacht.png";
+      a.click();
+
+      setStatus("Fertig.");
+    });
+  } catch(e){
     console.error(e);
     alert("Export fehlgeschlagen.");
     setStatus("Export fehlgeschlagen.");
   }
 });
 
-// Start
+/* Start */
 loadLights();
 setInterval(loadLights, 30000);
 </script>
