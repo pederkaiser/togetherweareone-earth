@@ -1,241 +1,273 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <title>Together We Are One</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Eine Menschheit</title>
+
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <!-- Export als PNG -->
+  <script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
+
   <style>
-    body { margin: 0; font-family: system-ui, sans-serif; background: #101014; color: #fafafa;}
-    .teleprompter {
-      max-width: 520px;
-      margin: 32px auto 18px auto;
-      background: rgba(36,34,28,0.97);
-      border-radius: 18px;
-      box-shadow: 0 6px 32px rgba(0,0,0,0.19);
-      padding: 20px 26px 16px 26px;
-      font-size: 1.18em;
-      color: #ffe9c2;
-      min-height: 60px;
-      position: relative;
+    :root{
+      --bg:#0b0d12;
+      --ghost: rgba(255,255,255,0.18);
+      --hi: rgba(255,255,255,0.95);
+      --warm: rgba(255,220,170,0.95);
+    }
+    html, body { height: 100%; margin: 0; }
+    body{
+      background: radial-gradient(1200px 700px at 50% 15%, #1a2033 0%, var(--bg) 60%, #07080c 100%);
+      color: #fff;
+      font-family: ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "Inter", "Segoe UI", Arial, sans-serif;
+    }
+
+    .wrap{
+      min-height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 18px;
+      padding: 22px;
+      box-sizing: border-box;
+    }
+
+    /* Zentrierter Textblock */
+    .copy{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+    .line{
+      max-width: 980px;
       text-align: center;
-      letter-spacing: 0.01em;
-      line-height: 1.5;
+      font-size: clamp(20px, 3vw, 34px);
+      line-height: 1.45;
+      letter-spacing: 0.2px;
+      margin: 0;
+      font-weight: 500;
     }
-    .tp-text {
-  min-height: 2.2em;
-  text-align: left;
-  white-space: normal;        /* jetzt automatischer Umbruch */}
-    .tp-word {
-  opacity: 0.35;
-  color: #ffe9c2;
-  font-weight: 400;
-  transition: opacity 0.18s, color 0.18s;
-  padding: 0 0.06em;
-  white-space: normal;        /* damit Umbruch pro Wort möglich bleibt */
-}
-    .tp-word.done {
-  opacity: 1;
-  color: #fff9e4;
-  font-weight: 700;
-}
-.tp-word.active {
-  opacity: 1;
-  color: #fff9e4;
-  font-weight: 700;
-}
-    .tp-controls {
-      display: flex; align-items: center; justify-content: center;
-      margin-top: 13px; user-select: none; gap: 10px;
+    .word{
+      color: var(--ghost);
+      transition: color 160ms ease, filter 160ms ease;
+      white-space: pre; /* Leerzeichen behalten */
     }
-    .tp-controls button {
-      background: none;
-      border: none;
-      color: #ffd670;
-      font-size: 1.65em;
-      cursor: pointer;
-      border-radius: 50%;
-      width: 40px; height: 40px;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s, color 0.2s;
+    .word.active{
+      color: var(--hi);
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.14));
     }
-    .tp-controls button:active { background: #ffd67022; color: #fff4d4;}
-    .tp-progress {
-      flex: 1;
-      height: 6px;
-      margin: 0 12px;
-      border-radius: 5px;
-      background: #3b3535;
+    .word.active.warm{
+      color: var(--warm);
+      filter: drop-shadow(0 0 14px rgba(255,210,140,0.20));
+    }
+
+    /* Karte */
+    #map{
+      height: min(58vh, 560px);
+      border-radius: 18px;
       overflow: hidden;
-      position: relative;
-      top: 0.5em;
+      box-shadow: 0 10px 50px rgba(0,0,0,0.35);
+      background: #000;
     }
-    .tp-cursor {
-    display: inline-block;
-    width: 0.7ch;
-    color: #ffe397;
-    animation: blink 1s steps(2, start) infinite;
+    /* Noch dunklerer Gesamteindruck ohne Style-Basteln */
+    .leaflet-tile {
+      filter: brightness(0.72) contrast(1.15) saturate(0.85);
     }
-@keyframes blink { to {opacity: 0;} }
-    .tp-progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg,#ffe397,#ffd64d 85%);
-      transition: width 0.32s;
+
+    /* Buttons */
+    .controls{
+      display:flex;
+      justify-content:center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    #map { width: 100vw; height: 60vh; max-height: 420px; border-radius: 18px; box-shadow: 0 2px 14px rgba(0,0,0,0.25);}
-    .hint {text-align:center; font-size: 1.1em; color: #ddd; margin-top: 20px;}
-    @media (max-width: 600px) {
-      .teleprompter {margin: 12px 4px 10px 4px; padding: 9px;}
-      #map {height: 44vh;}
+    button{
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.92);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      backdrop-filter: blur(8px);
+    }
+    button:hover{
+      background: rgba(255,255,255,0.12);
+    }
+
+    .hint{
+      text-align:center;
+      color: rgba(255,255,255,0.55);
+      font-size: 13px;
+      margin: 0;
     }
   </style>
 </head>
+
 <body>
-  <div class="teleprompter" id="teleprompter">
-  <div class="tp-text" id="tp-text"></div>
-  <div class="tp-controls">
-    <button id="tp-prev" title="Zurück">&#8592;</button>
-    <div class="tp-progress" id="tp-progress"><div class="tp-progress-bar"></div></div>
-    <button id="tp-next" title="Weiter">&#8594;</button>
+  <div class="wrap">
+    <div class="copy">
+      <p id="line" class="line"></p>
+    </div>
+
+    <div id="map" aria-label="Weltkarte"></div>
+
+    <div class="controls">
+      <button id="btnWorld">Weltansicht</button>
+      <button id="btnExport">Karte generieren (PNG)</button>
+      <button id="btnClear">Lichter löschen</button>
+    </div>
+
+    <p class="hint">Tipp: Zoome hinein, tippe auf einen Ort – dort erscheint ein Licht.</p>
   </div>
-  </div> 
-  <div id="map"></div>
-  <div class="hint" id="hint">Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)</div>
+
   <script>
-    // -------- Teleprompter-Text-Array (nur Deutsch, beliebig anpassbar) ----
-  const tpTexts = [
-  "Manchmal schauen wir in den Himmel.",
-  "Vielleicht sehen wir einen Stern, den Mond, ferne Galaxien.",
-  "Für einen Moment wird uns bewusst, wie klein unser Planet ist.",
-  "Wie selten – vielleicht sogar einzigartig – das Leben hier ist.",
-  "Auf diesem winzigen Punkt im Weltall teilen wir unser Leben.",
-  "Jeder von uns mit einer eigenen Geschichte, aber doch alle miteinander verbunden.",
-  "Nicht durch Herkunft, Sprache oder Grenzen – sondern durch das Glück, gemeinsam hier zu sein.",
-  "Manche Menschen spüren in solchen Momenten, dass wir eigentlich eine einzige Gemeinschaft sind.",
-  "Dass uns mehr verbindet als trennt.",
-  "Hast du das auch schon einmal gefühlt?",
-  "Helf’ uns, dieses Gefühl sichtbar zu machen!"
-];
+    /***** 1) Ghost-Text + Wort-für-Wort Highlight *****/
+    const text = `Manchmal schauen wir in den Himmel. Vielleicht sehen wir einen Stern, den Mond, ferne Galaxien.
+Für einen Moment wird uns bewusst, wie klein unser Planet ist. Wie selten – vielleicht sogar einzigartig – das Leben hier ist.`;
 
-const WORD_MS = 100;      // Zeit pro Wort
-const SENTENCE_PAUSE = 1100; // Pause nach vollem Satz
+    const lineEl = document.getElementById("line");
+    const tokens = text.split(/(\s+)/); // Worte + Leerzeichen behalten
 
-let tpIndex = 0;
-let tpWordIdx = 0;
-let tpTimer = null;
+    lineEl.innerHTML = tokens.map(t => {
+      if (/^\s+$/.test(t)) return `<span class="word space">${t}</span>`;
+      return `<span class="word">${t}</span>`;
+    }).join("");
 
-const tpTextEl = document.getElementById("tp-text");
-const tpProgress = document.getElementById("tp-progress");
+    const wordSpans = Array.from(lineEl.querySelectorAll(".word"))
+      .filter(s => !s.classList.contains("space"));
 
-function showTypewriterSentence(idx, auto=true) {
-  clearInterval(tpTimer);
-  tpIndex = idx;
-  tpWordIdx = 0;
-  tpTextEl.textContent = "";
-  updateProgress();
-
-  const words = tpTexts[tpIndex].split(" ");
-  function typeNext() {
-    if(tpWordIdx < words.length) {
-      tpTextEl.innerHTML = tpTextEl.textContent.replace(/\|$/, '')  // alten Cursor weg
-    + (tpWordIdx === 0 ? "" : " ") + words[tpWordIdx]
-    + `<span class="tp-cursor">|</span>`;
-      tpWordIdx++;
-    } else {
-      clearInterval(tpTimer);
-      tpTextEl.innerHTML = tpTextEl.textContent.replace(/\|$/, ''); // Cursor entfernen
-      if(auto) setTimeout(() => {
-        if(tpIndex < tpTexts.length - 1) showTypewriterSentence(tpIndex + 1, auto);
-      }, SENTENCE_PAUSE);
+    let wi = 0;
+    function highlightStep(){
+      wordSpans.forEach(s => s.classList.remove("active","warm"));
+      if (wordSpans[wi]) wordSpans[wi].classList.add("active","warm");
+      wi = (wi + 1) % wordSpans.length;
     }
-  }
-  typeNext();
-  tpTimer = setInterval(typeNext, WORD_MS);
-}
+    highlightStep();
+    setInterval(highlightStep, 260);
 
-function updateProgress(){
-  tpProgress.innerHTML =
-    `<div class="tp-progress-bar" style="width:${100*(tpIndex+1)/tpTexts.length}%"></div>`;
-}
+    /***** 2) Leaflet Map: dunkler Basemap + Lichter *****/
+    const map = L.map("map", {
+      worldCopyJump: true,
+      zoomControl: true,
+      preferCanvas: true
+    }).setView([20, 10], 2);
 
-// Buttons
-document.getElementById("tp-next").onclick = () => {
-  if(tpIndex < tpTexts.length - 1) showTypewriterSentence(tpIndex + 1, false);
-};
-document.getElementById("tp-prev").onclick = () => {
-  if(tpIndex > 0) showTypewriterSentence(tpIndex - 1, false);
-};
-
-// Start
-showTypewriterSentence(0, true);
-
-    // --------- Der Rest: Map und Supabase wie gehabt ----------
-
-    function uuidv4() {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-      });
-    }
-    const SUPABASE_URL = 'https://gwfqdukbcgtcefqtgnbl.supabase.co';  // <-- DEIN Project URL aus Supabase!
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3ZnFkdWtiY2d0Y2VmcXRnbmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MDU2MTMsImV4cCI6MjA4NDI4MTYxM30.ePyuDxhVoc1ol5lQ8JbRKaybgpEPozBR3Wf71oFj040';  // <-- DEIN anon public key!
-
-    const candleIcon = L.icon({
-      iconUrl: 'https://openmoji.org/data/color/svg/1F56F.svg',
-      iconSize: [32, 40],
-      iconAnchor: [16, 38],
-      popupAnchor: [0, -34]
-    });
-
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    let session = localStorage.getItem('myLightSession');
-    if(!session) {
-      session = uuidv4();
-      localStorage.setItem('myLightSession', session);
-    }
-    const map = L.map('map', { zoomControl: true }).setView([20, 0], 2);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap contributors & CartoDB',
-      maxZoom: 18,
+    // Dunkle, sehr verbreitete Tiles:
+    // CARTO Dark Matter (tokenfrei), Attribution beachten
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      subdomains: "abcd",
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
     }).addTo(map);
 
-    let allMarkers = [];
-    let myMarker = null;
-    async function loadLights() {
-      allMarkers.forEach(m => map.removeLayer(m));
-      allMarkers = [];
-      myMarker = null;
-      let { data, error } = await sb.from('lights').select('*');
-      if(data) {
-        data.forEach(row => {
-          const icon = candleIcon;
-          const marker = L.marker([row.lat, row.lng], {icon, interactive: row.session === session});
-          if(row.session === session) {
-            marker.bindPopup("Helf’ uns, dieses Gefühl sichtbar zu machen!").openPopup();
-            myMarker = marker;
-          }
-          allMarkers.push(marker);
-          marker.addTo(map);
-        });
-      }
+    // Layergruppe für Lichter
+    const lightsLayer = L.layerGroup().addTo(map);
+
+    // Canvas Renderer für viele Punkte (Performance)
+    const canvasRenderer = L.canvas({ padding: 0.5 });
+
+    function addLight(latlng){
+      // 1) Glow (größer, weich)
+      L.circleMarker(latlng, {
+        renderer: canvasRenderer,
+        radius: 10,
+        stroke: false,
+        fill: true,
+        fillOpacity: 0.20,
+        fillColor: "rgba(255,220,170,1)"
+      }).addTo(lightsLayer);
+
+      // 2) Kern (klein, hell)
+      L.circleMarker(latlng, {
+        renderer: canvasRenderer,
+        radius: 3.2,
+        stroke: false,
+        fill: true,
+        fillOpacity: 0.95,
+        fillColor: "rgba(255,245,235,1)"
+      }).addTo(lightsLayer);
+
+      // Mini-"Puls" (kurz, dann Ruhe)
+      // (Leaflet circleMarker radius lässt sich ändern)
+      const pulse = L.circleMarker(latlng, {
+        renderer: canvasRenderer,
+        radius: 2,
+        stroke: false,
+        fill: true,
+        fillOpacity: 0.75,
+        fillColor: "rgba(255,245,235,1)"
+      }).addTo(lightsLayer);
+
+      let r = 2;
+      const t = setInterval(() => {
+        r += 1.2;
+        pulse.setRadius(r);
+        pulse.setStyle({ fillOpacity: Math.max(0, 0.75 - r * 0.08) });
+        if (r > 12) { clearInterval(t); lightsLayer.removeLayer(pulse); }
+      }, 60);
     }
-    async function loadMyLight() {
-      let { data } = await sb.from('lights').select('*').eq('session', session).maybeSingle();
-      return data;
-    }
-    map.on('click', async function(e) {
-      let existing = await loadMyLight();
-      if(existing) {
-        await sb.from('lights').update({lat: e.latlng.lat, lng: e.latlng.lng}).eq('session', session);
-      } else {
-        await sb.from('lights').insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
-      }
-      await loadLights();
+
+    map.on("click", (e) => {
+      addLight(e.latlng);
+      // hier würdest du später an dein Backend POSTen:
+      // fetch("/api/lights", {method:"POST", body: JSON.stringify(e.latlng), headers:{'Content-Type':'application/json'}})
     });
-    loadLights();
-    setInterval(loadLights, 30000);
+
+    function fitToWorld(){
+      const layers = [];
+      lightsLayer.eachLayer(l => layers.push(l));
+      if (layers.length === 0){
+        map.flyTo([20, 10], 2, { duration: 0.9 });
+        return;
+      }
+      const bounds = L.latLngBounds([]);
+      // jede zweite Markierung ist der Kern / Glow, egal: bounds über alle
+      lightsLayer.eachLayer(l => {
+        if (l.getLatLng) bounds.extend(l.getLatLng());
+      });
+      map.fitBounds(bounds.pad(0.35), { animate: true, duration: 0.9 });
+    }
+
+    document.getElementById("btnWorld").addEventListener("click", fitToWorld);
+
+    document.getElementById("btnClear").addEventListener("click", () => {
+      lightsLayer.clearLayers();
+      map.flyTo([20, 10], 2, { duration: 0.9 });
+    });
+
+    /***** 3) Export als PNG (Karte generieren) *****/
+    document.getElementById("btnExport").addEventListener("click", () => {
+      // Für den "All"-Look: zuerst rauszoomen/fitten, dann exportieren
+      fitToWorld();
+
+      // warten bis Tiles & Render fertig sind
+      setTimeout(() => {
+        leafletImage(map, function(err, canvas) {
+          if (err) { alert("Export fehlgeschlagen."); return; }
+          const img = canvas.toDataURL("image/png");
+
+          const a = document.createElement("a");
+          a.href = img;
+          a.download = "eine-menschheit-karte.png";
+          a.click();
+        });
+      }, 900);
+    });
   </script>
 </body>
 </html>
