@@ -133,22 +133,24 @@
     let myMarker = null;
 
     async function loadLights() {
-      // Bestehende Marker entfernen
-      allMarkers.forEach(m => map.removeLayer(m));
-      allMarkers = [];
-      let { data, error } = await sb.from('lights').select('*');
-      if(data) {
-        data.forEach(row => {
-          const icon = candleIcon;
-          const marker = L.marker([row.lat, row.lng], {icon, interactive: row.session === session});
-          if(row.session === session) {
-            marker.bindPopup(getLang().call).openPopup();
-            myMarker = marker;
-          }
-          allMarkers.push(marker);
-          marker.addTo(map);
-        });
+  // Entferne alte Marker
+  allMarkers.forEach(m => map.removeLayer(m));
+  allMarkers = [];
+  myMarker = null; // <- Wichtig, damit es nicht doppelt wird!
+  let { data, error } = await sb.from('lights').select('*');
+  if(data) {
+    data.forEach(row => {
+      const icon = candleIcon;
+      const marker = L.marker([row.lat, row.lng], {icon, interactive: row.session === session});
+      if(row.session === session) {
+        marker.bindPopup(getLang().call).openPopup();
+        myMarker = marker; // <- Speichere den Marker für spätere Updates
       }
+      allMarkers.push(marker);
+      marker.addTo(map);
+    });
+  }
+}
       // // --- HEATMAP, falls du sie aktivieren willst ---
       // let points = data.map(row => [row.lat, row.lng, 1]);
       // if(window.heat) { map.removeLayer(window.heat); }
@@ -161,14 +163,22 @@
     }
 
     map.on('click', async function(e) {
-      let existing = await loadMyLight();
-      if(existing) {
-        await sb.from('lights').update({lat: e.latlng.lat, lng: e.latlng.lng}).eq('session', session);
-      } else {
-        await sb.from('lights').insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
-      }
-      await loadLights();
-    });
+  let existing = await loadMyLight();
+  if(existing) {
+    // Update in der DB
+    await sb.from('lights').update({lat: e.latlng.lat, lng: e.latlng.lng}).eq('session', session);
+
+    // Marker auf der Karte verschieben (sofort)
+    if(myMarker) {
+      myMarker.setLatLng(e.latlng);
+      myMarker.openPopup();
+    }
+  } else {
+    // Neues Licht eintragen
+    await sb.from('lights').insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
+  }
+  await loadLights(); // Re-Load für alle Marker
+});
 
     // Initial Map
     loadLights();
