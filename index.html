@@ -75,14 +75,17 @@
       margin:0;
       padding:8px 10px 10px 10px;
       min-height:3.2em;
+      hyphens: none;
     }
     /* Zeilenumbruch: aktiv */
     .tp-word{
-      color: var(--ghost);
-      transition: color 160ms ease, filter 160ms ease;
-      white-space: normal;
-      overflow-wrap: anywhere;
-    }
+  color: var(--ghost);
+  transition: color 160ms ease, filter 160ms ease;
+  white-space: normal;
+  hyphens: none;            /* keine Silbentrennung */
+  overflow-wrap: normal;    /* nicht mitten im Wort umbrechen */
+  word-break: keep-all;     /* Wörter zusammenhalten (für Sprachen mit Leerzeichen) */
+}
     .tp-space{ white-space: pre; }
     .tp-word.done{
       color: var(--warm);
