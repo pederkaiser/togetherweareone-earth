@@ -302,9 +302,9 @@ function applyDarkness(v){
   const t = v / 100;
 
   // Overlay: bei 0 leicht sichtbar, bei 100 deutlich dunkler
-  const shadeOpacity = 0.15 + t * 0.70;       // 0.15 .. 0.85
+  const shadeOpacity = 0.15 + t * 0.80;       // 0.15 .. 0.85
   // Tiles: bei 0 fast normal, bei 100 dunkler
-  const brightness = 1.00 - t * 0.26;         // 1.00 .. 0.74
+  const brightness = 1.00 - t * 0.42;         // 1.00 .. 0.74
 
   document.documentElement.style.setProperty("--shade-opacity", shadeOpacity.toFixed(2));
   document.documentElement.style.setProperty("--map-brightness", brightness.toFixed(2));
