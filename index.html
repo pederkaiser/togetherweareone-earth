@@ -233,16 +233,18 @@ const tpTextEl = document.getElementById("tp-text");
 const tpBarEl  = document.getElementById("tp-bar");
 
 function renderSentence(sentence){
-  const tokens = sentence.split(/(\s+)/);
+  const tokens = sentence.split(/(\s+)/); // Worte + Leerzeichen behalten
+
   tpTextEl.innerHTML = tokens.map(t => {
-    if (/^\s+$/.test(t)) return `<span class="tp-word space">${t}</span>`;
+    if (/^\s+$/.test(t)) {
+      return `<span class="tp-space">${t}</span>`;   // Spaces separat
+    }
     return `<span class="tp-word">${t}</span>`;
   }).join("");
 }
 
 function markProgress(activeWordIdx){
-  const wordSpans = Array.from(tpTextEl.querySelectorAll(".tp-word"))
-    .filter(s => !s.classList.contains("space"));
+  const wordSpans = Array.from(tpTextEl.querySelectorAll(".tp-word"));
 
   wordSpans.forEach((w, i) => {
     w.classList.remove("active");
