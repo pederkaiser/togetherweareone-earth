@@ -25,8 +25,22 @@
       line-height: 1.5;
     }
     .tp-text { min-height: 1.8em; transition: color 0.2s;}
-    .tp-text span { opacity:0; animation: tpword 0.6s forwards; }
-    @keyframes tpword { from {opacity:0;transform:translateY(8px);} to {opacity:1;transform:none;} }
+    .tp-word {
+  opacity: 0.45;
+  color: #ffe9c2;
+  font-weight: 400;
+  transition: all 0.23s;
+  padding: 0 0.06em;
+}
+.tp-word.active {
+  opacity: 1;
+  color: #fff9e4;
+  font-weight: 600;
+  background: linear-gradient(90deg, #fff9e4 70%, #ffe6a4 120%);
+  border-radius: 6px;
+  box-shadow: 0 1px 6px #fff3bb30;
+  font-size: 1.06em;
+}
     .tp-controls {
       display: flex; align-items: center; justify-content: center;
       margin-top: 13px; user-select: none; gap: 10px;
@@ -68,13 +82,13 @@
 </head>
 <body>
   <div class="teleprompter" id="teleprompter">
-    <div class="tp-text" id="tp-text"></div>
-    <div class="tp-controls">
-      <button id="tp-prev" title="Zurück">&#8592;</button>
-      <div class="tp-progress" id="tp-progress"><div class="tp-progress-bar"></div></div>
-      <button id="tp-next" title="Weiter">&#8594;</button>
-    </div>
+  <div class="tp-text" id="tp-text"></div>
+  <div class="tp-controls">
+    <button id="tp-prev" title="Zurück">&#8592;</button>
+    <div class="tp-progress" id="tp-progress"><div class="tp-progress-bar"></div></div>
+    <button id="tp-next" title="Weiter">&#8594;</button>
   </div>
+  </div> 
   <div id="map"></div>
   <div class="hint" id="hint">Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)</div>
   <script>
