@@ -233,4 +233,25 @@
 
     // Hole ggf. das eigene Licht aus der DB
     async function loadMyLight() {
-      let { data }
+      let { data } = await sb.from('lights').select('*').eq('session', session).maybeSingle();
+      return data;
+    }
+
+    // Klick auf Karte: Setze oder verschiebe dein Licht
+    map.on('click', async function(e) {
+      let existing = await loadMyLight();
+      if(existing) {
+        await sb.from('lights').update({lat: e.latlng.lat, lng: e.latlng.lng}).eq('session', session);
+      } else {
+        await sb.from('lights').insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
+      }
+      await loadLights();
+    });
+
+    // Initialer Load + regelmäßiges Aktualisieren
+    loadLights();
+    setInterval(loadLights, 30000);
+
+  </script>
+</body>
+</html>
