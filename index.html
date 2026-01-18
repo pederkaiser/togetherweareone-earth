@@ -4,12 +4,20 @@
   <meta charset="UTF-8" />
   <title>Together We Are One</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Supabase JS -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- UUID für Session -->
+  <script src="https://cdn.jsdelivr.net/npm/uuid@9.0.0/dist/umd/uuidv4.min.js"></script>
+  <!-- Leaflet.heat für Heatmap (nur bei Bedarf, unten auskommentiert) -->
+  <!-- <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script> -->
   <style>
-    body { margin: 0; font-family: system-ui, sans-serif; background: #111; color: #fafafa;}
+    body { margin: 0; font-family: system-ui, sans-serif; background: #101014; color: #fafafa;}
     .banner { text-align: center; max-width: 540px; margin: 40px auto 16px auto; padding: 16px;
-      background: rgba(30,30,30,0.85); border-radius: 14px; box-shadow: 0 2px 24px rgba(0,0,0,0.18);}
+      background: rgba(30,30,30,0.90); border-radius: 14px;
+      box-shadow: 0 2px 24px rgba(0,0,0,0.18);}
     .banner h1 { margin-top: 0; font-size: 2em; }
     .banner p { margin: 1em 0; }
     #map { width: 100vw; height: 60vh; max-height: 420px; border-radius: 18px; box-shadow: 0 2px 14px rgba(0,0,0,0.25);}
@@ -21,102 +29,140 @@
   </style>
 </head>
 <body>
-  <div class="banner">
-    <h1>Together We Are One</h1>
-    <p>
-      Manchmal schauen wir in den Himmel. Vielleicht sehen wir einen Stern, den Mond, ferne Galaxien. Für einen Moment wird uns bewusst, wie klein unser Planet ist. Wie selten – vielleicht sogar einzigartig – das Leben hier ist.
-    </p>
-    <p>
-      Auf diesem winzigen Punkt im Weltall teilen wir unser Leben. Jeder von uns mit einer eigenen Geschichte, aber doch alle miteinander verbunden. Nicht durch Herkunft, Sprache oder Grenzen – sondern durch das Glück, gemeinsam hier zu sein.
-    </p>
-    <p>
-      Manche Menschen spüren in solchen Momenten, dass wir eigentlich eine einzige Gemeinschaft sind. Dass uns mehr verbindet als trennt.
-    </p>
-    <h3>Hast du das auch schon einmal gefühlt?</h3>
-    <strong>Helf’ uns, dieses Gefühl sichtbar zu machen!</strong>
+  <div class="banner" id="banner">
+    <!-- Text wird per JS mehrsprachig gesetzt -->
   </div>
   <div id="map"></div>
-  <div class="hint">Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)</div>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/uuid@9.0.0/dist/umd/uuidv4.min.js"></script>
+  <div class="hint" id="hint"></div>
   <script>
-    // SUPABASE: Deine Daten einfügen
+    // ------------- KONFIGURATION -------------
+    // Supabase-Projektinfos eintragen:
     const SUPABASE_URL = 'https://gwfqdukbcgtcefqtgnbl.supabase.co';  // <-- DEIN Project URL aus Supabase!
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3ZnFkdWtiY2d0Y2VmcXRnbmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MDU2MTMsImV4cCI6MjA4NDI4MTYxM30.ePyuDxhVoc1ol5lQ8JbRKaybgpEPozBR3Wf71oFj040';              // <-- DEIN anon public key!
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Nutzer-ID für "ein Licht pro Browser"
+    // Kerzen-/Licht-Icon
+    const candleIcon = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/2897/2897679.png', // Ersetze ggf. durch ein eigenes!
+      iconSize: [28, 28],
+      iconAnchor: [14, 27],
+      popupAnchor: [0, -24]
+    });
+
+    // ------------- MEHRSPRACHIGKEIT -------------
+    const texts = {
+      de: {
+        h1: "Together We Are One",
+        p1: "Manchmal schauen wir in den Himmel. Vielleicht sehen wir einen Stern, den Mond, ferne Galaxien. Für einen Moment wird uns bewusst, wie klein unser Planet ist. Wie selten – vielleicht sogar einzigartig – das Leben hier ist.",
+        p2: "Auf diesem winzigen Punkt im Weltall teilen wir unser Leben. Jeder von uns mit einer eigenen Geschichte, aber doch alle miteinander verbunden. Nicht durch Herkunft, Sprache oder Grenzen – sondern durch das Glück, gemeinsam hier zu sein.",
+        p3: "Manche Menschen spüren in solchen Momenten, dass wir eigentlich eine einzige Gemeinschaft sind. Dass uns mehr verbindet als trennt.",
+        ask: "Hast du das auch schon einmal gefühlt?",
+        call: "Helf’ uns, dieses Gefühl sichtbar zu machen!",
+        hint: "Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)"
+      },
+      en: {
+        h1: "Together We Are One",
+        p1: "Sometimes we look up at the sky and see a star, the moon, or distant galaxies. For a moment, we realize how small our planet is—how rare, maybe even unique, life here really is.",
+        p2: "On this tiny point in the universe, we share our lives. Each of us with our own story, yet all connected—not by origin, language, or borders, but by the luck of being here together.",
+        p3: "Some people sense in such moments that we are actually one community. That more connects us than divides us.",
+        ask: "Have you ever felt this, too?",
+        call: "Help us make this feeling visible!",
+        hint: "Click on the map to set or move your light. (Only one light per browser.)"
+      },
+      fr: {
+        h1: "Together We Are One",
+        p1: "Parfois, nous regardons le ciel. Nous voyons peut-être une étoile, la lune, des galaxies lointaines. Pendant un instant, nous réalisons combien notre planète est petite et combien la vie ici est rare – voire unique.",
+        p2: "Sur ce minuscule point dans l’univers, nous partageons notre vie. Chacun de nous a sa propre histoire, mais nous sommes tous reliés. Non par l’origine, la langue ou les frontières – mais par la chance d’être ici ensemble.",
+        p3: "Certains ressentent alors que nous sommes en fait une seule communauté. Que ce qui nous relie est plus fort que ce qui nous sépare.",
+        ask: "As-tu déjà ressenti cela ?",
+        call: "Aide-nous à rendre ce sentiment visible !",
+        hint: "Clique sur la carte pour placer ou déplacer ta lumière. (Une seule lumière par navigateur.)"
+      }
+      // ...weitere Sprachen nach Bedarf hinzufügen
+    };
+
+    function getLang() {
+      const lang = (navigator.language || navigator.userLanguage || 'en').substr(0,2).toLowerCase();
+      return texts[lang] || texts['en'];
+    }
+
+    function renderTexts() {
+      const t = getLang();
+      document.getElementById('banner').innerHTML = `
+        <h1>${t.h1}</h1>
+        <p>${t.p1}</p>
+        <p>${t.p2}</p>
+        <p>${t.p3}</p>
+        <h3>${t.ask}</h3>
+        <strong>${t.call}</strong>
+      `;
+      document.getElementById('hint').textContent = t.hint;
+    }
+    renderTexts();
+
+    // ------------- SUPABASE & MAP -------------
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Nutzer-ID für ein Licht pro Browser
     let session = localStorage.getItem('myLightSession');
     if(!session) {
       session = uuidv4();
       localStorage.setItem('myLightSession', session);
     }
 
-    var map = L.map('map').setView([20, 0], 2);
+    const map = L.map('map', { zoomControl: true }).setView([20, 0], 2);
 
-    // Kerzen-Icon als Marker
-    var candleIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/2897/2897679.png',
-      iconSize: [36, 36],
-      iconAnchor: [18, 35],
-      popupAnchor: [0, -32]
-    });
+    // Dark-Map-Theme (OpenStreetMap CartoDB DarkMatter)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap contributors & CartoDB',
+      maxZoom: 18,
+    }).addTo(map);
 
-    // Alle Marker auf der Karte
     let allMarkers = [];
     let myMarker = null;
 
-    // 1. Alle Lichter laden und anzeigen
     async function loadLights() {
-      // Bestehende Marker löschen
+      // Bestehende Marker entfernen
       allMarkers.forEach(m => map.removeLayer(m));
       allMarkers = [];
-
       let { data, error } = await supabase.from('lights').select('*');
       if(data) {
         data.forEach(row => {
-          const marker = L.marker([row.lat, row.lng], {icon: candleIcon}).addTo(map);
+          const icon = candleIcon;
+          const marker = L.marker([row.lat, row.lng], {icon, interactive: row.session === session});
           if(row.session === session) {
-            marker.bindPopup('Das ist dein Licht!').openPopup();
+            marker.bindPopup(getLang().call).openPopup();
             myMarker = marker;
-          } else {
-            marker.bindPopup('Hier leuchtet ein Licht!');
           }
           allMarkers.push(marker);
+          marker.addTo(map);
         });
       }
+      // // --- HEATMAP, falls du sie aktivieren willst ---
+      // let points = data.map(row => [row.lat, row.lng, 1]);
+      // if(window.heat) { map.removeLayer(window.heat); }
+      // window.heat = L.heatLayer(points, {radius: 18, blur: 24, minOpacity: 0.5}).addTo(map);
     }
 
-    // 2. Licht für eigenen Browser finden
     async function loadMyLight() {
-      let { data, error } = await supabase.from('lights').select('*').eq('session', session).maybeSingle();
+      let { data } = await supabase.from('lights').select('*').eq('session', session).maybeSingle();
       return data;
     }
 
-    // 3. Licht setzen/verschieben
     map.on('click', async function(e) {
-      // Licht in DB setzen/aktualisieren (immer pro Session)
       let existing = await loadMyLight();
       if(existing) {
-        // Update
         await supabase.from('lights').update({lat: e.latlng.lat, lng: e.latlng.lng}).eq('session', session);
       } else {
-        // Neues Licht
         await supabase.from('lights').insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
       }
       await loadLights();
     });
 
     // Initial Map
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 18,
-    }).addTo(map);
-
     loadLights();
-
-    // Optional: regelmäßig aktualisieren (alle 30 Sekunden)
+    // Optional: regelmäßig alle 30 Sek. aktualisieren
     setInterval(loadLights, 30000);
+
   </script>
 </body>
 </html>
