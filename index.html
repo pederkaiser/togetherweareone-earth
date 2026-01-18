@@ -319,8 +319,28 @@ if(!session) { session = uuidv4(); localStorage.setItem('myLightSession', sessio
 -------------------------- */
 const WORLD_BOUNDS = L.latLngBounds(L.latLng(-60, -180), L.latLng(85, 180));
 const WORLD_VIEW = { center: [20, 0], zoom: 2.0 };  // "ein Erdball" (2D) — ruhig & weit
-const tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+const tileUrlLabels = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+const tileUrlNoLabels = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
+// Alternative (heller): 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
 
+const baseWithLabels = L.tileLayer(tileUrlLabels, {
+  attribution: '&copy; OpenStreetMap &copy; CARTO',
+  maxZoom: 18,
+  noWrap: true,
+  bounds: WORLD_BOUNDS,
+  crossOrigin: true
+});
+
+const baseNoLabels = L.tileLayer(tileUrlNoLabels, {
+  attribution: '&copy; OpenStreetMap &copy; CARTO',
+  maxZoom: 18,
+  noWrap: true,
+  bounds: WORLD_BOUNDS,
+  crossOrigin: true
+});
+
+// Standard: mit Labels
+baseWithLabels.addTo(map);
 const map = L.map('map', {
   zoomControl: true,
   worldCopyJump: false,      // wichtig: nicht springen/wrappen
@@ -567,25 +587,38 @@ function waitForMapSettled(tileLayer){
   });
 }
 
+function waitTiles(layer){
+  return new Promise(resolve => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    };
+    layer.once('load', finish);
+    setTimeout(finish, 1200); // Fallback
+  });
+}
+
 document.getElementById("btnCard").addEventListener("click", async () => {
   try{
-    setStatus("Erzeuge Erdball…");
+    setStatus("Erzeuge Screenshot…");
 
-    // View merken, danach wiederherstellen
-    const prevCenter = map.getCenter();
-    const prevZoom = map.getZoom();
-
-    // 1) auf "ein Erdball" rauszoomen
+    // 1) auf Weltansicht (genau wie dein Button)
     map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
 
-    // 2) warten bis Tiles + Move fertig
-    const tileLayer = map._layers[Object.keys(map._layers).find(k => map._layers[k] instanceof L.TileLayer)];
-    if(tileLayer) await waitForMapSettled(tileLayer);
+    // 2) kurz auf "no labels" umschalten
+    if (map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
+    baseNoLabels.addTo(map);
 
-    // 3) Canvas snapshot
+    // 3) warten bis Tiles da sind
+    await waitTiles(baseNoLabels);
+
+    // 4) Screenshot
     leafletImage(map, function(err, canvas) {
-      // View zurück
-      map.setView(prevCenter, prevZoom, { animate: true });
+      // 5) Layer zurück
+      map.removeLayer(baseNoLabels);
+      baseWithLabels.addTo(map);
 
       if(err){
         console.error(err);
@@ -594,19 +627,19 @@ document.getElementById("btnCard").addEventListener("click", async () => {
         return;
       }
 
-      // 4) Postprocess: Globus-Maske + Night-Look
-      const out = applyNightGlobeLook(canvas);
+      // Optional: exakt dein Night-Look auch im Export erzwingen
+      // (wenn du CSS Filter/Overlays nutzt, kann Export abweichen)
+      // -> Hier könnte man, falls nötig, noch eine kleine Postprocessing-Stufe machen.
 
-      // 5) Download
-      const png = out.toDataURL("image/png");
+      const png = canvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = png;
-      a.download = "erde-bei-nacht.png";
+      a.download = "weltansicht-ohne-labels.png";
       a.click();
 
       setStatus("Fertig.");
     });
-  } catch(e){
+  } catch (e){
     console.error(e);
     alert("Export fehlgeschlagen.");
     setStatus("Export fehlgeschlagen.");
