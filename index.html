@@ -192,10 +192,25 @@
       .tp-btn{ width:40px; height:40px; border-radius:14px; }
       #map{ height:52vh; }
     }
+    #langBadge{
+  position: fixed;
+  left: 10px;
+  top: 10px;
+  z-index: 9999;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.25);
+  color: rgba(255,255,255,0.85);
+  font: 600 12px/1 ui-sans-serif, system-ui, -apple-system, "Inter", "Segoe UI", Arial, sans-serif;
+  letter-spacing: 0.08em;
+  backdrop-filter: blur(8px);
+}
   </style>
 </head>
 
 <body>
+  <div id="langBadge" aria-label="Language"></div>
   <div class="wrap">
 
     <div class="teleprompter" aria-label="Text">
@@ -226,19 +241,158 @@
 /* -------------------------
    1) PROMPTER (unverändert, mit Zeilenumbruch)
 -------------------------- */
-const tpTexts = [
-  "Manchmal schauen wir in den Himmel.",
-  "Vielleicht sehen wir einen Stern, den Mond, ferne Galaxien.",
-  "Für einen Moment wird uns bewusst, wie klein unser Planet ist.",
-  "Wie selten – vielleicht sogar einzigartig – das Leben hier ist.",
-  "Auf diesem winzigen Punkt im Weltall teilen wir unser Leben.",
-  "Jeder von uns mit einer eigenen Geschichte, aber doch alle miteinander verbunden.",
-  "Nicht durch Herkunft, Sprache oder Grenzen – sondern durch das Glück, gemeinsam hier zu sein.",
-  "Manche Menschen spüren in solchen Momenten, dass wir eigentlich eine einzige Gemeinschaft sind.",
-  "Dass uns mehr verbindet als trennt.",
-  "Hast du das auch schon einmal gefühlt?",
-  "Helf’ uns, dieses Gefühl sichtbar zu machen!"
-];
+// --- Language selection (URL override ?lang=xx, otherwise browser) ---
+function getLangFromUrl() {
+  const p = new URLSearchParams(location.search);
+  const v = (p.get("lang") || "").trim();
+  return v ? v.toLowerCase() : null;
+}
+
+function normalizeLang(tag) {
+  if (!tag) return "en";
+  const t = tag.toLowerCase();
+
+  // Chinese script handling
+  if (t.startsWith("zh")) return "zh";
+
+  // Map "in" to "id" (old code), "iw" to "he" etc.
+  if (t.startsWith("in")) return "id";
+  if (t.startsWith("iw")) return "he";
+
+  // Use primary subtag: "de-de" -> "de"
+  return t.split("-")[0];
+}
+
+const SUPPORTED = ["en","es","hi","zh","ar","ru","de"]; // de optional for you
+
+function pickLanguage() {
+  // 1) URL override
+  const urlLang = normalizeLang(getLangFromUrl());
+  if (urlLang && SUPPORTED.includes(urlLang)) return urlLang;
+
+  // 2) Browser preferences
+  const prefs = (navigator.languages && navigator.languages.length)
+    ? navigator.languages
+    : [navigator.language || "en"];
+
+  for (const tag of prefs) {
+    const base = normalizeLang(tag);
+    if (SUPPORTED.includes(base)) return base;
+  }
+
+  // 3) fallback
+  return "en";
+}
+
+const LANG = pickLanguage();
+const badge = document.getElementById("langBadge");
+if (badge) badge.textContent = LANG.toUpperCase();
+
+// --- Teleprompter texts per language ---
+const TP = {
+  de: [
+    "Manchmal schauen wir in den Himmel.",
+    "Vielleicht sehen wir einen Stern, den Mond, ferne Galaxien.",
+    "Für einen Moment wird uns bewusst, wie klein unser Planet ist.",
+    "Wie selten – vielleicht sogar einzigartig – das Leben hier ist.",
+    "Auf diesem winzigen Punkt im Weltall teilen wir unser Leben.",
+    "Jeder von uns mit einer eigenen Geschichte, aber doch alle miteinander verbunden.",
+    "Nicht durch Herkunft, Sprache oder Grenzen – sondern durch das Glück, gemeinsam hier zu sein.",
+    "Manche Menschen spüren in solchen Momenten, dass wir eigentlich eine einzige Gemeinschaft sind.",
+    "Dass uns mehr verbindet als trennt.",
+    "Hast du das auch schon einmal gefühlt?",
+    "Helf’ uns, dieses Gefühl sichtbar zu machen!"
+  ],
+
+  en: [
+    "Sometimes we look up at the sky.",
+    "Maybe we see a star, the Moon, distant galaxies.",
+    "For a moment, we realize how small our planet is.",
+    "How rare — perhaps even unique — life here may be.",
+    "On this tiny point in the universe, we share our lives.",
+    "Each of us with our own story — and yet all connected.",
+    "Not by origin, language, or borders — but by the gift of being here together.",
+    "In moments like this, some people feel we are one single community.",
+    "That what connects us is greater than what divides us.",
+    "Have you ever felt that too?",
+    "Help us make this feeling visible."
+  ],
+
+  es: [
+    "A veces miramos al cielo.",
+    "Quizá vemos una estrella, la Luna, galaxias lejanas.",
+    "Por un momento, nos damos cuenta de lo pequeño que es nuestro planeta.",
+    "De lo raro — quizá incluso único — que es que exista vida aquí.",
+    "En este pequeño punto del universo compartimos nuestras vidas.",
+    "Cada uno con su propia historia, y aun así conectados.",
+    "No por origen, idioma o fronteras, sino por el regalo de estar aquí juntos.",
+    "En momentos así, algunas personas sienten que somos una sola comunidad.",
+    "Que lo que nos une es más grande que lo que nos separa.",
+    "¿Alguna vez lo has sentido también?",
+    "Ayúdanos a hacer visible este sentimiento."
+  ],
+
+  hi: [
+    "कभी-कभी हम आकाश की ओर देखते हैं।",
+    "शायद हम कोई तारा, चाँद, दूर की आकाशगंगाएँ देखते हैं।",
+    "एक पल के लिए हमें एहसास होता है कि हमारा ग्रह कितना छोटा है।",
+    "और यहाँ जीवन कितना दुर्लभ — शायद अनोखा — हो सकता है।",
+    "इस छोटे से बिंदु पर, हम अपनी ज़िंदगियाँ साझा करते हैं।",
+    "हर किसी की अपनी कहानी है, और फिर भी हम जुड़े हुए हैं।",
+    "जन्म, भाषा या सीमाओं से नहीं — बल्कि साथ यहाँ होने के उपहार से।",
+    "ऐसे क्षणों में कुछ लोग महसूस करते हैं कि हम एक ही समुदाय हैं।",
+    "कि जो हमें जोड़ता है, वह जो हमें बाँटता है उससे बड़ा है।",
+    "क्या आपने भी कभी ऐसा महसूस किया है?",
+    "इस भावना को दृश्य बनाने में हमारी मदद करें।"
+  ],
+
+  zh: [
+    "有时我们会仰望天空。",
+    "也许我们看见一颗星、月亮，或遥远的星系。",
+    "在那一瞬间，我们意识到地球是多么渺小。",
+    "这里的生命是多么稀有——也许甚至独一无二。",
+    "在宇宙这个小小的点上，我们共享人生。",
+    "我们各有故事，却彼此相连。",
+    "不是因为出身、语言或边界，而是因为我们能一起在这里。",
+    "在这样的时刻，有些人会感到：我们是同一个共同体。",
+    "连接我们的，比分隔我们的更多。",
+    "你也曾有过这种感觉吗？",
+    "帮助我们让这种感觉变得可见。"
+  ],
+
+  ar: [
+    "أحيانًا ننظر إلى السماء.",
+    "قد نرى نجمةً أو القمرَ أو مجرّاتٍ بعيدة.",
+    "وفي لحظةٍ ما ندرك كم كوكبُنا صغير.",
+    "وكم أن الحياة هنا نادرة — وربما فريدة.",
+    "على هذه النقطة الصغيرة في الكون نتشارك حياتنا.",
+    "لكلٍّ منا قصته، ومع ذلك نحن مترابطون.",
+    "ليس بالأصل أو اللغة أو الحدود — بل بهبة وجودنا هنا معًا.",
+    "في مثل هذه اللحظات يشعر بعض الناس أننا مجتمعٌ واحد.",
+    "وأن ما يجمعنا أكبر مما يفرّقنا.",
+    "هل شعرتَ بهذا من قبل؟",
+    "ساعدنا على جعل هذا الشعور مرئيًا."
+  ],
+
+  ru: [
+    "Иногда мы смотрим в небо.",
+    "Может быть, видим звезду, Луну, далёкие галактики.",
+    "И на мгновение понимаем, насколько мала наша планета.",
+    "Насколько редка — возможно, даже уникальна — жизнь здесь.",
+    "На этой крошечной точке во Вселенной мы делим свою жизнь.",
+    "У каждого своя история — и всё же мы связаны.",
+    "Не происхождением, языком или границами — а тем, что мы вместе здесь.",
+    "В такие моменты некоторые чувствуют: мы — единое сообщество.",
+    "И что нас объединяет больше, чем разделяет.",
+    "Бывало ли у тебя такое чувство?",
+    "Помоги сделать это чувство видимым."
+  ]
+};
+
+const tpTexts = TP[LANG] || TP.en;
+
+// Optional: set <html lang="..."> for accessibility
+document.documentElement.lang = LANG;
 
 const WORD_MS = 240;
 const SENTENCE_PAUSE = 900;
