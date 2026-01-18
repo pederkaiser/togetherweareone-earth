@@ -72,6 +72,13 @@
       position: relative;
       top: 0.5em;
     }
+    .tp-cursor {
+    display: inline-block;
+    width: 0.7ch;
+    color: #ffe397;
+    animation: blink 1s steps(2, start) infinite;
+    }
+@keyframes blink { to {opacity: 0;} }
     .tp-progress-bar {
       height: 100%;
       background: linear-gradient(90deg,#ffe397,#ffd64d 85%);
@@ -98,7 +105,7 @@
   <div class="hint" id="hint">Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)</div>
   <script>
     // -------- Teleprompter-Text-Array (nur Deutsch, beliebig anpassbar) ----
-    const tpTexts = [
+  const tpTexts = [
   "Manchmal schauen wir in den Himmel.",
   "Vielleicht sehen wir einen Stern, den Mond, ferne Galaxien.",
   "Für einen Moment wird uns bewusst, wie klein unser Planet ist.",
@@ -112,8 +119,8 @@
   "Helf’ uns, dieses Gefühl sichtbar zu machen!"
 ];
 
-const WORD_MS = 100;
-const SENTENCE_PAUSE = 1100;
+const WORD_MS = 340;      // Zeit pro Wort
+const SENTENCE_PAUSE = 1100; // Pause nach vollem Satz
 
 let tpIndex = 0;
 let tpWordIdx = 0;
@@ -122,23 +129,30 @@ let tpTimer = null;
 const tpTextEl = document.getElementById("tp-text");
 const tpProgress = document.getElementById("tp-progress");
 
-function renderSentence(sentence){
-  // Wichtig: Wir rendern ALLE Wörter sofort, damit nichts "wandert"
-  const parts = sentence.split(" ");
-
-  tpTextEl.innerHTML = parts.map((w,i) => {
-    // Leerzeichen bewusst als Text drin lassen, damit Layout stabil bleibt
-    const trailingSpace = (i < parts.length - 1) ? " " : "";
-    return `<span class="tp-word" data-i="${i}">${w}${trailingSpace}</span>`;
-  }).join("");
-
+function showTypewriterSentence(idx, auto=true) {
+  clearInterval(tpTimer);
+  tpIndex = idx;
   tpWordIdx = 0;
-  highlightWord();
-}
+  tpTextEl.textContent = "";
+  updateProgress();
 
-function highlightWord(){
-  const words = tpTextEl.querySelectorAll(".tp-word");
-  words.forEach((el,i) => el.classList.toggle("active", i === tpWordIdx));
+  const words = tpTexts[tpIndex].split(" ");
+  function typeNext() {
+    if(tpWordIdx < words.length) {
+      tpTextEl.innerHTML = tpTextEl.textContent.replace(/\|$/, '')  // alten Cursor weg
+    + (tpWordIdx === 0 ? "" : " ") + words[tpWordIdx]
+    + `<span class="tp-cursor">|</span>`;
+      tpWordIdx++;
+    } else {
+      clearInterval(tpTimer);
+      tpTextEl.innerHTML = tpTextEl.textContent.replace(/\|$/, ''); // Cursor entfernen
+      if(auto) setTimeout(() => {
+        if(tpIndex < tpTexts.length - 1) showTypewriterSentence(tpIndex + 1, auto);
+      }, SENTENCE_PAUSE);
+    }
+  }
+  typeNext();
+  tpTimer = setInterval(typeNext, WORD_MS);
 }
 
 function updateProgress(){
@@ -146,43 +160,16 @@ function updateProgress(){
     `<div class="tp-progress-bar" style="width:${100*(tpIndex+1)/tpTexts.length}%"></div>`;
 }
 
-function step(){
-  const words = tpTextEl.querySelectorAll(".tp-word");
-  if(tpWordIdx < words.length - 1){
-    tpWordIdx++;
-    highlightWord();
-    return;
-  }
-
-  // Satz fertig -> Pause -> nächster Satz
-  clearInterval(tpTimer);
-  setTimeout(() => {
-    if(tpIndex < tpTexts.length - 1){
-      tpIndex++;
-      show(tpIndex);
-    }
-  }, SENTENCE_PAUSE);
-}
-
-function show(idx){
-  tpIndex = idx;
-  updateProgress();
-  renderSentence(tpTexts[tpIndex]);
-
-  clearInterval(tpTimer);
-  tpTimer = setInterval(step, WORD_MS);
-}
-
 // Buttons
 document.getElementById("tp-next").onclick = () => {
-  if(tpIndex < tpTexts.length - 1) show(tpIndex + 1);
+  if(tpIndex < tpTexts.length - 1) showTypewriterSentence(tpIndex + 1, false);
 };
 document.getElementById("tp-prev").onclick = () => {
-  if(tpIndex > 0) show(tpIndex - 1);
+  if(tpIndex > 0) showTypewriterSentence(tpIndex - 1, false);
 };
 
 // Start
-show(0);
+showTypewriterSentence(0, true);
 
     // --------- Der Rest: Map und Supabase wie gehabt ----------
 
