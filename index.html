@@ -9,8 +9,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <!-- Supabase JS -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <!-- Leaflet.heat für Heatmap (optional, unten auskommentiert) -->
-  <!-- <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script> -->
   <style>
     body { margin: 0; font-family: system-ui, sans-serif; background: #101014; color: #fafafa;}
     .banner { text-align: center; max-width: 540px; margin: 40px auto 16px auto; padding: 16px;
@@ -27,15 +25,12 @@
   </style>
 </head>
 <body>
-  <div class="banner" id="banner">
-    <!-- Text wird per JS mehrsprachig gesetzt -->
-  </div>
+  <div class="banner" id="banner"></div>
   <div id="map"></div>
   <div class="hint" id="hint"></div>
   <script>
     // -------- UUID v4 Funktion (für Session-ID) ----------
     function uuidv4() {
-      // https://stackoverflow.com/a/2117523/1293256
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
@@ -49,10 +44,10 @@
 
     // Kerzen-/Licht-Icon
     const candleIcon = L.icon({
-      iconUrl: 'https://openmoji.org/data/color/svg/1F56F.svg', // Ggf. eigenes Icon verwenden
-      iconSize: [28, 28],
-      iconAnchor: [14, 27],
-      popupAnchor: [0, -24]
+      iconUrl: 'https://openmoji.org/data/color/svg/1F56F.svg', // z.B. Kerze von OpenMoji
+      iconSize: [32, 40],
+      iconAnchor: [16, 38],
+      popupAnchor: [0, -34]
     });
 
     // ------------- MEHRSPRACHIGKEIT -------------
@@ -83,8 +78,88 @@
         ask: "As-tu déjà ressenti cela ?",
         call: "Aide-nous à rendre ce sentiment visible !",
         hint: "Clique sur la carte pour placer ou déplacer ta lumière. (Une seule lumière par navigateur.)"
+      },
+      es: {
+        h1: "Together We Are One",
+        p1: "A veces miramos al cielo. Tal vez vemos una estrella, la luna o galaxias lejanas. Por un momento, nos damos cuenta de lo pequeño que es nuestro planeta y de lo raro –quizás único– que es la vida aquí.",
+        p2: "En este pequeño punto en el universo compartimos nuestra vida. Cada uno con su propia historia, pero todos conectados, no por origen, idioma o fronteras, sino por la suerte de estar aquí juntos.",
+        p3: "Algunas personas sienten en esos momentos que en realidad somos una sola comunidad. Que lo que nos une es más fuerte que lo que nos separa.",
+        ask: "¿Alguna vez has sentido esto también?",
+        call: "¡Ayúdanos a hacer visible este sentimiento!",
+        hint: "Haz clic en el mapa para poner o mover tu luz. (Solo una luz por navegador.)"
+      },
+      pt: {
+        h1: "Together We Are One",
+        p1: "Às vezes olhamos para o céu. Talvez vejamos uma estrela, a lua, galáxias distantes. Por um momento, percebemos o quão pequeno é o nosso planeta – quão rara, talvez até única, é a vida aqui.",
+        p2: "Neste pequeno ponto no universo, compartilhamos nossa vida. Cada um com sua própria história, mas todos conectados – não por origem, idioma ou fronteiras, mas pela sorte de estarmos juntos aqui.",
+        p3: "Algumas pessoas sentem, nesses momentos, que somos de fato uma única comunidade. Que o que nos une é mais forte do que o que nos separa.",
+        ask: "Você já sentiu isso também?",
+        call: "Ajude-nos a tornar esse sentimento visível!",
+        hint: "Clique no mapa para definir ou mover sua luz. (Apenas uma luz por navegador.)"
+      },
+      it: {
+        h1: "Together We Are One",
+        p1: "A volte guardiamo il cielo. Magari vediamo una stella, la luna, galassie lontane. Per un momento ci rendiamo conto di quanto sia piccolo il nostro pianeta e quanto sia rara – forse unica – la vita qui.",
+        p2: "Su questo minuscolo punto nell’universo condividiamo la nostra vita. Ognuno con la propria storia, ma tutti collegati – non per origine, lingua o confini, ma per la fortuna di essere qui insieme.",
+        p3: "Alcune persone sentono in questi momenti che siamo davvero una sola comunità. Che ciò che ci unisce è più forte di ciò che ci divide.",
+        ask: "Anche tu hai mai provato questa sensazione?",
+        call: "Aiutaci a rendere visibile questo sentimento!",
+        hint: "Clicca sulla mappa per posizionare o spostare la tua luce. (Solo una luce per browser.)"
+      },
+      tr: {
+        h1: "Together We Are One",
+        p1: "Bazen gökyüzüne bakarız. Belki bir yıldız, ay veya uzak galaksiler görürüz. Bir an için, gezegenimizin ne kadar küçük olduğunu ve buradaki yaşamın ne kadar nadir – belki de eşsiz – olduğunu fark ederiz.",
+        p2: "Evrenin bu küçük noktasında hayatımızı paylaşıyoruz. Her birimizin kendi hikâyesi var, ama hepimiz birbirimize bağlıyız – köken, dil veya sınırlar nedeniyle değil, burada birlikte olmanın şansı sayesinde.",
+        p3: "Bazı insanlar böyle anlarda aslında tek bir toplum olduğumuzu hisseder. Bizi birleştiren şeyin ayıran şeyden daha fazla olduğunu.",
+        ask: "Sen de bunu hiç hissettin mi?",
+        call: "Bu duyguyu görünür kılmamıza yardım et!",
+        hint: "Işığını yerleştirmek veya taşımak için haritaya tıkla. (Tarayıcı başına yalnızca bir ışık.)"
+      },
+      ar: {
+        h1: "معاً نحن واحد",
+        p1: "أحيانًا ننظر إلى السماء. ربما نرى نجمة أو القمر أو مجرات بعيدة. للحظة ندرك كم كوكبنا صغير، وكم أن الحياة هنا نادرة – ربما فريدة.",
+        p2: "على هذه النقطة الصغيرة في الكون نشارك حياتنا. لكل منا قصته، ولكننا جميعًا مترابطون – ليس بالأصل أو اللغة أو الحدود، بل بحظ تواجدنا معًا هنا.",
+        p3: "بعض الناس يشعرون في تلك اللحظات أننا في الحقيقة مجتمع واحد. وأن ما يجمعنا أكثر مما يفرقنا.",
+        ask: "هل شعرت بذلك يومًا؟",
+        call: "ساعدنا في إظهار هذا الشعور!",
+        hint: "انقر على الخريطة لوضع أو نقل ضوئك. (ضوء واحد فقط لكل متصفح.)"
+      },
+      ru: {
+        h1: "Together We Are One",
+        p1: "Иногда мы смотрим на небо. Может быть, видим звезду, луну или далекие галактики. На мгновение мы осознаём, насколько мала наша планета и насколько редка — возможно, уникальна — жизнь здесь.",
+        p2: "На этой крошечной точке во Вселенной мы делим свою жизнь. У каждого из нас своя история, но все мы связаны не происхождением, языком или границами, а счастьем быть здесь вместе.",
+        p3: "В такие моменты некоторые люди чувствуют, что мы на самом деле единое сообщество. Что нас больше объединяет, чем разделяет.",
+        ask: "Ты когда-нибудь чувствовал(а) это?",
+        call: "Помоги нам сделать это чувство видимым!",
+        hint: "Кликни по карте, чтобы поставить или переместить свой огонёк. (Только один огонёк на браузер.)"
+      },
+      zh: {
+        h1: "Together We Are One",
+        p1: "有时候我们会仰望天空，看到星星、月亮，或遥远的星系。那一刻，我们会意识到地球是多么渺小，生命在这里是多么稀有——也许是独一无二的。",
+        p2: "在这宇宙中的微小一隅，我们共同生活。每个人都有自己的故事，但我们都彼此相连——不是因为出身、语言或国界，而是因为共同在这里的幸运。",
+        p3: "有些人在那一刻会感受到，我们其实是一个共同体。连接我们的，比分隔我们的更多。",
+        ask: "你也曾经有过这种感觉吗？",
+        call: "帮我们让这种感受被看见！",
+        hint: "点击地图设置或移动你的光点。（每个浏览器仅可设置一个光点。）"
+      },
+      hi: {
+        h1: "Together We Are One",
+        p1: "कभी-कभी हम आकाश की ओर देखते हैं। शायद हमें कोई तारा, चाँद या दूर की गैलेक्सियाँ दिखती हैं। एक पल के लिए हमें एहसास होता है कि हमारा ग्रह कितना छोटा है, और यहाँ जीवन कितना दुर्लभ – शायद अनोखा – है।",
+        p2: "इस ब्रह्मांड के छोटे से बिंदु पर हम अपनी ज़िंदगी साझा करते हैं। हम सब की अपनी-अपनी कहानी है, फिर भी हम सभी एक-दूसरे से जुड़े हुए हैं – न कि जन्म, भाषा या सीमाओं से, बल्कि यहाँ साथ होने के सौभाग्य से।",
+        p3: "ऐसे क्षणों में कुछ लोगों को महसूस होता है कि हम वास्तव में एक ही समुदाय हैं। कि जो हमें जोड़ता है, वह हमें अलग करने वालों से ज़्यादा है।",
+        ask: "क्या आपने भी कभी ऐसा महसूस किया है?",
+        call: "इस भावना को उजागर करने में हमारी मदद करें!",
+        hint: "मानचित्र पर क्लिक करके अपनी रोशनी लगाएँ या स्थान बदलें। (प्रत्येक ब्राउज़र के लिए केवल एक रोशनी।)"
+      },
+      ja: {
+        h1: "Together We Are One",
+        p1: "時々、私たちは空を見上げます。星や月、遠い銀河を目にするかもしれません。その瞬間、私たちの地球がどれほど小さく、ここでの命がいかに珍しく—もしかしたら唯一無二であるかに気づきます。",
+        p2: "この宇宙の小さな点で、私たちは人生を共有しています。一人ひとりが自分自身の物語を持ちながらも、出身地や言語、国境によらず、ここに一緒にいられる幸運によって、みんながつながっています。",
+        p3: "そんな瞬間に、実は私たちが一つの共同体だと感じる人もいます。私たちを結びつけているものは、分けているものよりも多いのです。",
+        ask: "あなたも同じように感じたことがありますか？",
+        call: "この気持ちを可視化する手助けをしてください！",
+        hint: "地図をクリックして光をセットまたは移動してください。（1つのブラウザにつき1つの光のみ。）"
       }
-      // ...weitere Sprachen nach Bedarf hinzufügen
     };
 
     function getLang() {
@@ -118,72 +193,44 @@
 
     const map = L.map('map', { zoomControl: true }).setView([20, 0], 2);
 
-    // Dark-Map-Theme (OpenStreetMap CartoDB DarkMatter)
-    //L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    //  attribution: '&copy; OpenStreetMap contributors & CartoDB',
-    //  maxZoom: 18,
-    //}).addTo(map);
-
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OpenStreetMap contributors & CartoDB',
-  maxZoom: 18,
-}).addTo(map);
+      attribution: '&copy; OpenStreetMap contributors & CartoDB',
+      maxZoom: 18,
+    }).addTo(map);
 
     let allMarkers = [];
     let myMarker = null;
 
+    // Lade und rendere alle Marker, dabei wird nur EIN Marker für deinen User benutzt
     async function loadLights() {
-  // Entferne alte Marker
-  allMarkers.forEach(m => map.removeLayer(m));
-  allMarkers = [];
-  myMarker = null; // <- Wichtig, damit es nicht doppelt wird!
-  let { data, error } = await sb.from('lights').select('*');
-  if(data) {
-    data.forEach(row => {
-      const icon = candleIcon;
-      const marker = L.marker([row.lat, row.lng], {icon, interactive: row.session === session});
-      if(row.session === session) {
-        marker.bindPopup(getLang().call).openPopup();
-        myMarker = marker; // <- Speichere den Marker für spätere Updates
+      // Entferne alte Marker
+      allMarkers.forEach(m => map.removeLayer(m));
+      allMarkers = [];
+      myMarker = null;
+
+      let { data, error } = await sb.from('lights').select('*');
+      if(data) {
+        data.forEach(row => {
+          const icon = candleIcon;
+          if(row.session === session) {
+            // Dein Marker
+            if(myMarker) map.removeLayer(myMarker);
+            myMarker = L.marker([row.lat, row.lng], {icon, interactive: true});
+            myMarker.bindPopup(getLang().call);
+            myMarker.addTo(map);
+            allMarkers.push(myMarker);
+          } else {
+            // Andere Marker
+            const marker = L.marker([row.lat, row.lng], {icon, interactive: false});
+            allMarkers.push(marker);
+            marker.addTo(map);
+          }
+        });
+        // Optional: Zeige sofort dein Popup nach Reload
+        if(myMarker) myMarker.openPopup();
       }
-      allMarkers.push(marker);
-      marker.addTo(map);
-    });
-  }
-      // // --- HEATMAP, falls du sie aktivieren willst ---
-      // let points = data.map(row => [row.lat, row.lng, 1]);
-      // if(window.heat) { map.removeLayer(window.heat); }
-      // window.heat = L.heatLayer(points, {radius: 18, blur: 24, minOpacity: 0.5}).addTo(map);
     }
 
+    // Hole ggf. das eigene Licht aus der DB
     async function loadMyLight() {
-      let { data } = await sb.from('lights').select('*').eq('session', session).maybeSingle();
-      return data;
-    }
-
-    map.on('click', async function(e) {
-  let existing = await loadMyLight();
-  if(existing) {
-    // Update in der DB
-    await sb.from('lights').update({lat: e.latlng.lat, lng: e.latlng.lng}).eq('session', session);
-
-    // Marker auf der Karte verschieben (sofort)
-    if(myMarker) {
-      myMarker.setLatLng(e.latlng);
-      myMarker.openPopup();
-    }
-  } else {
-    // Neues Licht eintragen
-    await sb.from('lights').insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
-  }
-  await loadLights(); // Re-Load für alle Marker
-});
-
-    // Initial Map
-    loadLights();
-    // Optional: regelmäßig alle 30 Sek. aktualisieren
-    setInterval(loadLights, 30000);
-
-  </script>
-</body>
-</html>
+      let { data }
