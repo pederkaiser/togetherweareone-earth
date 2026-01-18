@@ -1,258 +1,218 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8" />
   <title>Together We Are One</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Supabase JS -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
     body { margin: 0; font-family: system-ui, sans-serif; background: #101014; color: #fafafa;}
-    .banner { text-align: center; max-width: 540px; margin: 40px auto 16px auto; padding: 16px;
-      background: rgba(30,30,30,0.90); border-radius: 14px;
-      box-shadow: 0 2px 24px rgba(0,0,0,0.18);}
-    .banner h1 { margin-top: 0; font-size: 2em; }
-    .banner p { margin: 1em 0; }
+    .teleprompter {
+      max-width: 520px;
+      margin: 32px auto 18px auto;
+      background: rgba(36,34,28,0.97);
+      border-radius: 18px;
+      box-shadow: 0 6px 32px rgba(0,0,0,0.19);
+      padding: 20px 26px 16px 26px;
+      font-size: 1.18em;
+      color: #ffe9c2;
+      min-height: 60px;
+      position: relative;
+      text-align: center;
+      letter-spacing: 0.01em;
+      line-height: 1.5;
+    }
+    .tp-text { min-height: 1.8em; transition: color 0.2s;}
+    .tp-text span { opacity:0; animation: tpword 0.6s forwards; }
+    @keyframes tpword { from {opacity:0;transform:translateY(8px);} to {opacity:1;transform:none;} }
+    .tp-controls {
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 13px; user-select: none; gap: 10px;
+    }
+    .tp-controls button {
+      background: none;
+      border: none;
+      color: #ffd670;
+      font-size: 1.65em;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.2s;
+    }
+    .tp-controls button:active { background: #ffd67022; color: #fff4d4;}
+    .tp-progress {
+      flex: 1;
+      height: 6px;
+      margin: 0 12px;
+      border-radius: 5px;
+      background: #3b3535;
+      overflow: hidden;
+      position: relative;
+      top: 0.5em;
+    }
+    .tp-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg,#ffe397,#ffd64d 85%);
+      transition: width 0.32s;
+    }
     #map { width: 100vw; height: 60vh; max-height: 420px; border-radius: 18px; box-shadow: 0 2px 14px rgba(0,0,0,0.25);}
     .hint {text-align:center; font-size: 1.1em; color: #ddd; margin-top: 20px;}
     @media (max-width: 600px) {
-      .banner {margin: 14px; padding: 8px;}
+      .teleprompter {margin: 12px 4px 10px 4px; padding: 9px;}
       #map {height: 44vh;}
     }
   </style>
 </head>
 <body>
-  <div class="banner" id="banner"></div>
+  <div class="teleprompter" id="teleprompter">
+    <div class="tp-text" id="tp-text"></div>
+    <div class="tp-controls">
+      <button id="tp-prev" title="Zurück">&#8592;</button>
+      <div class="tp-progress" id="tp-progress"><div class="tp-progress-bar"></div></div>
+      <button id="tp-next" title="Weiter">&#8594;</button>
+    </div>
+  </div>
   <div id="map"></div>
-  <div class="hint" id="hint"></div>
+  <div class="hint" id="hint">Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)</div>
   <script>
-    // -------- UUID v4 Funktion (für Session-ID) ----------
+    // -------- Teleprompter-Text-Array (nur Deutsch, beliebig anpassbar) ----
+    const tpTexts = [
+      "Manchmal schauen wir in den Himmel.",
+      "Vielleicht sehen wir einen Stern, den Mond, ferne Galaxien.",
+      "Für einen Moment wird uns bewusst, wie klein unser Planet ist.",
+      "Wie selten – vielleicht sogar einzigartig – das Leben hier ist.",
+      "Auf diesem winzigen Punkt im Weltall teilen wir unser Leben.",
+      "Jeder von uns mit einer eigenen Geschichte, aber doch alle miteinander verbunden.",
+      "Nicht durch Herkunft, Sprache oder Grenzen – sondern durch das Glück, gemeinsam hier zu sein.",
+      "Manche Menschen spüren in solchen Momenten, dass wir eigentlich eine einzige Gemeinschaft sind.",
+      "Dass uns mehr verbindet als trennt.",
+      "Hast du das auch schon einmal gefühlt?",
+      "Helf’ uns, dieses Gefühl sichtbar zu machen!"
+    ];
+    // Geschwindigkeit pro Wort (ms)
+    const WORD_MS = 370;    // ca. 2,5 Wörter pro Sekunde
+    const SENTENCE_PAUSE = 1200; // Satz komplett sichtbar, dann nächste
+
+    let tpIndex = 0, tpInterval = null, tpWordInterval = null, isPaused = false;
+    const tpTextEl = document.getElementById('tp-text');
+    const tpProgress = document.getElementById('tp-progress');
+    const btnNext = document.getElementById('tp-next');
+    const btnPrev = document.getElementById('tp-prev');
+
+    function showTeleprompterStep(idx, auto=true) {
+      if(idx < 0) idx = 0;
+      if(idx >= tpTexts.length) idx = tpTexts.length-1;
+      tpIndex = idx;
+      // Progress bar
+      tpProgress.innerHTML = `<div class="tp-progress-bar" style="width:${100*(tpIndex+1)/tpTexts.length}%"></div>`;
+      // Wort für Wort anzeigen
+      const words = tpTexts[tpIndex].split(" ");
+      tpTextEl.innerHTML = ""; // Reset
+      clearInterval(tpWordInterval);
+      let i = 0;
+      function showWord() {
+        if(i < words.length) {
+          const span = document.createElement('span');
+          span.textContent = (i>0 ? " " : "") + words[i];
+          span.style.animationDelay = (i*0.07)+'s';
+          tpTextEl.appendChild(span);
+          i++;
+        } else {
+          clearInterval(tpWordInterval);
+          // Nach kurzer Pause weiter
+          if(auto && !isPaused) setTimeout(() => { nextTeleprompter(true); }, SENTENCE_PAUSE);
+        }
+      }
+      showWord();
+      tpWordInterval = setInterval(showWord, WORD_MS);
+    }
+    function nextTeleprompter(auto) {
+      if(tpIndex < tpTexts.length-1) {
+        showTeleprompterStep(tpIndex+1, auto);
+      }
+    }
+    function prevTeleprompter() {
+      if(tpIndex > 0) {
+        showTeleprompterStep(tpIndex-1, false);
+      }
+    }
+    btnNext.onclick = () => { isPaused=false; nextTeleprompter(false); };
+    btnPrev.onclick = () => { isPaused=false; prevTeleprompter(); };
+
+    // Optional: Pause/Play (kannst du noch als Button einbauen)
+    // document.getElementById('tp-pause').onclick = () => { isPaused = !isPaused; };
+
+    // Autoplay-Start
+    showTeleprompterStep(0, true);
+
+    // --------- Der Rest: Map und Supabase wie gehabt ----------
+
     function uuidv4() {
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
       });
     }
-
-    // ------------- KONFIGURATION -------------
-    // Supabase-Projektinfos eintragen:
     const SUPABASE_URL = 'https://gwfqdukbcgtcefqtgnbl.supabase.co';  // <-- DEIN Project URL aus Supabase!
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3ZnFkdWtiY2d0Y2VmcXRnbmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MDU2MTMsImV4cCI6MjA4NDI4MTYxM30.ePyuDxhVoc1ol5lQ8JbRKaybgpEPozBR3Wf71oFj040';  // <-- DEIN anon public key!
 
-    // Kerzen-/Licht-Icon
     const candleIcon = L.icon({
-      iconUrl: 'https://openmoji.org/data/color/svg/1F56F.svg', // z.B. Kerze von OpenMoji
+      iconUrl: 'https://openmoji.org/data/color/svg/1F56F.svg',
       iconSize: [32, 40],
       iconAnchor: [16, 38],
       popupAnchor: [0, -34]
     });
 
-    // ------------- MEHRSPRACHIGKEIT -------------
-    const texts = {
-      de: {
-        h1: "Together We Are One",
-        p1: "Manchmal schauen wir in den Himmel. Vielleicht sehen wir einen Stern, den Mond, ferne Galaxien. Für einen Moment wird uns bewusst, wie klein unser Planet ist. Wie selten – vielleicht sogar einzigartig – das Leben hier ist.",
-        p2: "Auf diesem winzigen Punkt im Weltall teilen wir unser Leben. Jeder von uns mit einer eigenen Geschichte, aber doch alle miteinander verbunden. Nicht durch Herkunft, Sprache oder Grenzen – sondern durch das Glück, gemeinsam hier zu sein.",
-        p3: "Manche Menschen spüren in solchen Momenten, dass wir eigentlich eine einzige Gemeinschaft sind. Dass uns mehr verbindet als trennt.",
-        ask: "Hast du das auch schon einmal gefühlt?",
-        call: "Helf’ uns, dieses Gefühl sichtbar zu machen!",
-        hint: "Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)"
-      },
-      en: {
-        h1: "Together We Are One",
-        p1: "Sometimes we look up at the sky and see a star, the moon, or distant galaxies. For a moment, we realize how small our planet is—how rare, maybe even unique, life here really is.",
-        p2: "On this tiny point in the universe, we share our lives. Each of us with our own story, yet all connected—not by origin, language, or borders, but by the luck of being here together.",
-        p3: "Some people sense in such moments that we are actually one community. That more connects us than divides us.",
-        ask: "Have you ever felt this, too?",
-        call: "Help us make this feeling visible!",
-        hint: "Click on the map to set or move your light. (Only one light per browser.)"
-      },
-      fr: {
-        h1: "Together We Are One",
-        p1: "Parfois, nous regardons le ciel. Nous voyons peut-être une étoile, la lune, des galaxies lointaines. Pendant un instant, nous réalisons combien notre planète est petite et combien la vie ici est rare – voire unique.",
-        p2: "Sur ce minuscule point dans l’univers, nous partageons notre vie. Chacun de nous a sa propre histoire, mais nous sommes tous reliés. Non par l’origine, la langue ou les frontières – mais par la chance d’être ici ensemble.",
-        p3: "Certains ressentent alors que nous sommes en fait une seule communauté. Que ce qui nous relie est plus fort que ce qui nous sépare.",
-        ask: "As-tu déjà ressenti cela ?",
-        call: "Aide-nous à rendre ce sentiment visible !",
-        hint: "Clique sur la carte pour placer ou déplacer ta lumière. (Une seule lumière par navigateur.)"
-      },
-      es: {
-        h1: "Together We Are One",
-        p1: "A veces miramos al cielo. Tal vez vemos una estrella, la luna o galaxias lejanas. Por un momento, nos damos cuenta de lo pequeño que es nuestro planeta y de lo raro –quizás único– que es la vida aquí.",
-        p2: "En este pequeño punto en el universo compartimos nuestra vida. Cada uno con su propia historia, pero todos conectados, no por origen, idioma o fronteras, sino por la suerte de estar aquí juntos.",
-        p3: "Algunas personas sienten en esos momentos que en realidad somos una sola comunidad. Que lo que nos une es más fuerte que lo que nos separa.",
-        ask: "¿Alguna vez has sentido esto también?",
-        call: "¡Ayúdanos a hacer visible este sentimiento!",
-        hint: "Haz clic en el mapa para poner o mover tu luz. (Solo una luz por navegador.)"
-      },
-      pt: {
-        h1: "Together We Are One",
-        p1: "Às vezes olhamos para o céu. Talvez vejamos uma estrela, a lua, galáxias distantes. Por um momento, percebemos o quão pequeno é o nosso planeta – quão rara, talvez até única, é a vida aqui.",
-        p2: "Neste pequeno ponto no universo, compartilhamos nossa vida. Cada um com sua própria história, mas todos conectados – não por origem, idioma ou fronteiras, mas pela sorte de estarmos juntos aqui.",
-        p3: "Algumas pessoas sentem, nesses momentos, que somos de fato uma única comunidade. Que o que nos une é mais forte do que o que nos separa.",
-        ask: "Você já sentiu isso também?",
-        call: "Ajude-nos a tornar esse sentimento visível!",
-        hint: "Clique no mapa para definir ou mover sua luz. (Apenas uma luz por navegador.)"
-      },
-      it: {
-        h1: "Together We Are One",
-        p1: "A volte guardiamo il cielo. Magari vediamo una stella, la luna, galassie lontane. Per un momento ci rendiamo conto di quanto sia piccolo il nostro pianeta e quanto sia rara – forse unica – la vita qui.",
-        p2: "Su questo minuscolo punto nell’universo condividiamo la nostra vita. Ognuno con la propria storia, ma tutti collegati – non per origine, lingua o confini, ma per la fortuna di essere qui insieme.",
-        p3: "Alcune persone sentono in questi momenti che siamo davvero una sola comunità. Che ciò che ci unisce è più forte di ciò che ci divide.",
-        ask: "Anche tu hai mai provato questa sensazione?",
-        call: "Aiutaci a rendere visibile questo sentimento!",
-        hint: "Clicca sulla mappa per posizionare o spostare la tua luce. (Solo una luce per browser.)"
-      },
-      tr: {
-        h1: "Together We Are One",
-        p1: "Bazen gökyüzüne bakarız. Belki bir yıldız, ay veya uzak galaksiler görürüz. Bir an için, gezegenimizin ne kadar küçük olduğunu ve buradaki yaşamın ne kadar nadir – belki de eşsiz – olduğunu fark ederiz.",
-        p2: "Evrenin bu küçük noktasında hayatımızı paylaşıyoruz. Her birimizin kendi hikâyesi var, ama hepimiz birbirimize bağlıyız – köken, dil veya sınırlar nedeniyle değil, burada birlikte olmanın şansı sayesinde.",
-        p3: "Bazı insanlar böyle anlarda aslında tek bir toplum olduğumuzu hisseder. Bizi birleştiren şeyin ayıran şeyden daha fazla olduğunu.",
-        ask: "Sen de bunu hiç hissettin mi?",
-        call: "Bu duyguyu görünür kılmamıza yardım et!",
-        hint: "Işığını yerleştirmek veya taşımak için haritaya tıkla. (Tarayıcı başına yalnızca bir ışık.)"
-      },
-      ar: {
-        h1: "معاً نحن واحد",
-        p1: "أحيانًا ننظر إلى السماء. ربما نرى نجمة أو القمر أو مجرات بعيدة. للحظة ندرك كم كوكبنا صغير، وكم أن الحياة هنا نادرة – ربما فريدة.",
-        p2: "على هذه النقطة الصغيرة في الكون نشارك حياتنا. لكل منا قصته، ولكننا جميعًا مترابطون – ليس بالأصل أو اللغة أو الحدود، بل بحظ تواجدنا معًا هنا.",
-        p3: "بعض الناس يشعرون في تلك اللحظات أننا في الحقيقة مجتمع واحد. وأن ما يجمعنا أكثر مما يفرقنا.",
-        ask: "هل شعرت بذلك يومًا؟",
-        call: "ساعدنا في إظهار هذا الشعور!",
-        hint: "انقر على الخريطة لوضع أو نقل ضوئك. (ضوء واحد فقط لكل متصفح.)"
-      },
-      ru: {
-        h1: "Together We Are One",
-        p1: "Иногда мы смотрим на небо. Может быть, видим звезду, луну или далекие галактики. На мгновение мы осознаём, насколько мала наша планета и насколько редка — возможно, уникальна — жизнь здесь.",
-        p2: "На этой крошечной точке во Вселенной мы делим свою жизнь. У каждого из нас своя история, но все мы связаны не происхождением, языком или границами, а счастьем быть здесь вместе.",
-        p3: "В такие моменты некоторые люди чувствуют, что мы на самом деле единое сообщество. Что нас больше объединяет, чем разделяет.",
-        ask: "Ты когда-нибудь чувствовал(а) это?",
-        call: "Помоги нам сделать это чувство видимым!",
-        hint: "Кликни по карте, чтобы поставить или переместить свой огонёк. (Только один огонёк на браузер.)"
-      },
-      zh: {
-        h1: "Together We Are One",
-        p1: "有时候我们会仰望天空，看到星星、月亮，或遥远的星系。那一刻，我们会意识到地球是多么渺小，生命在这里是多么稀有——也许是独一无二的。",
-        p2: "在这宇宙中的微小一隅，我们共同生活。每个人都有自己的故事，但我们都彼此相连——不是因为出身、语言或国界，而是因为共同在这里的幸运。",
-        p3: "有些人在那一刻会感受到，我们其实是一个共同体。连接我们的，比分隔我们的更多。",
-        ask: "你也曾经有过这种感觉吗？",
-        call: "帮我们让这种感受被看见！",
-        hint: "点击地图设置或移动你的光点。（每个浏览器仅可设置一个光点。）"
-      },
-      hi: {
-        h1: "Together We Are One",
-        p1: "कभी-कभी हम आकाश की ओर देखते हैं। शायद हमें कोई तारा, चाँद या दूर की गैलेक्सियाँ दिखती हैं। एक पल के लिए हमें एहसास होता है कि हमारा ग्रह कितना छोटा है, और यहाँ जीवन कितना दुर्लभ – शायद अनोखा – है।",
-        p2: "इस ब्रह्मांड के छोटे से बिंदु पर हम अपनी ज़िंदगी साझा करते हैं। हम सब की अपनी-अपनी कहानी है, फिर भी हम सभी एक-दूसरे से जुड़े हुए हैं – न कि जन्म, भाषा या सीमाओं से, बल्कि यहाँ साथ होने के सौभाग्य से।",
-        p3: "ऐसे क्षणों में कुछ लोगों को महसूस होता है कि हम वास्तव में एक ही समुदाय हैं। कि जो हमें जोड़ता है, वह हमें अलग करने वालों से ज़्यादा है।",
-        ask: "क्या आपने भी कभी ऐसा महसूस किया है?",
-        call: "इस भावना को उजागर करने में हमारी मदद करें!",
-        hint: "मानचित्र पर क्लिक करके अपनी रोशनी लगाएँ या स्थान बदलें। (प्रत्येक ब्राउज़र के लिए केवल एक रोशनी।)"
-      },
-      ja: {
-        h1: "Together We Are One",
-        p1: "時々、私たちは空を見上げます。星や月、遠い銀河を目にするかもしれません。その瞬間、私たちの地球がどれほど小さく、ここでの命がいかに珍しく—もしかしたら唯一無二であるかに気づきます。",
-        p2: "この宇宙の小さな点で、私たちは人生を共有しています。一人ひとりが自分自身の物語を持ちながらも、出身地や言語、国境によらず、ここに一緒にいられる幸運によって、みんながつながっています。",
-        p3: "そんな瞬間に、実は私たちが一つの共同体だと感じる人もいます。私たちを結びつけているものは、分けているものよりも多いのです。",
-        ask: "あなたも同じように感じたことがありますか？",
-        call: "この気持ちを可視化する手助けをしてください！",
-        hint: "地図をクリックして光をセットまたは移動してください。（1つのブラウザにつき1つの光のみ。）"
-      }
-    };
-
-    function getLang() {
-      const lang = (navigator.language || navigator.userLanguage || 'en').substr(0,2).toLowerCase();
-      return texts[lang] || texts['en'];
-    }
-
-    function renderTexts() {
-      const t = getLang();
-      document.getElementById('banner').innerHTML = `
-        <h1>${t.h1}</h1>
-        <p>${t.p1}</p>
-        <p>${t.p2}</p>
-        <p>${t.p3}</p>
-        <h3>${t.ask}</h3>
-        <strong>${t.call}</strong>
-      `;
-      document.getElementById('hint').textContent = t.hint;
-    }
-    renderTexts();
-
-    // ------------- SUPABASE & MAP -------------
-
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    // Nutzer-ID für ein Licht pro Browser
     let session = localStorage.getItem('myLightSession');
     if(!session) {
       session = uuidv4();
       localStorage.setItem('myLightSession', session);
     }
-
     const map = L.map('map', { zoomControl: true }).setView([20, 0], 2);
-
-    // Dark-Map-Theme (OpenStreetMap CartoDB DarkMatter)
-    //L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    //  attribution: '&copy; OpenStreetMap contributors & CartoDB',
-    //  maxZoom: 18,
-    //}).addTo(map);
-
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OpenStreetMap contributors & CartoDB',
-  maxZoom: 18,
-}).addTo(map);
+      attribution: '&copy; OpenStreetMap contributors & CartoDB',
+      maxZoom: 18,
+    }).addTo(map);
 
     let allMarkers = [];
     let myMarker = null;
-
     async function loadLights() {
-  // Entferne alte Marker
-  allMarkers.forEach(m => map.removeLayer(m));
-  allMarkers = [];
-  myMarker = null; // <- Wichtig, damit es nicht doppelt wird!
-  let { data, error } = await sb.from('lights').select('*');
-  if(data) {
-    data.forEach(row => {
-      const icon = candleIcon;
-      const marker = L.marker([row.lat, row.lng], {icon, interactive: row.session === session});
-      if(row.session === session) {
-        marker.bindPopup(getLang().call).openPopup();
-        myMarker = marker; // <- Speichere den Marker für spätere Updates
+      allMarkers.forEach(m => map.removeLayer(m));
+      allMarkers = [];
+      myMarker = null;
+      let { data, error } = await sb.from('lights').select('*');
+      if(data) {
+        data.forEach(row => {
+          const icon = candleIcon;
+          const marker = L.marker([row.lat, row.lng], {icon, interactive: row.session === session});
+          if(row.session === session) {
+            marker.bindPopup("Helf’ uns, dieses Gefühl sichtbar zu machen!").openPopup();
+            myMarker = marker;
+          }
+          allMarkers.push(marker);
+          marker.addTo(map);
+        });
       }
-      allMarkers.push(marker);
-      marker.addTo(map);
-    });
-  }
-      // // --- HEATMAP, falls du sie aktivieren willst ---
-      // let points = data.map(row => [row.lat, row.lng, 1]);
-      // if(window.heat) { map.removeLayer(window.heat); }
-      // window.heat = L.heatLayer(points, {radius: 18, blur: 24, minOpacity: 0.5}).addTo(map);
     }
-
     async function loadMyLight() {
       let { data } = await sb.from('lights').select('*').eq('session', session).maybeSingle();
       return data;
     }
-
     map.on('click', async function(e) {
-  let existing = await loadMyLight();
-  if(existing) {
-    // Update Position in der DB
-    await sb.from('lights').update({lat: e.latlng.lat, lng: e.latlng.lng}).eq('session', session);
-  } else {
-    // Neues Licht setzen
-    await sb.from('lights').insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
-  }
-  await loadLights(); // Immer nach dem Schreiben neu laden!
-});
-
-    // Initial Map
+      let existing = await loadMyLight();
+      if(existing) {
+        await sb.from('lights').update({lat: e.latlng.lat, lng: e.latlng.lng}).eq('session', session);
+      } else {
+        await sb.from('lights').insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
+      }
+      await loadLights();
+    });
     loadLights();
-    // Optional: regelmäßig alle 30 Sek. aktualisieren
     setInterval(loadLights, 30000);
-
   </script>
 </body>
 </html>
