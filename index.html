@@ -239,19 +239,13 @@
     map.on('click', async function(e) {
   let existing = await loadMyLight();
   if(existing) {
-    // Update in der DB
+    // Update Position in der DB
     await sb.from('lights').update({lat: e.latlng.lat, lng: e.latlng.lng}).eq('session', session);
-
-    // Marker auf der Karte verschieben (sofort)
-    if(myMarker) {
-      myMarker.setLatLng(e.latlng);
-      myMarker.openPopup();
-    }
   } else {
-    // Neues Licht eintragen
+    // Neues Licht setzen
     await sb.from('lights').insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
   }
-  await loadLights(); // Re-Load für alle Marker
+  await loadLights(); // Immer nach dem Schreiben neu laden!
 });
 
     // Initial Map
