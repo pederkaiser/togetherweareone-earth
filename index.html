@@ -12,7 +12,7 @@
   <!-- Supabase -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-  <!-- Optional: PNG Export -->
+  <!-- PNG Export -->
   <script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
 
   <style>
@@ -27,8 +27,12 @@
       --text: rgba(255,255,255,0.92);
       --warm: rgba(255,220,170,0.95);
 
-      --btn: rgba(255,255,255,0.08);
-      --btnHover: rgba(255,255,255,0.12);
+      /* === MAP TUNING (dein "von Hand" Regler) === */
+      --map-brightness: 0.92;   /* kleiner = dunkler */
+      --map-contrast: 1.10;
+      --map-saturate: 0.95;
+
+      --shade-opacity: 0.50;    /* dunkler Film/Vignette: 0..1 */
     }
 
     html,body { height:100%; }
@@ -54,9 +58,8 @@
       margin: 0 auto;
     }
 
-    /* --- Prompter / Copy --- */
+    /* --- Prompter --- */
     .teleprompter{
-      position: relative;
       padding: 18px 18px 14px 18px;
       border-radius: 20px;
       background: linear-gradient(180deg, var(--card2), var(--card));
@@ -75,66 +78,23 @@
       min-height: 3.2em;
     }
 
-    /* Voller Satz immer sichtbar ("ghost") */
-    .tp-word{
-      color: var(--ghost);
-      transition: color 160ms ease, filter 160ms ease, opacity 160ms ease;
-      white-space: pre;
-    }
+    .tp-word{ color: var(--ghost); transition: color 160ms ease, filter 160ms ease; white-space: pre; }
+    .tp-word.done{ color: var(--warm); filter: drop-shadow(0 0 12px rgba(255,210,140,0.18)); }
+    .tp-word.active{ color: rgba(255,245,235,0.98); filter: drop-shadow(0 0 18px rgba(255,210,140,0.26)); }
 
-    /* Bereits "aufgebaut" (bleibt warm/hell) */
-    .tp-word.done{
-      color: var(--warm);
-      filter: drop-shadow(0 0 12px rgba(255,210,140,0.18));
-    }
-
-    /* Aktives Wort (ein Tick heller als done) */
-    .tp-word.active{
-      color: rgba(255,245,235,0.98);
-      filter: drop-shadow(0 0 18px rgba(255,210,140,0.26));
-    }
-
-    .tp-meta{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap: 10px;
-      margin-top: 8px;
-      user-select:none;
-    }
-
+    .tp-meta{ display:flex; align-items:center; justify-content:center; gap: 10px; margin-top: 8px; user-select:none; }
     .tp-btn{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
+      width: 42px; height: 42px; border-radius: 14px;
       border: 1px solid rgba(255,255,255,0.10);
       background: rgba(255,255,255,0.06);
       color: rgba(255,255,255,0.85);
       cursor: pointer;
       transition: background 140ms ease, transform 140ms ease;
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 18px; font-weight: 700;
     }
     .tp-btn:hover{ background: rgba(255,255,255,0.10); transform: translateY(-1px); }
-    .tp-btn:active{ transform: translateY(0px); }
-
-    .tp-progress{
-      width: min(520px, 62vw);
-      height: 8px;
-      border-radius: 8px;
-      overflow:hidden;
-      background: rgba(255,255,255,0.10);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-    .tp-progress-bar{
-      height:100%;
-      width: 0%;
-      background: linear-gradient(90deg, rgba(255,220,170,0.65), rgba(255,255,255,0.55));
-      transition: width 220ms ease;
-    }
+    .tp-progress{ width: min(520px, 62vw); height: 8px; border-radius: 8px; overflow:hidden; background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.08); }
+    .tp-progress-bar{ height:100%; width: 0%; background: linear-gradient(90deg, rgba(255,220,170,0.65), rgba(255,255,255,0.55)); transition: width 220ms ease; }
 
     /* --- Map --- */
     .mapWrap{
@@ -148,15 +108,16 @@
     #map{ width: 100%; height: min(62vh, 520px); }
 
     .leaflet-tile{
-      filter: brightness(0.88) contrast(1.10) saturate(0.95);
+      filter: brightness(var(--map-brightness)) contrast(var(--map-contrast)) saturate(var(--map-saturate));
     }
 
     .mapShade{
       pointer-events:none;
       position:absolute; inset:0;
+      opacity: var(--shade-opacity);
       background:
-        radial-gradient(900px 420px at 50% 10%, rgba(0,0,0,0.15), rgba(0,0,0,0.45) 65%),
-        linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.32));
+        radial-gradient(900px 420px at 50% 10%, rgba(0,0,0,0.10), rgba(0,0,0,0.55) 65%),
+        linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.40));
       mix-blend-mode: multiply;
     }
 
@@ -168,6 +129,7 @@
       gap: 10px;
       z-index: 500;
       flex-wrap: wrap;
+      align-items: center;
     }
     .hud button{
       padding: 10px 12px;
@@ -182,27 +144,30 @@
       letter-spacing: 0.2px;
     }
     .hud button:hover{ background: rgba(0,0,0,0.30); transform: translateY(-1px); }
-    .hud button:active{ transform: translateY(0px); }
 
-    .hint{
-      text-align:center;
-      margin: 4px 0 0 0;
-      color: rgba(255,255,255,0.60);
-      font-size: 14px;
+    .hud .sliderBox{
+      display:flex; align-items:center; gap:8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(10px);
+      color: rgba(255,255,255,0.85);
+      font-weight: 650;
+    }
+    .hud input[type="range"]{
+      width: 140px;
     }
 
-    .status{
-      text-align:center;
-      color: rgba(255,255,255,0.70);
-      font-size: 13px;
-      margin-top: 6px;
-    }
+    .hint{ text-align:center; margin: 4px 0 0 0; color: rgba(255,255,255,0.60); font-size: 14px; }
+    .status{ text-align:center; color: rgba(255,255,255,0.70); font-size: 13px; margin-top: 6px; }
 
     @media (max-width: 600px){
       .wrap{ padding: 12px 10px; }
       .teleprompter{ padding: 14px 12px 12px 12px; border-radius: 18px; }
       .tp-btn{ width: 40px; height: 40px; border-radius: 14px; }
       #map{ height: 52vh; }
+      .hud input[type="range"]{ width: 110px; }
     }
   </style>
 </head>
@@ -210,36 +175,38 @@
 <body>
   <div class="wrap">
 
-    <!-- PROMPTER -->
-    <div class="teleprompter" id="teleprompter" aria-label="Text">
+    <div class="teleprompter" aria-label="Text">
       <p class="tp-text" id="tp-text"></p>
-
       <div class="tp-meta">
         <button class="tp-btn" id="tp-prev" title="Zurück" aria-label="Zurück">←</button>
-        <div class="tp-progress" aria-label="Fortschritt">
-          <div class="tp-progress-bar" id="tp-bar"></div>
-        </div>
+        <div class="tp-progress"><div class="tp-progress-bar" id="tp-bar"></div></div>
         <button class="tp-btn" id="tp-next" title="Weiter" aria-label="Weiter">→</button>
       </div>
     </div>
 
-    <!-- MAP -->
     <div class="mapWrap">
       <div class="hud">
         <button id="btnWorld" title="Alle Lichter zeigen">Weltansicht</button>
         <button id="btnCard" title="PNG der Weltansicht erzeugen">Karte generieren</button>
+
+        <!-- Dunkel-Regler -->
+        <div class="sliderBox" title="Dunkelheit der Karte">
+          Dunkel
+          <input id="shadeSlider" type="range" min="0" max="100" value="50" />
+        </div>
       </div>
+
       <div id="map"></div>
-      <div class="mapShade"></div>
+      <div class="mapShade" id="mapShade"></div>
     </div>
 
-    <p class="hint" id="hint">Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)</p>
+    <p class="hint">Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)</p>
     <p class="status" id="status"></p>
   </div>
 
 <script>
 /* -------------------------
-   1) PROMPTER: Satz bleibt sichtbar, Wörter bauen sich in Highlight-Farbe auf
+   PROMPTER: Wörter bleiben nach Highlight warm ("bauen sich auf")
 -------------------------- */
 const tpTexts = [
   "Manchmal schauen wir in den Himmel.",
@@ -266,7 +233,7 @@ const tpTextEl = document.getElementById("tp-text");
 const tpBarEl  = document.getElementById("tp-bar");
 
 function renderSentence(sentence){
-  const tokens = sentence.split(/(\s+)/); // inkl. Spaces
+  const tokens = sentence.split(/(\s+)/);
   tpTextEl.innerHTML = tokens.map(t => {
     if (/^\s+$/.test(t)) return `<span class="tp-word space">${t}</span>`;
     return `<span class="tp-word">${t}</span>`;
@@ -277,14 +244,12 @@ function markProgress(activeWordIdx){
   const wordSpans = Array.from(tpTextEl.querySelectorAll(".tp-word"))
     .filter(s => !s.classList.contains("space"));
 
-  // Alles bis inkl. activeWordIdx bleibt "done"
   wordSpans.forEach((w, i) => {
     w.classList.remove("active");
     if (i <= activeWordIdx) w.classList.add("done");
     else w.classList.remove("done");
   });
 
-  // Aktuelles Wort zusätzlich als "active" (heller)
   if (wordSpans[activeWordIdx]) wordSpans[activeWordIdx].classList.add("active");
 }
 
@@ -308,7 +273,6 @@ function playSentence(idx, auto=true){
       markProgress(tpWordIdx);
     } else {
       clearInterval(tpTimer);
-      // Satz komplett "gebaut"
       markProgress(words.length - 1);
       if(auto){
         setTimeout(() => {
@@ -329,8 +293,28 @@ document.getElementById("tp-prev").onclick = () => {
 playSentence(0, true);
 
 /* -------------------------
-   2) MAP + SUPABASE
-   Änderung: Klick soll NICHT zoomen. Kein Auto-fit nach Klick.
+   MAP "von Hand" dunkler machen: Slider steuert CSS Vars
+-------------------------- */
+const shadeSlider = document.getElementById("shadeSlider");
+
+// Mapping: Slider 0..100 -> Overlay 0.15..0.85 und Tile-Brightness 1.00..0.74
+function applyDarkness(v){
+  const t = v / 100;
+
+  // Overlay: bei 0 leicht sichtbar, bei 100 deutlich dunkler
+  const shadeOpacity = 0.15 + t * 0.70;       // 0.15 .. 0.85
+  // Tiles: bei 0 fast normal, bei 100 dunkler
+  const brightness = 1.00 - t * 0.26;         // 1.00 .. 0.74
+
+  document.documentElement.style.setProperty("--shade-opacity", shadeOpacity.toFixed(2));
+  document.documentElement.style.setProperty("--map-brightness", brightness.toFixed(2));
+}
+
+applyDarkness(parseInt(shadeSlider.value, 10));
+shadeSlider.addEventListener("input", (e) => applyDarkness(parseInt(e.target.value, 10)));
+
+/* -------------------------
+   MAP + SUPABASE
 -------------------------- */
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -359,12 +343,12 @@ const map = L.map('map', {
   preferCanvas: true
 }).setView([20, 0], 2);
 
+// Heller Basemap, Nacht-Look über Overlay/Filter steuerbar
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
   maxZoom: 18,
 }).addTo(map);
 
-// Lichter: Glow + Kern
 const canvasRenderer = L.canvas({ padding: 0.5 });
 const lightsLayer = L.layerGroup().addTo(map);
 
@@ -388,26 +372,6 @@ function addGlowLight(latlng, isMine=false){
     fillColor: "rgba(255,245,235,1)",
     interactive: isMine
   }).addTo(lightsLayer);
-
-  if(isMine){
-    const pulse = L.circleMarker(latlng, {
-      renderer: canvasRenderer,
-      radius: 2,
-      stroke: false,
-      fill: true,
-      fillOpacity: 0.70,
-      fillColor: "rgba(255,245,235,1)",
-      interactive: false
-    }).addTo(lightsLayer);
-
-    let r = 2;
-    const t = setInterval(() => {
-      r += 1.1;
-      pulse.setRadius(r);
-      pulse.setStyle({ fillOpacity: Math.max(0, 0.70 - r * 0.06) });
-      if (r > 14) { clearInterval(t); lightsLayer.removeLayer(pulse); }
-    }, 55);
-  }
 }
 
 let allLightPoints = [];
@@ -428,11 +392,7 @@ async function loadLights() {
       addGlowLight([row.lat, row.lng], isMine);
     }
 
-    if(mine){
-      setStatus("Dein Licht ist gesetzt. Du kannst es durch Klicken verschieben.");
-    } else {
-      setStatus("Setze dein Licht mit einem Klick auf die Karte.");
-    }
+    setStatus(mine ? "Dein Licht ist gesetzt. Du kannst es durch Klicken verschieben." : "Setze dein Licht mit einem Klick auf die Karte.");
   } catch (e){
     console.error(e);
     setStatus("Konnte Lichter nicht laden. Prüfe Supabase URL/Key und Tabelle „lights“.");
@@ -444,20 +404,15 @@ async function loadMyLight() {
   return data;
 }
 
-/* WICHTIG: Kein auto-zoom/flyTo/fitBounds nach Klick! */
+// WICHTIG: Klick verändert NICHT den Zoom (kein fitBounds, kein flyTo)
 map.on('click', async function(e) {
   try{
     const existing = await loadMyLight();
     if(existing) {
-      await sb.from('lights')
-        .update({lat: e.latlng.lat, lng: e.latlng.lng})
-        .eq('session', session);
+      await sb.from('lights').update({lat: e.latlng.lat, lng: e.latlng.lng}).eq('session', session);
     } else {
-      await sb.from('lights')
-        .insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
+      await sb.from('lights').insert({lat: e.latlng.lat, lng: e.latlng.lng, session});
     }
-
-    // nur neu zeichnen, Zoom bleibt unverändert
     await loadLights();
   } catch(err){
     console.error(err);
@@ -474,19 +429,14 @@ function fitToLights(animate=true){
   map.fitBounds(bounds.pad(0.35), { animate, duration: 0.9 });
 }
 
-document.getElementById("btnWorld").addEventListener("click", () => {
-  fitToLights(true);
-});
+document.getElementById("btnWorld").addEventListener("click", () => fitToLights(true));
 
+// "Karte generieren": zoomt kurz zur Weltansicht, exportiert PNG
 document.getElementById("btnCard").addEventListener("click", () => {
-  // Erst Weltansicht (nur wenn gewünscht), dann PNG
   fitToLights(true);
   setTimeout(() => {
     leafletImage(map, function(err, canvas) {
-      if (err) {
-        alert("Export fehlgeschlagen.");
-        return;
-      }
+      if (err) { alert("Export fehlgeschlagen."); return; }
       const png = canvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = png;
@@ -496,7 +446,7 @@ document.getElementById("btnCard").addEventListener("click", () => {
   }, 950);
 });
 
-// Initial
+// Start
 loadLights();
 setInterval(loadLights, 30000);
 </script>
