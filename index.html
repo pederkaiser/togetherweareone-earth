@@ -484,7 +484,7 @@ const map = L.map('map', {
   maxBoundsViscosity: 1.0
 }).setView(WORLD_VIEW.center, WORLD_VIEW.zoom);
 
-  // Ghost-Light: folgt dem Cursor, zeigt "hier wird das Licht gesetzt"
+// Ghost-Light: folgt dem Cursor, zeigt "hier wird das Licht gesetzt"
 const ghost = L.circleMarker([0,0], {
   renderer: canvasRenderer,
   radius: 10,
@@ -520,7 +520,7 @@ map.on("mousemove", (e) => {
   ghost.setLatLng(e.latlng);
   ghostCore.setLatLng(e.latlng);
 });
-
+  
 /* Tile layers (mit/ohne Labels) */
 const tileUrlLabels   = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 const tileUrlNoLabels = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
