@@ -75,17 +75,14 @@
       margin:0;
       padding:8px 10px 10px 10px;
       min-height:3.2em;
-      hyphens: auto;
     }
     /* Zeilenumbruch: aktiv */
     .tp-word{
-  color: var(--ghost);
-  transition: color 160ms ease, filter 160ms ease;
-  white-space: normal;
-  overflow-wrap: break-word;   /* statt anywhere */
-  word-break: normal;          /* keine Wortzerstörung */
-  hyphens: auto;               /* Silbentrennung, wenn möglich */
-}
+      color: var(--ghost);
+      transition: color 160ms ease, filter 160ms ease;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
     .tp-space{ white-space: pre; }
     .tp-word.done{
       color: var(--warm);
@@ -288,16 +285,6 @@ function pickLanguage() {
 }
 
 const LANG = pickLanguage();
-document.documentElement.lang = LANG;
-
-// ... erst später:
-const tpTextEl = document.getElementById("tp-text");
-const tpBarEl  = document.getElementById("tp-bar");
-
-// ERST JETZT ist tpTextEl sicher verfügbar:
-//if (LANG === "zh" || LANG === "ja") {
-//  tpTextEl.style.hyphens = "none";
-//}
 const badge = document.getElementById("langBadge");
 if (badge) badge.textContent = LANG.toUpperCase();
 
@@ -379,7 +366,7 @@ const TP = {
     "وفي لحظةٍ ما ندرك كم كوكبُنا صغير.",
     "وكم أن الحياة هنا نادرة — وربما فريدة.",
     "على هذه النقطة الصغيرة في الكون نتشارك حياتنا.",
-    "لكلٍّ منا قصته، ومع ذلك نحن مترابطون.",
+    "لكلٍّ منا قصته، ومع ذلك نحن مترابطون.",
     "ليس بالأصل أو اللغة أو الحدود — بل بهبة وجودنا هنا معًا.",
     "في مثل هذه اللحظات يشعر بعض الناس أننا مجتمعٌ واحد.",
     "وأن ما يجمعنا أكبر مما يفرّقنا.",
