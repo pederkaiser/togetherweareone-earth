@@ -105,7 +105,7 @@
     // Nutzer-ID für ein Licht pro Browser
     let session = localStorage.getItem('myLightSession');
     if(!session) {
-      session = uuidv4();
+      session = uuid.v4();
       localStorage.setItem('myLightSession', session);
     }
 
