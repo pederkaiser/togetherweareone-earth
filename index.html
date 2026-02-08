@@ -81,9 +81,10 @@
       color: var(--ghost);
       transition: color 160ms ease, filter 160ms ease;
       white-space: normal;
-      overflow-wrap: anywhere;
+      overflow-wrap: normal;
+      word-break: keep-all;
     }
-    .tp-space{ white-space: pre; }
+    .tp-space{ white-space: pre;}
     .tp-word.done{
       color: var(--warm);
       filter: drop-shadow(0 0 12px rgba(255,210,140,0.18));
@@ -299,92 +300,56 @@ const TP = {
     "Dass wir hier sind, auf diesem blauen Planeten tief im Weltall, ist ein unglaublicher Zufall.",
     "Dieses Glück teilen wir alle.",
     "Wir sind alle etwas Besonderes – und zugleich eins.",
-    "Lasst uns einander zeigen, dass uns dieses Gefühl verbindet.",
-    "Als Teil dieser Gemeinschaft haben wir die Kraft, Großes für die Menschheit zu schaffen."
+    "Als Teil dieser Gemeinschaft haben wir die Kraft, Großes für die Menschheit zu schaffen.",
+    "Lasst uns einander zeigen, dass uns dieses Gefühl verbindet."
   ],
 
   en: [
-    "Sometimes we look up at the sky.",
-    "Maybe we see a star, the Moon, distant galaxies.",
-    "For a moment, we realize how small our planet is.",
-    "How rare — perhaps even unique — life here may be.",
-    "On this tiny point in the universe, we share our lives.",
-    "Each of us with our own story — and yet all connected.",
-    "Not by origin, language, or borders — but by the gift of being here together.",
-    "In moments like this, some people feel we are one single community.",
-    "That what connects us is greater than what divides us.",
-    "Have you ever felt that too?",
-    "Help us make this feeling visible."
+    "That we are here, on this blue planet deep in space, is an incredible coincidence.",
+    "We all share this good fortune.",
+    "We are all something special — and yet one.",
+    "As part of this community, we have the power to create great things for humanity.",
+    "Let us show one another that this feeling connects us."
   ],
 
   es: [
-    "A veces miramos al cielo.",
-    "Quizá vemos una estrella, la Luna, galaxias lejanas.",
-    "Por un momento, nos damos cuenta de lo pequeño que es nuestro planeta.",
-    "De lo raro — quizá incluso único — que es que exista vida aquí.",
-    "En este pequeño punto del universo compartimos nuestras vidas.",
-    "Cada uno con su propia historia, y aun así conectados.",
-    "No por origen, idioma o fronteras, sino por el regalo de estar aquí juntos.",
-    "En momentos así, algunas personas sienten que somos una sola comunidad.",
-    "Que lo que nos une es más grande que lo que nos separa.",
-    "¿Alguna vez lo has sentido también?",
-    "Ayúdanos a hacer visible este sentimiento."
+    "Que estemos aquí, en este planeta azul en lo profundo del espacio, es una coincidencia increíble.",
+    "Esta fortuna la compartimos todos.",
+    "Todos somos algo especial — y, al mismo tiempo, uno.",
+    "Como parte de esta comunidad, tenemos la fuerza para crear grandes cosas para la humanidad.",
+    "Mostrémonos unos a otros que este sentimiento nos une."
   ],
 
   hi: [
-    "कभी-कभी हम आकाश की ओर देखते हैं।",
-    "शायद हम कोई तारा, चाँद, दूर की आकाशगंगाएँ देखते हैं।",
-    "एक पल के लिए हमें एहसास होता है कि हमारा ग्रह कितना छोटा है।",
-    "और यहाँ जीवन कितना दुर्लभ — शायद अनोखा — हो सकता है।",
-    "इस छोटे से बिंदु पर, हम अपनी ज़िंदगियाँ साझा करते हैं।",
-    "हर किसी की अपनी कहानी है, और फिर भी हम जुड़े हुए हैं।",
-    "जन्म, भाषा या सीमाओं से नहीं — बल्कि साथ यहाँ होने के उपहार से।",
-    "ऐसे क्षणों में कुछ लोग महसूस करते हैं कि हम एक ही समुदाय हैं।",
-    "कि जो हमें जोड़ता है, वह जो हमें बाँटता है उससे बड़ा है।",
-    "क्या आपने भी कभी ऐसा महसूस किया है?",
-    "इस भावना को दृश्य बनाने में हमारी मदद करें।"
+    "कि हम यहाँ हैं, इस नीले ग्रह पर, अंतरिक्ष की गहराइयों में — यह एक अद्भुत संयोग है।",
+    "यह सौभाग्य हम सभी साझा करते हैं।",
+    "हम सभी कुछ विशेष हैं — और फिर भी एक हैं।",
+    "इस समुदाय का हिस्सा होकर, हमारे पास मानवता के लिए महान कार्य करने की शक्ति है।",
+    "आइए एक-दूसरे को दिखाएँ कि यह भावना हमें जोड़ती है।"
   ],
 
   zh: [
-    "有时我们会仰望天空。",
-    "也许我们看见一颗星、月亮，或遥远的星系。",
-    "在那一瞬间，我们意识到地球是多么渺小。",
-    "这里的生命是多么稀有——也许甚至独一无二。",
-    "在宇宙这个小小的点上，我们共享人生。",
-    "我们各有故事，却彼此相连。",
-    "不是因为出身、语言或边界，而是因为我们能一起在这里。",
-    "在这样的时刻，有些人会感到：我们是同一个共同体。",
-    "连接我们的，比分隔我们的更多。",
-    "你也曾有过这种感觉吗？",
-    "帮助我们让这种感觉变得可见。"
+    "我们能在这里，在浩瀚宇宙深处的这颗蓝色星球上存在，是一个不可思议的巧合。",
+    "这份幸运属于我们所有人。",
+    "我们每个人都独一无二——却又合而为一。",
+    "作为这个共同体的一部分，我们拥有为人类创造伟大事物的力量。",
+    "让我们彼此展现，这种感觉将我们连接在一起。"
   ],
 
   ar: [
-    "أحيانًا ننظر إلى السماء.",
-    "قد نرى نجمةً أو القمرَ أو مجرّاتٍ بعيدة.",
-    "وفي لحظةٍ ما ندرك كم كوكبُنا صغير.",
-    "وكم أن الحياة هنا نادرة — وربما فريدة.",
-    "على هذه النقطة الصغيرة في الكون نتشارك حياتنا.",
-    "لكلٍّ منا قصته، ومع ذلك نحن مترابطون.",
-    "ليس بالأصل أو اللغة أو الحدود — بل بهبة وجودنا هنا معًا.",
-    "في مثل هذه اللحظات يشعر بعض الناس أننا مجتمعٌ واحد.",
-    "وأن ما يجمعنا أكبر مما يفرّقنا.",
-    "هل شعرتَ بهذا من قبل؟",
-    "ساعدنا على جعل هذا الشعور مرئيًا."
+    "إن وجودنا هنا، على هذا الكوكب الأزرق في أعماق الكون، هو مصادفة مذهلة.",
+    "هذا الحظ نتشاركه جميعًا.",
+    "كل واحدٍ منا مميز — ومع ذلك فنحن واحد.",
+    "كجزءٍ من هذا المجتمع، نمتلك القدرة على تحقيق أشياء عظيمة للبشرية.",
+    "دعونا نُظهر لبعضنا أن هذا الشعور يربطنا."
   ],
 
   ru: [
-    "Иногда мы смотрим в небо.",
-    "Может быть, видим звезду, Луну, далёкие галактики.",
-    "И на мгновение понимаем, насколько мала наша планета.",
-    "Насколько редка — возможно, даже уникальна — жизнь здесь.",
-    "На этой крошечной точке во Вселенной мы делим свою жизнь.",
-    "У каждого своя история — и всё же мы связаны.",
-    "Не происхождением, языком или границами — а тем, что мы вместе здесь.",
-    "В такие моменты некоторые чувствуют: мы — единое сообщество.",
-    "И что нас объединяет больше, чем разделяет.",
-    "Бывало ли у тебя такое чувство?",
-    "Помоги сделать это чувство видимым."
+    "То, что мы здесь, на этой голубой планете в глубинах космоса, — невероятная случайность.",
+    "Это счастье мы разделяем все.",
+    "Каждый из нас особенный — и в то же время мы едины.",
+    "Будучи частью этого сообщества, мы обладаем силой творить великое для человечества.",
+    "Давайте покажем друг другу, что это чувство объединяет нас."
   ]
 };
 
