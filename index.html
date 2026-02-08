@@ -68,14 +68,15 @@
       backdrop-filter: blur(10px);
     }
     .tp-text{
+      display: block;
+      max-width: 28em;
+      margin: 0 auto;
+
       text-align: center;
       font-size: clamp(18px, 2.5vw, 30px);
       line-height: 1.45;
-      margin: 0 auto;
       padding: 8px 10px 10px 10px;
-      max-width: 28em;     /* ← DAS ist der Schlüssel */
     }
-    /* Zeilenumbruch: aktiv */
     .tp-word{
       color: var(--ghost);
       transition: color 160ms ease, filter 160ms ease;
@@ -83,7 +84,7 @@
       overflow-wrap: normal;
       word-break: normal;
     }
-    .tp-space{ white-space: pre;}
+    .tp-space{ white-space: normal;}
     .tp-word.done{
       color: var(--warm);
       filter: drop-shadow(0 0 12px rgba(255,210,140,0.18));
