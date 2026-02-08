@@ -239,7 +239,7 @@
       <div class="mapShade"></div>
     </div>
 
-    <p class="hint">Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)</p>
+    <p class="hint" id="hint"></p>
     <p class="status" id="status"></p>
   </div>
 
@@ -353,6 +353,108 @@ const TP = {
   ]
 };
 
+  const UI = {
+  en: {
+    prev: "Back",
+    next: "Next",
+    world: "World view",
+    card: "Generate map",
+    hint: "Click on the map to place or move your light. (One light per browser.)",
+    status_set: "Your light is set. You can move it by clicking on the map.",
+    status_empty: "Place your light by clicking on the map.",
+    status_error_load: "Could not load lights.",
+    status_error_save: "Saving failed.",
+    status_export: "Creating image…",
+    status_done: "Done."
+  },
+
+  de: {
+    prev: "Zurück",
+    next: "Weiter",
+    world: "Weltansicht",
+    card: "Karte generieren",
+    hint: "Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)",
+    status_set: "Dein Licht ist gesetzt. Du kannst es durch Klicken verschieben.",
+    status_empty: "Setze dein Licht mit einem Klick auf die Karte.",
+    status_error_load: "Konnte Lichter nicht laden.",
+    status_error_save: "Speichern fehlgeschlagen.",
+    status_export: "Erzeuge Bild…",
+    status_done: "Fertig."
+  },
+
+  es: {
+    prev: "Atrás",
+    next: "Siguiente",
+    world: "Vista mundial",
+    card: "Generar mapa",
+    hint: "Haz clic en el mapa para colocar o mover tu luz. (Una luz por navegador.)",
+    status_set: "Tu luz está colocada. Puedes moverla haciendo clic.",
+    status_empty: "Coloca tu luz haciendo clic en el mapa.",
+    status_error_load: "No se pudieron cargar las luces.",
+    status_error_save: "Error al guardar.",
+    status_export: "Creando imagen…",
+    status_done: "Listo."
+  },
+
+  hi: {
+    prev: "पीछे",
+    next: "आगे",
+    world: "विश्व दृश्य",
+    card: "मानचित्र बनाएँ",
+    hint: "अपनी रोशनी लगाने या स्थान बदलने के लिए मानचित्र पर क्लिक करें।",
+    status_set: "आपकी रोशनी सेट है। आप इसे क्लिक करके बदल सकते हैं।",
+    status_empty: "मानचित्र पर क्लिक करके अपनी रोशनी लगाएँ।",
+    status_error_load: "रोशनियाँ लोड नहीं हो सकीं।",
+    status_error_save: "सहेजना विफल रहा।",
+    status_export: "चित्र बनाया जा रहा है…",
+    status_done: "पूर्ण।"
+  },
+
+  zh: {
+    prev: "返回",
+    next: "继续",
+    world: "世界视图",
+    card: "生成地图",
+    hint: "点击地图以放置或移动你的光点。（每个浏览器一个）",
+    status_set: "你的光点已设置，可以点击移动。",
+    status_empty: "点击地图放置你的光点。",
+    status_error_load: "无法加载光点。",
+    status_error_save: "保存失败。",
+    status_export: "正在生成图片…",
+    status_done: "完成。"
+  },
+
+  ar: {
+    prev: "رجوع",
+    next: "التالي",
+    world: "عرض العالم",
+    card: "إنشاء الخريطة",
+    hint: "انقر على الخريطة لوضع الضوء أو تحريكه.",
+    status_set: "تم وضع ضوئك. يمكنك تحريكه بالنقر.",
+    status_empty: "ضع ضوءك بالنقر على الخريطة.",
+    status_error_load: "تعذر تحميل الأضواء.",
+    status_error_save: "فشل الحفظ.",
+    status_export: "جارٍ إنشاء الصورة…",
+    status_done: "تم."
+  },
+
+  ru: {
+    prev: "Назад",
+    next: "Далее",
+    world: "Вид мира",
+    card: "Создать карту",
+    hint: "Нажмите на карту, чтобы разместить или переместить свет.",
+    status_set: "Ваш свет установлен. Вы можете переместить его.",
+    status_empty: "Нажмите на карту, чтобы установить свет.",
+    status_error_load: "Не удалось загрузить огни.",
+    status_error_save: "Ошибка сохранения.",
+    status_export: "Создание изображения…",
+    status_done: "Готово."
+  }
+};
+
+const UI_TEXT = UI[LANG] || UI.en;
+
 const tpTexts = TP[LANG] || TP.en;
 
 // Optional: set <html lang="..."> for accessibility
@@ -407,8 +509,17 @@ function playSentence(idx, auto=true){
     }
   }, WORD_MS);
 }
-document.getElementById("tp-next").onclick = () => { if(tpIndex < tpTexts.length - 1) playSentence(tpIndex + 1, false); };
-document.getElementById("tp-prev").onclick = () => { if(tpIndex > 0) playSentence(tpIndex - 1, false); };
+document.getElementById("tp-prev").title =
+document.getElementById("tp-prev").ariaLabel =
+document.getElementById("tp-prev").textContent = "←";
+
+document.getElementById("tp-next").title =
+document.getElementById("tp-next").ariaLabel =
+document.getElementById("tp-next").textContent = "→";
+
+document.getElementById("btnWorld").textContent = UI_TEXT.world;
+document.getElementById("btnCard").textContent = UI_TEXT.card;
+document.getElementById("hint").textContent = UI_TEXT.hint;
 playSentence(0, true);
 
 /* -------------------------
@@ -426,6 +537,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const statusEl = document.getElementById("status");
 function setStatus(msg){ statusEl.textContent = msg || ""; }
+function setStatus(key){ statusEl.textContent = UI_TEXT[key] || ""; }
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -561,10 +673,10 @@ async function loadLights(){
       if(isMine) mine = row;
       addLight([row.lat, row.lng], isMine);
     }
-    setStatus(mine ? "Dein Licht ist gesetzt. Du kannst es durch Klicken verschieben." : "Setze dein Licht mit einem Klick auf die Karte.");
+    setStatus(mine ? "status_set" : "status_empty");
   } catch(e){
     console.error(e);
-    setStatus("Konnte Lichter nicht laden. Prüfe Supabase URL/Key und Tabelle „lights“.");
+    setStatus("status_error_load");
   }
 }
 
@@ -585,7 +697,7 @@ map.on('click', async (e) => {
     await loadLights();
   } catch(err){
     console.error(err);
-    setStatus("Speichern fehlgeschlagen. Prüfe Supabase-Rechte (RLS/Policies).");
+    setStatus("status_error_save");
   }
 });
 
@@ -610,7 +722,7 @@ function waitTiles(layer){
 
 document.getElementById("btnCard").addEventListener("click", async () => {
   try{
-    setStatus("Erzeuge Screenshot…");
+    setStatus("status_export");
 
     // 1) auf Weltansicht
     map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
@@ -630,8 +742,8 @@ document.getElementById("btnCard").addEventListener("click", async () => {
 
       if(err){
         console.error(err);
-        setStatus("Export fehlgeschlagen.");
-        alert("Export fehlgeschlagen.");
+        setStatus("status_error_save");
+        alert("status_error_save");
         return;
       }
       const png = canvas.toDataURL("image/png");
@@ -639,12 +751,12 @@ document.getElementById("btnCard").addEventListener("click", async () => {
       a.href = png;
       a.download = "weltansicht-ohne-labels.png";
       a.click();
-      setStatus("Fertig.");
+      setStatus("status_done");
     });
   } catch(e){
     console.error(e);
-    setStatus("Export fehlgeschlagen.");
-    alert("Export fehlgeschlagen.");
+    setStatus("status_error_save");
+    alert("status_error_save");
   }
 });
 
