@@ -296,17 +296,11 @@ if (badge) badge.textContent = LANG.toUpperCase();
 // --- Teleprompter texts per language ---
 const TP = {
   de: [
-    "Manchmal schauen wir in den Himmel.",
-    "Vielleicht sehen wir einen Stern, den Mond, ferne Galaxien.",
-    "Für einen Moment wird uns bewusst, wie klein unser Planet ist.",
-    "Wie selten – vielleicht sogar einzigartig – das Leben hier ist.",
-    "Auf diesem winzigen Punkt im Weltall teilen wir unser Leben.",
-    "Jeder von uns mit einer eigenen Geschichte, aber doch alle miteinander verbunden.",
-    "Nicht durch Herkunft, Sprache oder Grenzen – sondern durch das Glück, gemeinsam hier zu sein.",
-    "Manche Menschen spüren in solchen Momenten, dass wir eigentlich eine einzige Gemeinschaft sind.",
-    "Dass uns mehr verbindet als trennt.",
-    "Hast du das auch schon einmal gefühlt?",
-    "Helf’ uns, dieses Gefühl sichtbar zu machen!"
+    "Dass wir hier sind, auf diesem blauen Planeten tief im Weltall, ist ein unglaublicher Zufall.",
+    "Dieses Glück teilen wir alle.",
+    "Wir sind alle etwas Besonderes – und zugleich eins.",
+    "Lasst uns einander zeigen, dass uns dieses Gefühl verbindet.",
+    "Als Teil dieser Gemeinschaft haben wir die Kraft, Großes für die Menschheit zu schaffen."
   ],
 
   en: [
@@ -582,7 +576,15 @@ let allLightPoints = [];
 /* Load */
 async function loadLights(){
   try{
-    const { data, error } = await sb.from('lights').select('*');
+    const b = map.getBounds();
+    const { data, error } = await sb
+      .from('lights')
+      .select('lat,lng,session') // nicht unbedingt *
+      .gte('lat', b.getSouth())
+      .lte('lat', b.getNorth())
+      .gte('lng', b.getWest())
+      .lte('lng', b.getEast());
+
     if(error) throw error;
 
     allLightPoints = data || [];
