@@ -296,10 +296,6 @@ function pickLanguage() {
   return "en";
 }
 
-  // 3) fallback
-  return "en";
-}
-
 const LANG = pickLanguage();
 const badge = document.getElementById("langBadge");
 if (badge) badge.textContent = LANG.toUpperCase();
