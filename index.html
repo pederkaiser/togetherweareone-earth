@@ -274,19 +274,27 @@ function normalizeLang(tag) {
 const SUPPORTED = ["en","es","hi","zh","ar","ru","de"]; // de optional for you
 
 function pickLanguage() {
-  // 1) URL override
+  // 1) URL override – absoluter Vorrang
   const urlLang = normalizeLang(getLangFromUrl());
-  if (urlLang && SUPPORTED.includes(urlLang)) return urlLang;
-
-  // 2) Browser preferences
-  const prefs = (navigator.languages && navigator.languages.length)
-    ? navigator.languages
-    : [navigator.language || "en"];
-
-  for (const tag of prefs) {
-    const base = normalizeLang(tag);
-    if (SUPPORTED.includes(base)) return base;
+  if (urlLang && SUPPORTED.includes(urlLang)) {
+    return urlLang;
   }
+
+  const prefs = (navigator.languages && navigator.languages.length)
+    ? navigator.languages.map(normalizeLang)
+    : [normalizeLang(navigator.language || "en")];
+
+  // 2) Regionale Sanftheit: Deutsch bevorzugen, aber nur ohne URL-Override
+  if (prefs.includes("de")) return "de";
+
+  // 3) Erste unterstützte Sprache aus den Preferences
+  for (const lang of prefs) {
+    if (SUPPORTED.includes(lang)) return lang;
+  }
+
+  // 4) Fallback
+  return "en";
+}
 
   // 3) fallback
   return "en";
