@@ -17,22 +17,23 @@
 
   <style>
     :root{
-      --bg0:#0b0d12;
-      --bg1:#121526;
+      --bg0:#0c0e13;   /* minimal wärmer als --bg0:#0b0d12;*/
+      --bg1:#14172a;   /* etwas mehr Tiefe als --bg1:#121526;*/
       --card: rgba(255,255,255,0.06);
       --card2: rgba(255,255,255,0.08);
       --stroke: rgba(255,255,255,0.10);
 
       --ghost: rgba(255,255,255,0.22);
-      --text: rgba(255,255,255,0.92);
-      --warm: rgba(255,220,170,0.95);
+      --text: rgba(245,247,250,0.90);/*--text: rgba(255,255,255,0.92);*/
+      --warm: rgba(255,214,160,0.92);/*--warm: rgba(255,220,170,0.95);*/
 
       /* Anzeige-Look (fix, ohne User-Regler) */
       --map-brightness: 0.64;
       --map-contrast: 1.25;
       --map-saturate: 0.0;   /* Graustufe */
       --shade-opacity: 0.90;
-      --ocean-tint: rgba(0,0,0,0.38);
+      --ocean-tint: rgba(8,12,24,0.34);/*--ocean-tint: rgba(0,0,0,0.38);*/
+      --accent-soft: rgba(140,170,255,0.06);
     }
 
     html,body { height:100%; }
@@ -62,7 +63,7 @@
     .teleprompter{
       padding:18px 18px 14px 18px;
       border-radius:20px;
-      background: linear-gradient(180deg, var(--card2), var(--card));
+      background: linear-gradient(180deg, var(--card2), var(--card)), radial-gradient(600px 300px at 50% 0%, var(--accent-soft), transparent);/*background: linear-gradient(180deg, var(--card2), var(--card));*/
       border: 1px solid var(--stroke);
       box-shadow: 0 16px 60px rgba(0,0,0,0.35);
       backdrop-filter: blur(10px);
@@ -790,8 +791,8 @@ const ghost = L.circleMarker([0,0], {
   radius: 10,
   stroke: false,
   fill: true,
-  fillOpacity: 0.10,
-  fillColor: "rgba(255,220,170,1)",
+  fillOpacity: 0.06, /*0.10*/
+  fillColor: "rgba(255,240,220,1)",/*fillColor: "rgba(255,220,170,1)"*/
   interactive: false
 }).addTo(map);
 
