@@ -271,7 +271,27 @@ function normalizeLang(tag) {
   return t.split("-")[0];
 }
 
-const SUPPORTED = ["en","es","hi","zh","ar","ru","de"]; // de optional for you
+/*const SUPPORTED = ["en","es","hi","zh","ar","ru","de"]; // de optional for you*/
+  // Alle unterstützten Sprachen (Basis + Ergänzungen 1–9)
+const SUPPORTED = [
+  "en", // English
+  "de", // Deutsch
+  "es", // Español
+  "fr", // Français
+  "pt", // Português (pt-BR wird auf pt normalisiert)
+  "ru", // Русский
+  "ar", // العربية
+  "hi", // हिन्दी
+  "bn", // বাংলা
+  "ur", // اردو
+  "zh", // 中文 (zh-*, zh-Hans, zh-Hant -> zh)
+  "ja", // 日本語
+  "ko", // 한국어
+  "vi", // Tiếng Việt
+  "tr", // Türkçe
+  "sw", // Kiswahili
+  "id"  // Bahasa Indonesia
+];
 
 function pickLanguage() {
   // 1) URL override – absoluter Vorrang
@@ -283,9 +303,6 @@ function pickLanguage() {
   const prefs = (navigator.languages && navigator.languages.length)
     ? navigator.languages.map(normalizeLang)
     : [normalizeLang(navigator.language || "en")];
-
-  // 2) Regionale Sanftheit: Deutsch bevorzugen, aber nur ohne URL-Override
-  /*if (prefs.includes("de")) return "de";*/
 
   // 3) Erste unterstützte Sprache aus den Preferences
   for (const lang of prefs) {
