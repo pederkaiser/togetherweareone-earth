@@ -296,6 +296,8 @@ const LANG = pickLanguage();
 const badge = document.getElementById("langBadge");
 if (badge) badge.textContent = LANG.toUpperCase();
 
+const CHAR_BASED_LANGS = ["zh", "ja", "ko"];
+
 // --- Teleprompter texts per language ---
 const TP = {
   en: [
@@ -648,7 +650,12 @@ const tpTexts = TP[LANG] || TP.en;
 // Optional: set <html lang="..."> for accessibility
 document.documentElement.lang = LANG;
 
-const WORD_MS = 240;
+//const WORD_MS = 240;
+  const WORD_MS = {
+  zh: 120,
+  ja: 130,
+  ko: 140
+}[LANG] || 240;
 const SENTENCE_PAUSE = 900;
 
 let tpIndex = 0, tpWordIdx = 0, tpTimer = null;
@@ -680,22 +687,26 @@ function playSentence(idx, auto=true){
   renderSentence(tpTexts[tpIndex]);
   updateProgress();
 
-  const words = tpTexts[tpIndex].split(/\s+/).filter(Boolean);
-  markProgress(0);
+  const isCharBased = CHAR_BASED_LANGS.includes(LANG);
 
-  tpTimer = setInterval(() => {
-    tpWordIdx++;
-    if (tpWordIdx < words.length) markProgress(tpWordIdx);
-    else {
-      clearInterval(tpTimer);
-      markProgress(words.length - 1);
-      if(auto){
-        setTimeout(() => {
-          if(tpIndex < tpTexts.length - 1) playSentence(tpIndex + 1, true);
-        }, SENTENCE_PAUSE);
-      }
+const units = isCharBased
+  ? Array.from(tpTexts[tpIndex])   // einzelne Zeichen
+  : tpTexts[tpIndex].split(/\s+/).filter(Boolean);
+ markProgress(0);
+
+tpTimer = setInterval(() => {
+  tpWordIdx++;
+  if (tpWordIdx < units.length) markProgress(tpWordIdx);
+  else {
+    clearInterval(tpTimer);
+    markProgress(units.length - 1);
+    if(auto){
+      setTimeout(() => {
+        if(tpIndex < tpTexts.length - 1) playSentence(tpIndex + 1, true);
+      }, SENTENCE_PAUSE);
     }
-  }, WORD_MS);
+  }
+}, WORD_MS);
 }
 document.getElementById("tp-prev").title =
 document.getElementById("tp-prev").ariaLabel =
