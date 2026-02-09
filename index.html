@@ -298,67 +298,145 @@ if (badge) badge.textContent = LANG.toUpperCase();
 
 // --- Teleprompter texts per language ---
 const TP = {
-  de: [
-    "Dass wir hier sind, auf diesem blauen Planeten tief im Weltall, ist ein unglaublicher Zufall.",
-    "Dieses Glück teilen wir alle.",
-    "Wir sind alle etwas Besonderes – und zugleich eins.",
-    "Als Teil dieser Gemeinschaft haben wir die Kraft, Großes für die Menschheit zu schaffen.",
-    "Lasst uns einander zeigen, dass uns dieses Gefühl verbindet."
-  ],
-
   en: [
     "That we are here, on this blue planet deep in space, is an incredible coincidence.",
     "We all share this good fortune.",
     "We are all something special — and yet one.",
-    "As part of this community, we have the power to create great things for humanity.",
+    "As part of this community, we have the power to do much good for humanity.",
     "Let us show one another that this feeling connects us."
+  ],
+
+  de: [
+    "Dass wir hier sind, auf diesem blauen Planeten tief im Weltall, ist ein unglaublicher Zufall.",
+    "Dieses Glück teilen wir alle.",
+    "Wir sind alle etwas Besonderes – und zugleich eins.",
+    "Als Teil dieser Gemeinschaft haben wir die Kraft, viel Gutes für die Menschheit zu schaffen.",
+    "Lasst uns einander zeigen, dass uns dieses Gefühl verbindet."
   ],
 
   es: [
     "Que estemos aquí, en este planeta azul en lo profundo del espacio, es una coincidencia increíble.",
     "Esta fortuna la compartimos todos.",
     "Todos somos algo especial — y, al mismo tiempo, uno.",
-    "Como parte de esta comunidad, tenemos la fuerza para crear grandes cosas para la humanidad.",
+    "Como parte de esta comunidad, tenemos la capacidad de hacer mucho bien por la humanidad.",
     "Mostrémonos unos a otros que este sentimiento nos une."
   ],
 
-  hi: [
-    "कि हम यहाँ हैं, इस नीले ग्रह पर, अंतरिक्ष की गहराइयों में — यह एक अद्भुत संयोग है।",
-    "यह सौभाग्य हम सभी साझा करते हैं।",
-    "हम सभी कुछ विशेष हैं — और फिर भी एक हैं।",
-    "इस समुदाय का हिस्सा होकर, हमारे पास मानवता के लिए महान कार्य करने की शक्ति है।",
-    "आइए एक-दूसरे को दिखाएँ कि यह भावना हमें जोड़ती है।"
+  fr: [
+    "Le fait que nous soyons ici, sur cette planète bleue au cœur de l’espace, est une incroyable coïncidence.",
+    "Nous partageons tous cette chance.",
+    "Nous sommes tous uniques — et pourtant unis.",
+    "En tant que membres de cette communauté, nous avons la force de faire beaucoup de bien pour l’humanité.",
+    "Montrons-nous les uns aux autres que ce sentiment nous relie."
   ],
 
-  zh: [
-    "我们能在这里，在浩瀚宇宙深处的这颗蓝色星球上存在，是一个不可思议的巧合。",
-    "这份幸运属于我们所有人。",
-    "我们每个人都独一无二——却又合而为一。",
-    "作为这个共同体的一部分，我们拥有为人类创造伟大事物的力量。",
-    "让我们彼此展现，这种感觉将我们连接在一起。"
-  ],
-
-  ar: [
-    "إن وجودنا هنا، على هذا الكوكب الأزرق في أعماق الكون، هو مصادفة مذهلة.",
-    "هذا الحظ نتشاركه جميعًا.",
-    "كل واحدٍ منا مميز — ومع ذلك فنحن واحد.",
-    "كجزءٍ من هذا المجتمع، نمتلك القدرة على تحقيق أشياء عظيمة للبشرية.",
-    "دعونا نُظهر لبعضنا أن هذا الشعور يربطنا."
+  pt: [
+    "O fato de estarmos aqui, neste planeta azul no profundo do espaço, é uma coincidência incrível.",
+    "Essa sorte nós todos compartilhamos.",
+    "Todos somos especiais — e, ainda assim, somos um.",
+    "Como parte desta comunidade, temos a força para fazer muito bem à humanidade.",
+    "Vamos mostrar uns aos outros que esse sentimento nos une."
   ],
 
   ru: [
     "То, что мы здесь, на этой голубой планете в глубинах космоса, — невероятная случайность.",
     "Это счастье мы разделяем все.",
     "Каждый из нас особенный — и в то же время мы едины.",
-    "Будучи частью этого сообщества, мы обладаем силой творить великое для человечества.",
+    "Будучи частью этого сообщества, мы обладаем силой делать много доброго для человечества.",
     "Давайте покажем друг другу, что это чувство объединяет нас."
+  ],
+
+  ar: [
+    "إن وجودنا هنا، على هذا الكوكب الأزرق في أعماق الكون، هو مصادفة مذهلة.",
+    "هذا الحظ نتشاركه جميعًا.",
+    "كل واحدٍ منا مميز — ومع ذلك فنحن واحد.",
+    "وبصفتنا جزءًا من هذه الجماعة، نمتلك القدرة على فعل الكثير من الخير للبشرية.",
+    "دعونا نُظهر لبعضنا أن هذا الشعور يربطنا."
+  ],
+
+  hi: [
+    "कि हम यहाँ हैं, इस नीले ग्रह पर, अंतरिक्ष की गहराइयों में — यह एक अद्भुत संयोग है।",
+    "यह सौभाग्य हम सभी साझा करते हैं।",
+    "हम सभी विशेष हैं — और फिर भी एक हैं।",
+    "इस समुदाय का हिस्सा होकर, हमारे पास मानवता के लिए बहुत अच्छा करने की शक्ति है।",
+    "आइए एक-दूसरे को दिखाएँ कि यह भावना हमें जोड़ती है।"
+  ],
+
+  bn: [
+    "এই নীল গ্রহে, মহাকাশের গভীরে আমরা এখানে আছি — এটি এক অবিশ্বাস্য কাকতালীয় ঘটনা।",
+    "এই সৌভাগ্য আমরা সবাই ভাগ করে নিয়েছি।",
+    "আমরা সবাই বিশেষ — এবং তবুও এক।",
+    "এই সম্প্রদায়ের অংশ হিসেবে, মানবজাতির জন্য অনেক ভালো করার শক্তি আমাদের আছে।",
+    "চলুন একে অপরকে দেখাই যে এই অনুভূতিই আমাদের যুক্ত করে।"
+  ],
+
+  ur: [
+    "کہ ہم یہاں ہیں، خلا کی گہرائیوں میں اس نیلے سیارے پر، ایک ناقابلِ یقین اتفاق ہے۔",
+    "یہ خوش قسمتی ہم سب میں مشترک ہے۔",
+    "ہم سب خاص ہیں — اور پھر بھی ایک ہیں۔",
+    "اس برادری کا حصہ ہونے کے ناطے، ہمارے پاس انسانیت کے لیے بہت سا اچھا کرنے کی طاقت ہے۔",
+    "آئیں ایک دوسرے کو دکھائیں کہ یہ احساس ہمیں جوڑتا ہے۔"
+  ],
+
+  zh: [
+    "我们能在这里，在浩瀚宇宙深处的这颗蓝色星球上存在，是一个不可思议的巧合。",
+    "这份幸运属于我们所有人。",
+    "我们每个人都独一无二——却又合而为一。",
+    "作为这个共同体的一部分，我们拥有为人类带来许多善意的力量。",
+    "让我们彼此展现，这种感觉将我们连接在一起。"
+  ],
+
+  ja: [
+    "この青い惑星で、広大な宇宙の中に私たちが存在していることは、信じがたい偶然です。",
+    "この幸運は私たち皆が分かち合っています。",
+    "私たちは皆特別であり、同時にひとつです。",
+    "この共同体の一員として、人類のために多くの善を生み出す力を私たちは持っています。",
+    "この感覚が私たちを結びつけていることを示しましょう。"
+  ],
+
+  ko: [
+    "이 푸른 행성에서, 광활한 우주 속에 우리가 존재한다는 것은 놀라운 우연입니다.",
+    "이 행운은 우리 모두가 함께 나누고 있습니다.",
+    "우리는 모두 특별하면서도 동시에 하나입니다.",
+    "이 공동체의 일부로서, 우리는 인류를 위해 많은 선을 이룰 수 있는 힘을 가지고 있습니다.",
+    "이 감정이 우리를 연결하고 있음을 서로에게 보여줍시다."
+  ],
+
+  vi: [
+    "Việc chúng ta ở đây, trên hành tinh xanh này giữa không gian bao la, là một sự trùng hợp kỳ diệu.",
+    "May mắn này thuộc về tất cả chúng ta.",
+    "Mỗi người đều đặc biệt — và đồng thời là một.",
+    "Là một phần của cộng đồng này, chúng ta có sức mạnh để làm nhiều điều tốt đẹp cho nhân loại.",
+    "Hãy cho nhau thấy rằng cảm xúc này kết nối chúng ta."
+  ],
+
+  tr: [
+    "Bu mavi gezegende, uzayın derinliklerinde burada olmamız inanılmaz bir rastlantıdır.",
+    "Bu şansı hepimiz paylaşıyoruz.",
+    "Hepimiz özeliz — ve yine de biriz.",
+    "Bu topluluğun bir parçası olarak, insanlık için çok fazla iyilik yapma gücüne sahibiz.",
+    "Bu duygunun bizi birbirine bağladığını birbirimize gösterelim."
+  ],
+
+  sw: [
+    "Kwamba tupo hapa, kwenye sayari hii ya buluu katikati ya anga ya mbali, ni bahati isiyo ya kawaida.",
+    "Bahati hii tunashiriki sote.",
+    "Sote ni wa kipekee — na bado ni kitu kimoja.",
+    "Kama sehemu ya jumuiya hii, tuna nguvu ya kufanya mema mengi kwa ajili ya ubinadamu.",
+    "Tuonyeshane kwamba hisia hii inatuunganisha."
+  ],
+
+  id: [
+    "Bahwa kita berada di sini, di planet biru ini jauh di dalam angkasa, adalah sebuah kebetulan yang luar biasa.",
+    "Keberuntungan ini kita semua bagikan.",
+    "Kita semua istimewa — dan sekaligus satu.",
+    "Sebagai bagian dari komunitas ini, kita memiliki kekuatan untuk melakukan banyak kebaikan bagi umat manusia.",
+    "Mari kita tunjukkan satu sama lain bahwa perasaan ini menghubungkan kita."
   ]
 };
 
   const UI = {
   en: {
-    prev: "Back",
-    next: "Next",
     world: "World view",
     card: "Generate map",
     hint: "Click on the map to place or move your light. (One light per browser.)",
@@ -371,8 +449,6 @@ const TP = {
   },
 
   de: {
-    prev: "Zurück",
-    next: "Weiter",
     world: "Weltansicht",
     card: "Karte generieren",
     hint: "Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)",
@@ -385,8 +461,6 @@ const TP = {
   },
 
   es: {
-    prev: "Atrás",
-    next: "Siguiente",
     world: "Vista mundial",
     card: "Generar mapa",
     hint: "Haz clic en el mapa para colocar o mover tu luz. (Una luz por navegador.)",
@@ -398,41 +472,47 @@ const TP = {
     status_done: "Listo."
   },
 
-  hi: {
-    prev: "पीछे",
-    next: "आगे",
-    world: "विश्व दृश्य",
-    card: "मानचित्र बनाएँ",
-    hint: "अपनी रोशनी लगाने या स्थान बदलने के लिए मानचित्र पर क्लिक करें।",
-    status_set: "आपकी रोशनी सेट है। आप इसे क्लिक करके बदल सकते हैं।",
-    status_empty: "मानचित्र पर क्लिक करके अपनी रोशनी लगाएँ।",
-    status_error_load: "रोशनियाँ लोड नहीं हो सकीं।",
-    status_error_save: "सहेजना विफल रहा।",
-    status_export: "चित्र बनाया जा रहा है…",
-    status_done: "पूर्ण।"
+  fr: {
+    world: "Vue du monde",
+    card: "Générer la carte",
+    hint: "Cliquez sur la carte pour placer ou déplacer votre lumière.",
+    status_set: "Votre lumière est placée. Vous pouvez la déplacer.",
+    status_empty: "Placez votre lumière en cliquant sur la carte.",
+    status_error_load: "Impossible de charger les lumières.",
+    status_error_save: "Échec de l’enregistrement.",
+    status_export: "Création de l’image…",
+    status_done: "Terminé."
   },
 
-  zh: {
-    prev: "返回",
-    next: "继续",
-    world: "世界视图",
-    card: "生成地图",
-    hint: "点击地图以放置或移动你的光点。（每个浏览器一个）",
-    status_set: "你的光点已设置，可以点击移动。",
-    status_empty: "点击地图放置你的光点。",
-    status_error_load: "无法加载光点。",
-    status_error_save: "保存失败。",
-    status_export: "正在生成图片…",
-    status_done: "完成。"
+  pt: {
+    world: "Visão mundial",
+    card: "Gerar mapa",
+    hint: "Clique no mapa para colocar ou mover sua luz.",
+    status_set: "Sua luz foi colocada. Você pode movê-la.",
+    status_empty: "Coloque sua luz clicando no mapa.",
+    status_error_load: "Não foi possível carregar as luzes.",
+    status_error_save: "Falha ao salvar.",
+    status_export: "Gerando imagem…",
+    status_done: "Concluído."
+  },
+
+  ru: {
+    world: "Вид мира",
+    card: "Создать карту",
+    hint: "Нажмите на карту, чтобы разместить или переместить свет.",
+    status_set: "Ваш свет установлен. Вы можете его переместить.",
+    status_empty: "Нажмите на карту, чтобы установить свет.",
+    status_error_load: "Не удалось загрузить огни.",
+    status_error_save: "Ошибка сохранения.",
+    status_export: "Создание изображения…",
+    status_done: "Готово."
   },
 
   ar: {
-    prev: "رجوع",
-    next: "التالي",
     world: "عرض العالم",
     card: "إنشاء الخريطة",
     hint: "انقر على الخريطة لوضع الضوء أو تحريكه.",
-    status_set: "تم وضع ضوئك. يمكنك تحريكه بالنقر.",
+    status_set: "تم وضع ضوئك. يمكنك تحريكه.",
     status_empty: "ضع ضوءك بالنقر على الخريطة.",
     status_error_load: "تعذر تحميل الأضواء.",
     status_error_save: "فشل الحفظ.",
@@ -440,20 +520,128 @@ const TP = {
     status_done: "تم."
   },
 
-  ru: {
-    prev: "Назад",
-    next: "Далее",
-    world: "Вид мира",
-    card: "Создать карту",
-    hint: "Нажмите на карту, чтобы разместить или переместить свет.",
-    status_set: "Ваш свет установлен. Вы можете переместить его.",
-    status_empty: "Нажмите на карту, чтобы установить свет.",
-    status_error_load: "Не удалось загрузить огни.",
-    status_error_save: "Ошибка сохранения.",
-    status_export: "Создание изображения…",
-    status_done: "Готово."
+  hi: {
+    world: "विश्व दृश्य",
+    card: "मानचित्र बनाएँ",
+    hint: "अपनी रोशनी लगाने या स्थान बदलने के लिए मानचित्र पर क्लिक करें।",
+    status_set: "आपकी रोशनी सेट है। आप इसे बदल सकते हैं।",
+    status_empty: "मानचित्र पर क्लिक करके अपनी रोशनी लगाएँ।",
+    status_error_load: "रोशनियाँ लोड नहीं हो सकीं।",
+    status_error_save: "सहेजना विफल रहा।",
+    status_export: "चित्र बनाया जा रहा है…",
+    status_done: "पूर्ण।"
+  },
+
+  bn: {
+    world: "বিশ্ব দৃশ্য",
+    card: "মানচিত্র তৈরি করুন",
+    hint: "আপনার আলো বসাতে বা সরাতে মানচিত্রে ক্লিক করুন।",
+    status_set: "আপনার আলো বসানো হয়েছে। আপনি এটি সরাতে পারেন।",
+    status_empty: "মানচিত্রে ক্লিক করে আপনার আলো বসান।",
+    status_error_load: "আলো লোড করা যায়নি।",
+    status_error_save: "সংরক্ষণ ব্যর্থ হয়েছে।",
+    status_export: "ছবি তৈরি করা হচ্ছে…",
+    status_done: "সম্পন্ন।"
+  },
+
+  ur: {
+    world: "عالمی منظر",
+    card: "نقشہ بنائیں",
+    hint: "اپنی روشنی رکھنے یا منتقل کرنے کے لیے نقشے پر کلک کریں۔",
+    status_set: "آپ کی روشنی سیٹ ہو گئی ہے۔",
+    status_empty: "نقشے پر کلک کر کے اپنی روشنی رکھیں۔",
+    status_error_load: "روشنی لوڈ نہیں ہو سکی۔",
+    status_error_save: "محفوظ کرنا ناکام رہا۔",
+    status_export: "تصویر بنائی جا رہی ہے…",
+    status_done: "مکمل۔"
+  },
+
+  zh: {
+    world: "世界视图",
+    card: "生成地图",
+    hint: "点击地图以放置或移动你的光点。",
+    status_set: "你的光点已设置，可以移动。",
+    status_empty: "点击地图放置你的光点。",
+    status_error_load: "无法加载光点。",
+    status_error_save: "保存失败。",
+    status_export: "正在生成图片…",
+    status_done: "完成。"
+  },
+
+  ja: {
+    world: "世界表示",
+    card: "地図を生成",
+    hint: "地図をクリックして光を置いたり動かしたりしてください。",
+    status_set: "光が設定されました。移動できます。",
+    status_empty: "地図をクリックして光を置いてください。",
+    status_error_load: "光を読み込めませんでした。",
+    status_error_save: "保存に失敗しました。",
+    status_export: "画像を作成中…",
+    status_done: "完了。"
+  },
+
+  ko: {
+    world: "세계 보기",
+    card: "지도 생성",
+    hint: "지도를 클릭하여 빛을 놓거나 이동하세요.",
+    status_set: "빛이 설정되었습니다. 이동할 수 있습니다.",
+    status_empty: "지도를 클릭하여 빛을 놓으세요.",
+    status_error_load: "빛을 불러오지 못했습니다.",
+    status_error_save: "저장에 실패했습니다.",
+    status_export: "이미지 생성 중…",
+    status_done: "완료."
+  },
+
+  vi: {
+    world: "Chế độ xem thế giới",
+    card: "Tạo bản đồ",
+    hint: "Nhấp vào bản đồ để đặt hoặc di chuyển ánh sáng.",
+    status_set: "Ánh sáng của bạn đã được đặt.",
+    status_empty: "Nhấp vào bản đồ để đặt ánh sáng.",
+    status_error_load: "Không thể tải ánh sáng.",
+    status_error_save: "Lưu thất bại.",
+    status_export: "Đang tạo hình ảnh…",
+    status_done: "Hoàn tất."
+  },
+
+  tr: {
+    world: "Dünya görünümü",
+    card: "Harita oluştur",
+    hint: "Işığınızı yerleştirmek veya taşımak için haritaya tıklayın.",
+    status_set: "Işığınız yerleştirildi.",
+    status_empty: "Haritaya tıklayarak ışığınızı yerleştirin.",
+    status_error_load: "Işıklar yüklenemedi.",
+    status_error_save: "Kaydetme başarısız.",
+    status_export: "Görsel oluşturuluyor…",
+    status_done: "Tamamlandı."
+  },
+
+  sw: {
+    world: "Mtazamo wa dunia",
+    card: "Tengeneza ramani",
+    hint: "Bofya ramani ili kuweka au kusogeza mwanga wako.",
+    status_set: "Mwanga wako umewekwa.",
+    status_empty: "Bofya ramani kuweka mwanga wako.",
+    status_error_load: "Imeshindikana kupakia taa.",
+    status_error_save: "Kuhifadhi kumeshindikana.",
+    status_export: "Inaunda picha…",
+    status_done: "Imekamilika."
+  },
+
+  id: {
+    world: "Tampilan dunia",
+    card: "Buat peta",
+    hint: "Klik peta untuk menempatkan atau memindahkan cahaya Anda.",
+    status_set: "Cahaya Anda telah ditempatkan.",
+    status_empty: "Klik peta untuk menempatkan cahaya Anda.",
+    status_error_load: "Tidak dapat memuat cahaya.",
+    status_error_save: "Gagal menyimpan.",
+    status_export: "Membuat gambar…",
+    status_done: "Selesai."
   }
 };
+
+const UI_TEXT = UI[LANG] || UI.en;
 
 const UI_TEXT = UI[LANG] || UI.en;
 
