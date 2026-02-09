@@ -285,7 +285,7 @@ function pickLanguage() {
     : [normalizeLang(navigator.language || "en")];
 
   // 2) Regionale Sanftheit: Deutsch bevorzugen, aber nur ohne URL-Override
-  if (prefs.includes("de")) return "de";
+  /*if (prefs.includes("de")) return "de";*/
 
   // 3) Erste unterstützte Sprache aus den Preferences
   for (const lang of prefs) {
