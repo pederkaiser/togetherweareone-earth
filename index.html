@@ -138,6 +138,13 @@
       background: linear-gradient(90deg, rgba(255,220,170,0.65), rgba(255,255,255,0.55));
       transition: width 220ms ease;
     }
+    
+    .privacy-hint{
+  margin: 8px 0 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+}
 
     /* --- Map --- */
     .mapWrap{
@@ -293,6 +300,7 @@
     </div>
 
     <p class="hint" id="hint"></p>
+    <p id="privacyHint" class="privacy-hint"></p>
     <p class="status" id="status"></p>
   </div>
 
@@ -959,6 +967,26 @@ const url  = location.origin + "/?lang=" + LANG;
     { label: "Link kopieren", action: () => navigator.clipboard.writeText(url) }
   ];
 
+    const PRIVACY_HINT = {
+  de: "Lichter sind anonym und auf etwa 10 km gerundet.",
+  en: "Lights are anonymous and rounded to about 10 km.",
+  fr: "Les lumières sont anonymes et arrondies à environ 10 km.",
+  es: "Las luces son anónimas y están redondeadas a unos 10 km.",
+  pt: "As luzes são anônimas e arredondadas para cerca de 10 km.",
+  ru: "Огни анонимны и округлены примерно до 10 км.",
+  ar: "الأضواء مجهولة الهوية ومقربة إلى حوالي 10 كم.",
+  hi: "लाइट्स गुमनाम हैं और लगभग 10 किमी तक गोल की गई हैं।",
+  bn: "আলো গুলো গোপনীয় এবং প্রায় ১০ কিমি পর্যন্ত রাউন্ড করা হয়েছে।",
+  ur: "لائٹس گمنام ہیں اور تقریباً 10 کلومیٹر تک گول کی گئی ہیں۔",
+  zh: "灯光是匿名的，并四舍五入到约10公里。",
+  ja: "ライトは匿名で、約10km単位に丸められています。",
+  ko: "빛은 익명이며 약 10km 단위로 반올림됩니다.",
+  vi: "Các ánh sáng là ẩn danh và được làm tròn khoảng 10 km.",
+  tr: "Işıklar anonimdir ve yaklaşık 10 km’ye yuvarlanır.",
+  sw: "Taa ni za siri na zimezungushwa hadi takriban km 10.",
+  id: "Cahaya bersifat anonim dan dibulatkan hingga sekitar 10 km."
+};
+
   // hier: sehr simples Prompt (oder eigenes Modal)
   const choice = prompt(
     options.map((o, i) => `${i + 1}: ${o.label}`).join("\n")
@@ -1097,6 +1125,7 @@ document.getElementById("tp-next").textContent = "→";
 document.getElementById("btnWorld").textContent = UI_TEXT.world;
 document.getElementById("btnCard").textContent = UI_TEXT.card;
 document.getElementById("hint").textContent = UI_TEXT.hint;
+document.getElementById("privacyHint").textContent =  PRIVACY_HINT[LANG] || PRIVACY_HINT.en;
 playSentence(0, true);
 
 /* -------------------------
@@ -1263,10 +1292,11 @@ async function loadMyLight(){
 }
 
 function anonymize(lat, lng) {
-  const jitter = () => (Math.random() - 0.5) * 0.05; // ~5 km
+  const GRID = 0.1; // Grad ≈ 11 km
+
   return {
-    lat: lat + jitter(),
-    lng: lng + jitter()
+    lat: Math.round(lat / GRID) * GRID,
+    lng: Math.round(lng / GRID) * GRID
   };
 }
 
@@ -1299,15 +1329,24 @@ function anonymize(lat, lng) {
 }
 /* Click: speichern, Zoom bleibt */
 map.on('click', async (e) => {
-  try{
+  try {
+    const pos = anonymize(e.latlng.lat, e.latlng.lng);
+
     const existing = await loadMyLight();
-    if(existing){
-      await sb.from('lights').update({ lat: e.latlng.lat, lng: e.latlng.lng }).eq('session', session);
+
+    if (existing) {
+      await sb
+        .from('lights')
+        .update({ lat: pos.lat, lng: pos.lng })
+        .eq('session', session);
     } else {
-      await sb.from('lights').insert({ lat: e.latlng.lat, lng: e.latlng.lng, session });
+      await sb
+        .from('lights')
+        .insert({ lat: pos.lat, lng: pos.lng, session });
     }
+
     await loadLights();
-  } catch(err){
+  } catch (err) {
     console.error(err);
     setStatus("status_error_save");
   }
