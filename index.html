@@ -88,7 +88,7 @@
       margin:0;
       padding:8px 10px 10px 10px;
       min-height:3.2em;
-      overflow-wrap:anywhere; /* wichtig für ES/FR */
+      overflow-wrap:anywhere;
       word-break: normal;
     }
 
@@ -181,8 +181,22 @@
       box-shadow: 0 16px 60px rgba(0,0,0,0.35);
       background:#0a0b10;
     }
-    #map{ width:100%; height: min(62vh, 520px); }
+
+    /* IMPORTANT: keep Leaflet ABOVE the tint overlays */
+    #map{
+      width:100%;
+      height: min(62vh, 520px);
+      position:relative;
+      z-index: 2;
+    }
     #map, #map *{ cursor: crosshair !important; }
+
+    /* Overlays BELOW Leaflet so they don't hide tiny dots */
+    .mapTint, .mapShade{
+      pointer-events:none;
+      position:absolute; inset:0;
+      z-index: 1;
+    }
 
     .leaflet-tile{
       filter:
@@ -193,15 +207,11 @@
     }
 
     .mapTint{
-      pointer-events:none;
-      position:absolute; inset:0;
       background: var(--ocean-tint);
       mix-blend-mode: multiply;
       opacity:1;
     }
     .mapShade{
-      pointer-events:none;
-      position:absolute; inset:0;
       opacity: var(--shade-opacity);
       background:
         radial-gradient(900px 420px at 50% 10%, rgba(0,0,0,0.18), rgba(0,0,0,0.86) 65%),
@@ -214,7 +224,7 @@
       position:absolute;
       left:12px; top:12px;
       display:flex; gap:10px;
-      z-index:500;
+      z-index: 3; /* above everything */
       flex-wrap:wrap;
       align-items:center;
     }
@@ -234,25 +244,33 @@
     .hud button:disabled{ opacity:0.55; cursor:default; transform:none; }
 
     .hint{
-  margin-top: 6px;
-  margin-bottom: 0;
-  text-align:center;
-  color: rgba(255,255,255,0.60);
-  font-size:14px;
-}
-    .privacy-hint{
-  margin-top: 10px;
-  text-align:center;
-  font-size:12px;
-  color: rgba(255,255,255,0.55);
-}
+      margin-top: 6px;
+      margin-bottom: 0;
+      text-align:center;
+      color: rgba(255,255,255,0.60);
+      font-size:14px;
+      transition: opacity 300ms ease;
+    }
+    .hint.hidden{
+      opacity:0;
+      pointer-events:none;
+      height:0;
+      margin:0;
+      overflow:hidden;
+    }
     .status{
-  margin-top: 4px;   /* war zu groß */
-  margin-bottom: 0;
-  text-align: center;
-  color: rgba(255,255,255,0.70);
-  font-size: 13px;
-}
+      margin-top: 4px;
+      margin-bottom: 0;
+      text-align: center;
+      color: rgba(255,255,255,0.70);
+      font-size: 13px;
+    }
+    .privacy-hint{
+      margin-top: 10px;
+      text-align:center;
+      font-size:12px;
+      color: rgba(255,255,255,0.55);
+    }
 
     @media (max-width:600px){
       .wrap{ padding:12px 10px; }
@@ -275,13 +293,6 @@
       letter-spacing: 0.08em;
       backdrop-filter: blur(8px);
     }
-    #hint{
-  transition: opacity 300ms ease;
-}
-#hint.hidden{
-  opacity:0;
-  pointer-events:none;
-}
   </style>
 </head>
 
@@ -313,12 +324,18 @@
       <div class="mapTint"></div>
       <div class="mapShade"></div>
     </div>
-    <p class="privacy-hint" id="privacyHint"></p>
-    <p class="status" id="status"></p>
+
     <p class="hint" id="hint"></p>
+    <p class="status" id="status"></p>
+    <p class="privacy-hint" id="privacyHint"></p>
   </div>
 
 <script>
+/* -------------------------
+   Globals
+-------------------------- */
+let allLightPoints = []; // IMPORTANT: global (used by export)
+
 /* -------------------------
    1) Language
 -------------------------- */
@@ -327,7 +344,6 @@ function getLangFromUrl() {
   const v = (p.get("lang") || "").trim();
   return v ? v.toLowerCase() : null;
 }
-
 function normalizeLang(tag) {
   if (!tag) return "en";
   const t = tag.toLowerCase();
@@ -337,7 +353,6 @@ function normalizeLang(tag) {
   if (t.startsWith("pt")) return "pt";
   return t.split("-")[0];
 }
-
 const SUPPORTED = ["en","de","es","fr","pt","ru","ar","hi","bn","ur","zh","ja","ko","vi","tr","sw","id"];
 
 function pickLanguage() {
@@ -348,15 +363,11 @@ function pickLanguage() {
     ? navigator.languages.map(normalizeLang)
     : [normalizeLang(navigator.language || "en")];
 
-  for (const lang of prefs) {
-    if (SUPPORTED.includes(lang)) return lang;
-  }
+  for (const lang of prefs) if (SUPPORTED.includes(lang)) return lang;
   return "en";
 }
-
 const LANG = pickLanguage();
 document.documentElement.lang = LANG;
-
 const badge = document.getElementById("langBadge");
 if (badge) badge.textContent = LANG.toUpperCase();
 
@@ -529,186 +540,21 @@ const UI = {
     copy_ok: "Link kopiert",
     share_title: "Together We Are One"
   },
-  es: {
-    world:"Vista mundial", card:"Generar mapa",
-    hint:"Haz clic en el mapa para colocar o mover tu luz. (Una luz por navegador.)",
-    status_set:"Tu luz está colocada. Puedes moverla haciendo clic.",
-    status_empty:"Coloca tu luz haciendo clic en el mapa.",
-    status_error_load:"No se pudieron cargar las luces.",
-    status_error_save:"Error al guardar.",
-    status_export:"Creando imagen…",
-    status_done:"Listo.",
-    copy_ok:"Enlace copiado",
-    share_title:"Together We Are One"
-  },
-  fr: {
-    world:"Vue du monde", card:"Générer la carte",
-    hint:"Cliquez sur la carte pour placer ou déplacer votre lumière. (Une lumière par navigateur.)",
-    status_set:"Votre lumière est placée. Vous pouvez la déplacer.",
-    status_empty:"Placez votre lumière en cliquant sur la carte.",
-    status_error_load:"Impossible de charger les lumières.",
-    status_error_save:"Échec de l’enregistrement.",
-    status_export:"Création de l’image…",
-    status_done:"Terminé.",
-    copy_ok:"Lien copié",
-    share_title:"Together We Are One"
-  },
-  pt: {
-    world:"Visão mundial", card:"Gerar mapa",
-    hint:"Clique no mapa para colocar ou mover sua luz. (Uma luz por navegador.)",
-    status_set:"Sua luz foi colocada. Você pode movê-la.",
-    status_empty:"Coloque sua luz clicando no mapa.",
-    status_error_load:"Não foi possível carregar as luzes.",
-    status_error_save:"Falha ao salvar.",
-    status_export:"Gerando imagem…",
-    status_done:"Concluído.",
-    copy_ok:"Link copiado",
-    share_title:"Together We Are One"
-  },
-  ru: {
-    world:"Вид мира", card:"Создать карту",
-    hint:"Нажмите на карту, чтобы разместить или переместить свет. (Один свет на браузер.)",
-    status_set:"Ваш свет установлен. Вы можете его переместить.",
-    status_empty:"Нажмите на карту, чтобы установить свет.",
-    status_error_load:"Не удалось загрузить огни.",
-    status_error_save:"Ошибка сохранения.",
-    status_export:"Создание изображения…",
-    status_done:"Готово.",
-    copy_ok:"Ссылка скопирована",
-    share_title:"Together We Are One"
-  },
-  ar: {
-    world:"عرض العالم", card:"إنشاء الخريطة",
-    hint:"انقر على الخريطة لوضع الضوء أو تحريكه. (ضوء واحد لكل متصفح.)",
-    status_set:"تم وضع ضوئك. يمكنك تحريكه.",
-    status_empty:"ضع ضوءك بالنقر على الخريطة.",
-    status_error_load:"تعذر تحميل الأضواء.",
-    status_error_save:"فشل الحفظ.",
-    status_export:"جارٍ إنشاء الصورة…",
-    status_done:"تم.",
-    copy_ok:"تم نسخ الرابط",
-    share_title:"Together We Are One"
-  },
-  hi: {
-    world:"विश्व दृश्य", card:"मानचित्र बनाएँ",
-    hint:"अपनी रोशनी लगाने या स्थान बदलने के लिए मानचित्र पर क्लिक करें। (प्रति ब्राउज़र एक रोशनी.)",
-    status_set:"आपकी रोशनी सेट है। आप इसे बदल सकते हैं।",
-    status_empty:"मानचित्र पर क्लिक करके अपनी रोशनी लगाएँ।",
-    status_error_load:"रोशनियाँ लोड नहीं हो सकीं।",
-    status_error_save:"सहेजना विफल रहा।",
-    status_export:"चित्र बनाया जा रहा है…",
-    status_done:"पूर्ण।",
-    copy_ok:"लिंक कॉपी हुआ",
-    share_title:"Together We Are One"
-  },
-  bn: {
-    world:"বিশ্ব দৃশ্য", card:"মানচিত্র তৈরি করুন",
-    hint:"আপনার আলো বসাতে বা সরাতে মানচিত্রে ক্লিক করুন। (প্রতি ব্রাউজারে একটি আলো.)",
-    status_set:"আপনার আলো বসানো হয়েছে। আপনি এটি সরাতে পারেন।",
-    status_empty:"মানচিত্রে ক্লিক করে আপনার আলো বসান।",
-    status_error_load:"আলো লোড করা যায়নি।",
-    status_error_save:"সংরক্ষণ ব্যর্থ হয়েছে।",
-    status_export:"ছবি তৈরি করা হচ্ছে…",
-    status_done:"সম্পন্ন।",
-    copy_ok:"লিংক কপি হয়েছে",
-    share_title:"Together We Are One"
-  },
-  ur: {
-    world:"عالمی منظر", card:"نقشہ بنائیں",
-    hint:"اپنی روشنی رکھنے یا منتقل کرنے کے لیے نقشے پر کلک کریں۔ (ہر براؤزر کے لیے ایک روشنی.)",
-    status_set:"آپ کی روشنی سیٹ ہو گئی ہے۔",
-    status_empty:"نقشے پر کلک کر کے اپنی روشنی رکھیں۔",
-    status_error_load:"روشنی لوڈ نہیں ہو سکی۔",
-    status_error_save:"محفوظ کرنا ناکام رہا۔",
-    status_export:"تصویر بنائی جا رہی ہے…",
-    status_done:"مکمل۔",
-    copy_ok:"لنک کاپی ہو گیا",
-    share_title:"Together We Are One"
-  },
-  zh: {
-    world:"世界视图", card:"生成地图",
-    hint:"点击地图以放置或移动你的光点。（每个浏览器一个光点。）",
-    status_set:"你的光点已设置，可以移动。",
-    status_empty:"点击地图放置你的光点。",
-    status_error_load:"无法加载光点。",
-    status_error_save:"保存失败。",
-    status_export:"正在生成图片…",
-    status_done:"完成。",
-    copy_ok:"链接已复制",
-    share_title:"Together We Are One"
-  },
-  ja: {
-    world:"世界表示", card:"地図を生成",
-    hint:"地図をクリックして光を置いたり動かしたりしてください。（ブラウザごとに1つ）",
-    status_set:"光が設定されました。移動できます。",
-    status_empty:"地図をクリックして光を置いてください。",
-    status_error_load:"光を読み込めませんでした。",
-    status_error_save:"保存に失敗しました。",
-    status_export:"画像を作成中…",
-    status_done:"完了。",
-    copy_ok:"リンクをコピーしました",
-    share_title:"Together We Are One"
-  },
-  ko: {
-    world:"세계 보기", card:"지도 생성",
-    hint:"지도를 클릭하여 빛을 놓거나 이동하세요. (브라우저당 1개)",
-    status_set:"빛이 설정되었습니다. 이동할 수 있습니다.",
-    status_empty:"지도를 클릭하여 빛을 놓으세요.",
-    status_error_load:"빛을 불러오지 못했습니다.",
-    status_error_save:"저장에 실패했습니다.",
-    status_export:"이미지 생성 중…",
-    status_done:"완료.",
-    copy_ok:"링크가 복사되었습니다",
-    share_title:"Together We Are One"
-  },
-  vi: {
-    world:"Chế độ xem thế giới", card:"Tạo bản đồ",
-    hint:"Nhấp vào bản đồ để đặt hoặc di chuyển ánh sáng. (Một ánh sáng mỗi trình duyệt.)",
-    status_set:"Ánh sáng của bạn đã được đặt.",
-    status_empty:"Nhấp vào bản đồ để đặt ánh sáng.",
-    status_error_load:"Không thể tải ánh sáng.",
-    status_error_save:"Lưu thất bại.",
-    status_export:"Đang tạo hình ảnh…",
-    status_done:"Hoàn tất.",
-    copy_ok:"Đã sao chép liên kết",
-    share_title:"Together We Are One"
-  },
-  tr: {
-    world:"Dünya görünümü", card:"Harita oluştur",
-    hint:"Işığınızı yerleştirmek veya taşımak için haritaya tıklayın. (Tarayıcı başına bir ışık.)",
-    status_set:"Işığınız yerleştirildi.",
-    status_empty:"Haritaya tıklayarak ışığınızı yerleştirin.",
-    status_error_load:"Işıklar yüklenemedi.",
-    status_error_save:"Kaydetme başarısız.",
-    status_export:"Görsel oluşturuluyor…",
-    status_done:"Tamamlandı.",
-    copy_ok:"Bağlantı kopyalandı",
-    share_title:"Together We Are One"
-  },
-  sw: {
-    world:"Mtazamo wa dunia", card:"Tengeneza ramani",
-    hint:"Bofya ramani ili kuweka au kusogeza mwanga wako. (Mwanga mmoja kwa kivinjari.)",
-    status_set:"Mwanga wako umewekwa.",
-    status_empty:"Bofya ramani kuweka mwanga wako.",
-    status_error_load:"Imeshindikana kupakia taa.",
-    status_error_save:"Kuhifadhi kumeshindikana.",
-    status_export:"Inaunda picha…",
-    status_done:"Imekamilika.",
-    copy_ok:"Kiungo kimenakiliwa",
-    share_title:"Together We Are One"
-  },
-  id: {
-    world:"Tampilan dunia", card:"Buat peta",
-    hint:"Klik peta untuk menempatkan atau memindahkan cahaya Anda. (Satu cahaya per browser.)",
-    status_set:"Cahaya Anda telah ditempatkan.",
-    status_empty:"Klik peta untuk menempatkan cahaya Anda.",
-    status_error_load:"Tidak dapat memuat cahaya.",
-    status_error_save:"Gagal menyimpan.",
-    status_export:"Membuat gambar…",
-    status_done:"Selesai.",
-    copy_ok:"Tautan disalin",
-    share_title:"Together We Are One"
-  }
+  es:{ world:"Vista mundial", card:"Generar mapa", hint:"Haz clic en el mapa para colocar o mover tu luz. (Una luz por navegador.)", status_set:"Tu luz está colocada. Puedes moverla haciendo clic.", status_empty:"Coloca tu luz haciendo clic en el mapa.", status_error_load:"No se pudieron cargar las luces.", status_error_save:"Error al guardar.", status_export:"Creando imagen…", status_done:"Listo.", copy_ok:"Enlace copiado", share_title:"Together We Are One" },
+  fr:{ world:"Vue du monde", card:"Générer la carte", hint:"Cliquez sur la carte pour placer ou déplacer votre lumière. (Une lumière par navigateur.)", status_set:"Votre lumière est placée. Vous pouvez la déplacer.", status_empty:"Placez votre lumière en cliquant sur la carte.", status_error_load:"Impossible de charger les lumières.", status_error_save:"Échec de l’enregistrement.", status_export:"Création de l’image…", status_done:"Terminé.", copy_ok:"Lien copié", share_title:"Together We Are One" },
+  pt:{ world:"Visão mundial", card:"Gerar mapa", hint:"Clique no mapa para colocar ou mover sua luz. (Uma luz por navegador.)", status_set:"Sua luz foi colocada. Você pode movê-la.", status_empty:"Coloque sua luz clicando no mapa.", status_error_load:"Não foi possível carregar as luzes.", status_error_save:"Falha ao salvar.", status_export:"Gerando imagem…", status_done:"Concluído.", copy_ok:"Link copiado", share_title:"Together We Are One" },
+  ru:{ world:"Вид мира", card:"Создать карту", hint:"Нажмите на карту, чтобы разместить или переместить свет. (Один свет на браузер.)", status_set:"Ваш свет установлен. Вы можете его переместить.", status_empty:"Нажмите на карту, чтобы установить свет.", status_error_load:"Не удалось загрузить огни.", status_error_save:"Ошибка сохранения.", status_export:"Создание изображения…", status_done:"Готово.", copy_ok:"Ссылка скопирована", share_title:"Together We Are One" },
+  ar:{ world:"عرض العالم", card:"إنشاء الخريطة", hint:"انقر على الخريطة لوضع الضوء أو تحريكه. (ضوء واحد لكل متصفح.)", status_set:"تم وضع ضوئك. يمكنك تحريكه.", status_empty:"ضع ضوءك بالنقر على الخريطة.", status_error_load:"تعذر تحميل الأضواء.", status_error_save:"فشل الحفظ.", status_export:"جارٍ إنشاء الصورة…", status_done:"تم.", copy_ok:"تم نسخ الرابط", share_title:"Together We Are One" },
+  hi:{ world:"विश्व दृश्य", card:"मानचित्र बनाएँ", hint:"अपनी रोशनी लगाने या स्थान बदलने के लिए मानचित्र पर क्लिक करें। (प्रति ब्राउज़र एक रोशनी.)", status_set:"आपकी रोशनी सेट है। आप इसे बदल सकते हैं।", status_empty:"मानचित्र पर क्लिक करके अपनी रोशनी लगाएँ।", status_error_load:"रोशनियाँ लोड नहीं हो सकीं।", status_error_save:"सहेजना विफल रहा।", status_export:"चित्र बनाया जा रहा है…", status_done:"पूर्ण।", copy_ok:"लिंक कॉपी हुआ", share_title:"Together We Are One" },
+  bn:{ world:"বিশ্ব দৃশ্য", card:"মানচিত্র তৈরি করুন", hint:"আপনার আলো বসাতে বা সরাতে মানচিত্রে ক্লিক করুন। (প্রতি ব্রাউজারে একটি আলো.)", status_set:"আপনার আলো বসানো হয়েছে। আপনি এটি সরাতে পারেন।", status_empty:"মানচিত্রে ক্লিক করে আপনার আলো বসান।", status_error_load:"আলো লোড করা যায়নি।", status_error_save:"সংরক্ষণ ব্যর্থ হয়েছে।", status_export:"ছবি তৈরি করা হচ্ছে…", status_done:"সম্পন্ন।", copy_ok:"লিংক কপি হয়েছে", share_title:"Together We Are One" },
+  ur:{ world:"عالمی منظر", card:"نقشہ بنائیں", hint:"اپنی روشنی رکھنے یا منتقل کرنے کے لیے نقشے پر کلک کریں۔ (ہر براؤزر کے لیے ایک روشنی.)", status_set:"آپ کی روشنی سیٹ ہو گئی ہے۔", status_empty:"نقشے پر کلک کر کے اپنی روشنی رکھیں۔", status_error_load:"روشنی لوڈ نہیں ہو سکی۔", status_error_save:"محفوظ کرنا ناکام رہا۔", status_export:"تصویر بنائی جا رہی ہے…", status_done:"مکمل۔", copy_ok:"لنک کاپی ہو گیا", share_title:"Together We Are One" },
+  zh:{ world:"世界视图", card:"生成地图", hint:"点击地图以放置或移动你的光点。（每个浏览器一个光点。）", status_set:"你的光点已设置，可以移动。", status_empty:"点击地图放置你的光点。", status_error_load:"无法加载光点。", status_error_save:"保存失败。", status_export:"正在生成图片…", status_done:"完成。", copy_ok:"链接已复制", share_title:"Together We Are One" },
+  ja:{ world:"世界表示", card:"地図を生成", hint:"地図をクリックして光を置いたり動かしたりしてください。（ブラウザごとに1つ）", status_set:"光が設定されました。移動できます。", status_empty:"地図をクリックして光を置いてください。", status_error_load:"光を読み込めませんでした。", status_error_save:"保存に失敗しました。", status_export:"画像を作成中…", status_done:"完了。", copy_ok:"リンクをコピーしました", share_title:"Together We Are One" },
+  ko:{ world:"세계 보기", card:"지도 생성", hint:"지도를 클릭하여 빛을 놓거나 이동하세요. (브라우저당 1개)", status_set:"빛이 설정되었습니다. 이동할 수 있습니다.", status_empty:"지도를 클릭하여 빛을 놓으세요.", status_error_load:"빛을 불러오지 못했습니다.", status_error_save:"저장에 실패했습니다.", status_export:"이미지 생성 중…", status_done:"완료.", copy_ok:"링크가 복사되었습니다", share_title:"Together We Are One" },
+  vi:{ world:"Chế độ xem thế giới", card:"Tạo bản đồ", hint:"Nhấp vào bản đồ để đặt hoặc di chuyển ánh sáng. (Một ánh sáng mỗi trình duyệt.)", status_set:"Ánh sáng của bạn đã được đặt.", status_empty:"Nhấp vào bản đồ để đặt ánh sáng.", status_error_load:"Không thể tải ánh sáng.", status_error_save:"Lưu thất bại.", status_export:"Đang tạo hình ảnh…", status_done:"Hoàn tất.", copy_ok:"Đã sao chép liên kết", share_title:"Together We Are One" },
+  tr:{ world:"Dünya görünümü", card:"Harita oluştur", hint:"Işığınızı yerleştirmek veya taşımak için haritaya tıklayın. (Tarayıcı başına bir ışık.)", status_set:"Işığınız yerleştirildi.", status_empty:"Haritaya tıklayarak ışığınızı yerleştirin.", status_error_load:"Işıklar yüklenemedi.", status_error_save:"Kaydetme başarısız.", status_export:"Görsel oluşturuluyor…", status_done:"Tamamlandı.", copy_ok:"Bağlantı kopyalandı", share_title:"Together We Are One" },
+  sw:{ world:"Mtazamo wa dunia", card:"Tengeneza ramani", hint:"Bofya ramani ili kuweka au kusogeza mwanga wako. (Mwanga mmoja kwa kivinjari.)", status_set:"Mwanga wako umewekwa.", status_empty:"Bofya ramani kuweka mwanga wako.", status_error_load:"Imeshindikana kupakia taa.", status_error_save:"Kuhifadhi kumeshindikana.", status_export:"Inaunda picha…", status_done:"Imekamilika.", copy_ok:"Kiungo kimenakiliwa", share_title:"Together We Are One" },
+  id:{ world:"Tampilan dunia", card:"Buat peta", hint:"Klik peta untuk menempatkan atau memindahkan cahaya Anda. (Satu cahaya per browser.)", status_set:"Cahaya Anda telah ditempatkan.", status_empty:"Klik peta untuk menempatkan cahaya Anda.", status_error_load:"Tidak dapat memuat cahaya.", status_error_save:"Gagal menyimpan.", status_export:"Membuat gambar…", status_done:"Selesai.", copy_ok:"Tautan disalin", share_title:"Together We Are One" }
 };
 
 const PRIVACY_HINT = {
@@ -792,10 +638,8 @@ const tpTextEl = document.getElementById("tp-text");
 const tpBarEl  = document.getElementById("tp-bar");
 
 function renderSentence(sentence){
-  // Split into tokens incl spaces + newline markers
   const s = sentence.replace(/\n/g, " \n ");
   const tokens = s.split(/(\s+)/);
-
   tpTextEl.innerHTML = tokens.map(t => {
     if (t === "\n") return `<span class="tp-br"></span>`;
     if (/^\s+$/.test(t)) return `<span class="tp-space">${t}</span>`;
@@ -804,23 +648,15 @@ function renderSentence(sentence){
 }
 
 function getUnits(sentence){
-  if (CHAR_BASED_LANGS.includes(LANG)) {
-    // characters excluding whitespace/newlines
-    return Array.from(sentence.replace(/\s+/g, ""));
-  }
-  // words excluding newline markers
-  return sentence
-    .replace(/\n/g, " ")
-    .split(/\s+/)
-    .filter(Boolean);
+  if (CHAR_BASED_LANGS.includes(LANG)) return Array.from(sentence.replace(/\s+/g, ""));
+  return sentence.replace(/\n/g, " ").split(/\s+/).filter(Boolean);
 }
 
 function markProgress(activeIdx){
   const wordSpans = Array.from(tpTextEl.querySelectorAll(".tp-word"));
   wordSpans.forEach((w, i) => {
     w.classList.remove("active");
-    if (i <= activeIdx) w.classList.add("done");
-    else w.classList.remove("done");
+    if (i <= activeIdx) w.classList.add("done"); else w.classList.remove("done");
   });
   if (wordSpans[activeIdx]) wordSpans[activeIdx].classList.add("active");
 }
@@ -881,12 +717,10 @@ document.getElementById("shareMain").addEventListener("click", async () => {
     return;
   }
 
-  // Fallback: copy link
   try {
     await navigator.clipboard.writeText(url);
     alert(UI_TEXT.copy_ok || "Link copied");
   } catch (_) {
-    // last resort
     prompt("", url);
   }
 });
@@ -901,7 +735,6 @@ function uuidv4() {
   });
 }
 
-// Your Supabase project URL/key (as provided earlier)
 const SUPABASE_URL = 'https://gwfqdukbcgtcefqtgnbl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3ZnFkdWtiY2d0Y2VmcXRnbmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MDU2MTMsImV4cCI6MjA4NDI4MTYxM30.ePyuDxhVoc1ol5lQ8JbRKaybgpEPozBR3Wf71oFj040';
 
@@ -912,7 +745,7 @@ if(!session) { session = uuidv4(); localStorage.setItem('myLightSession', sessio
 
 const statusEl = document.getElementById("status");
 function setStatus(key){
-  statusEl.textContent = UI_TEXT[key] || key || "";
+  statusEl.textContent = UI_TEXT[key] || "";
 }
 
 /* -------------------------
@@ -954,7 +787,7 @@ const canvasRenderer = L.canvas({ padding: 0.5 });
 const lightsLayer = L.layerGroup().addTo(map);
 
 function anonymize(lat, lng) {
-  const GRID = 0.1; // ~11km
+  const GRID = 0.1; // ~10-11km
   return {
     lat: Math.round(lat / GRID) * GRID,
     lng: Math.round(lng / GRID) * GRID
@@ -978,7 +811,7 @@ const ghostCore = L.circleMarker([0,0], {
   stroke: false,
   fill: true,
   fillOpacity: 0.75,
-  fillColor: "rgba(255,250,245,1)",
+  fillColor: "rgba(255,255,255,1)",
   interactive: false
 }).addTo(map);
 
@@ -999,22 +832,22 @@ function addLight(latlng, isMine=false){
   if(!isMine){
     L.circleMarker(latlng, {
       renderer: canvasRenderer,
-      radius: 1.35,
+      radius: 1.5,
       stroke: false,
       fill: true,
-      fillOpacity: 0.70,
-      fillColor: "rgba(255,250,245,1)",
+      fillOpacity: 0.85,
+      fillColor: "rgba(255,255,255,1)",
       interactive: false
     }).addTo(lightsLayer);
     return;
   }
   L.circleMarker(latlng, {
     renderer: canvasRenderer,
-    radius: 2.6,
+    radius: 3.0,
     stroke: false,
     fill: true,
-    fillOpacity: 0.95,
-    fillColor: "rgba(255,250,245,1)",
+    fillOpacity: 1.0,
+    fillColor: "rgba(255,255,255,1)",
     interactive: true
   }).addTo(lightsLayer);
 }
@@ -1029,25 +862,25 @@ async function loadLights(){
     const { data, error } = await sb.from('lights').select('*');
     if(error) throw error;
 
+    allLightPoints = data || [];
     lightsLayer.clearLayers();
 
     let mine = null;
-    for(const row of (data || [])){
+    for(const row of allLightPoints){
       const isMine = (row.session === session);
       if(isMine) mine = row;
       addLight([row.lat, row.lng], isMine);
     }
-    allLightPoints = data || [];
 
     const hintEl = document.getElementById("hint");
+    if (mine) {
+      hintEl.classList.add("hidden");
+      setStatus("status_set");
+    } else {
+      hintEl.classList.remove("hidden");
+      setStatus("status_empty");
+    }
 
-if (mine) {
-  hintEl.classList.add("hidden");
-  setStatus("status_set");
-} else {
-  hintEl.classList.remove("hidden");
-  setStatus("status_empty");
-}
   } catch(e){
     console.error(e);
     setStatus("status_error_load");
@@ -1076,15 +909,14 @@ document.getElementById("btnWorld").addEventListener("click", () => {
 });
 
 /* -------------------------
-   7) Export (robust)
+   7) Export (aligned): SVG points only during export
 -------------------------- */
 function waitMoveEnd(m) {
   return new Promise(resolve => {
     let done = false;
-    const finish = () => { if(done) return; done = true; m.off("moveend", finish); resolve(); };
+    const finish = () => { if(done) return; done = true; resolve(); };
     m.once("moveend", finish);
-    // fallback in case moveend doesn't fire for same view
-    setTimeout(finish, 350);
+    setTimeout(finish, 450);
   });
 }
 
@@ -1094,83 +926,73 @@ function waitTiles(layer){
     const finish = () => {
       if(done) return;
       done = true;
-      layer.off('load', finish);
       requestAnimationFrame(() => requestAnimationFrame(resolve));
     };
     layer.once('load', finish);
-    setTimeout(finish, 1600);
+    setTimeout(finish, 1800);
   });
 }
 
-  function buildExportLightsLayer(points, mySession) {
+function buildExportLightsLayer(points, mySession) {
   const exportLayer = L.layerGroup();
-
   for (const row of (points || [])) {
     const isMine = row.session === mySession;
-
     L.circleMarker([row.lat, row.lng], {
-      // KEIN renderer: canvasRenderer -> so nutzt Leaflet SVG
-      radius: isMine ? 2.6 : 1.35,
+      // no renderer -> SVG (leaflet-image gets it right)
+      radius: isMine ? 3.0 : 1.5,
       stroke: false,
       fill: true,
-      fillOpacity: isMine ? 0.95 : 0.70,
-      fillColor: "rgba(255,250,245,1)",
+      fillOpacity: isMine ? 1.0 : 0.85,
+      fillColor: "rgba(255,255,255,1)",
       interactive: false
     }).addTo(exportLayer);
   }
-
   return exportLayer;
 }
 
 const btnCard = document.getElementById("btnCard");
-
 btnCard.addEventListener("click", async () => {
   let exportLights = null;
 
-  try {
+  try{
     btnCard.disabled = true;
     setStatus("status_export");
 
-    // 1) Weltansicht (stabil)
+    // 1) Stable world view (no animation)
     map.fitBounds(WORLD_BOUNDS, { padding: [20,20], animate: false });
     await waitMoveEnd(map);
 
-    // 2) Tiles ohne Labels
-    if (map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
+    // 2) Switch to no-label tiles
+    if(map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
     baseNoLabels.addTo(map);
     await waitTiles(baseNoLabels);
 
-    // 3) WICHTIG: Canvas-Lichter für Export entfernen (sonst verrutschen sie)
-    //    und stattdessen SVG-Lichter temporär hinzufügen
+    // 3) Remove live canvas points and add SVG export points
     if (map.hasLayer(lightsLayer)) map.removeLayer(lightsLayer);
 
-    // Ghost ausblenden (optional, aber sauber)
+    // Hide ghost for export
     ghost.setStyle({ fillOpacity: 0.0 });
     ghostCore.setStyle({ fillOpacity: 0.0 });
 
     exportLights = buildExportLightsLayer(allLightPoints, session);
     exportLights.addTo(map);
 
-    // 4) Ein Frame warten, damit SVG sicher gerendert ist
+    // wait a frame for SVG render
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-    // 5) Screenshot
-    leafletImage(map, function(err, canvas) {
-      // Restore always
-      try {
-        if (exportLights) map.removeLayer(exportLights);
-        if (!map.hasLayer(lightsLayer)) lightsLayer.addTo(map);
+    leafletImage(map, function(err, canvas){
+      // restore
+      try{
+        if(exportLights) map.removeLayer(exportLights);
+        if(!map.hasLayer(lightsLayer)) lightsLayer.addTo(map);
 
         map.removeLayer(baseNoLabels);
         baseWithLabels.addTo(map);
-
-        // Ghost wieder aktiv (Mouseover steuert später sowieso)
-        // (wir setzen hier nur auf "aus" – sobald Maus rein geht, geht es wieder an)
-      } catch(e) {}
+      }catch(e){}
 
       btnCard.disabled = false;
 
-      if (err) {
+      if(err){
         console.error(err);
         setStatus("status_error_save");
         return;
@@ -1184,33 +1006,19 @@ btnCard.addEventListener("click", async () => {
       setStatus("status_done");
     });
 
-  } catch (e) {
+  }catch(e){
     console.error(e);
-
-    try {
-      if (exportLights) map.removeLayer(exportLights);
-      if (!map.hasLayer(lightsLayer)) lightsLayer.addTo(map);
-      if (map.hasLayer(baseNoLabels)) map.removeLayer(baseNoLabels);
-      if (!map.hasLayer(baseWithLabels)) baseWithLabels.addTo(map);
-    } catch(_) {}
-
+    try{
+      if(exportLights) map.removeLayer(exportLights);
+      if(!map.hasLayer(lightsLayer)) lightsLayer.addTo(map);
+      if(map.hasLayer(baseNoLabels)) map.removeLayer(baseNoLabels);
+      if(!map.hasLayer(baseWithLabels)) baseWithLabels.addTo(map);
+    }catch(_){}
     btnCard.disabled = false;
     setStatus("status_error_save");
   }
 });
 
-function waitForFullRedraw(map) {
-  return new Promise(resolve => {
-    map.invalidateSize(true);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(resolve);
-    });
-  });
-}
-
-  let allLightPoints = [];
-  
-  
 /* -------------------------
    8) Start
 -------------------------- */
