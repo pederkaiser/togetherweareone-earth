@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Together We Are One</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- 
+
   <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -15,39 +15,38 @@
   <!-- PNG Export helper -->
   <script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
 
-<!-- Open Graph / WhatsApp / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="Together We Are One">
-<meta property="og:description" content="A quiet place. You set a light and see that many feel the same.">
-<meta property="og:image" content="https://togetherweareone.earth/TogetherWeAreOneEarth.jpeg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="1200">
-<meta property="og:url" content="https://togetherweareone.earth/">
+  <!-- Open Graph / WhatsApp / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Together We Are One">
+  <meta property="og:description" content="A quiet place. You set a light and see that many feel the same.">
+  <meta property="og:image" content="https://togetherweareone.earth/TogetherWeAreOneEarth.jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="1200">
+  <meta property="og:url" content="https://togetherweareone.earth/">
 
-<!-- Twitter (optional, aber gut) -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://togetherweareone.earth/TogetherWeAreOneEarth.jpeg">
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://togetherweareone.earth/TogetherWeAreOneEarth.jpeg">
 
   <style>
-   :root{
-  --bg0:#0c0e13;
-  --bg1:#14172a;
+    :root{
+      --bg0:#0b0d12;
+      --bg1:#121526;
+      --card: rgba(255,255,255,0.06);
+      --card2: rgba(255,255,255,0.08);
+      --stroke: rgba(255,255,255,0.10);
 
-  --card: rgba(255,255,255,0.06);
-  --card2: rgba(255,255,255,0.08);
-  --stroke: rgba(255,255,255,0.10);
+      --ghost: rgba(255,255,255,0.22);
+      --text: rgba(255,255,255,0.92);
+      --warm: rgba(255,220,170,0.95);
 
-  --text: rgba(245,247,250,0.90);
-  --ghost: rgba(255,255,255,0.22);
-  --warm: rgba(255,214,160,0.92);
+      --map-brightness: 0.64;
+      --map-contrast: 1.25;
+      --map-saturate: 0.0;
+      --shade-opacity: 0.90;
+      --ocean-tint: rgba(0,0,0,0.38);
+    }
 
-  --map-brightness: 0.66;
-  --map-contrast: 1.20;
-  --map-saturate: 0.0;
-
-  --shade-opacity: 0.88;
-  --ocean-tint: rgba(8,12,24,0.34);
-}
     html,body { height:100%; }
     body{
       margin:0;
@@ -75,31 +74,32 @@
     .teleprompter{
       padding:18px 18px 14px 18px;
       border-radius:20px;
-      background: linear-gradient(180deg, var(--card2), var(--card)), radial-gradient(600px 300px at 50% 0%, var(--accent-soft), transparent);/*background: linear-gradient(180deg, var(--card2), var(--card));*/
+      background: linear-gradient(180deg, var(--card2), var(--card));
       border: 1px solid var(--stroke);
       box-shadow: 0 16px 60px rgba(0,0,0,0.35);
       backdrop-filter: blur(10px);
     }
-    .tp-text{
-      display: block;
-      max-width: 28em;
-      margin: 0 auto;
 
-      text-align: center;
+    .tp-text{
+      text-align:center;
       font-size: clamp(18px, 2.5vw, 30px);
-      line-height: 1.45;
-      padding: 8px 10px 10px 10px;
-      overflow-wrap: normal;
-      word-break: keep-all;
+      line-height:1.45;
+      letter-spacing:0.2px;
+      margin:0;
+      padding:8px 10px 10px 10px;
+      min-height:3.2em;
+      overflow-wrap:anywhere; /* wichtig für ES/FR */
+      word-break: normal;
     }
+
     .tp-word{
       color: var(--ghost);
       transition: color 160ms ease, filter 160ms ease;
       white-space: normal;
-      overflow-wrap: normal;
-      word-break: keep-all;
+      overflow-wrap:anywhere;
+      word-break: normal;
     }
-    .tp-space{ white-space: normal;}
+    .tp-space{ white-space: pre; }
     .tp-word.done{
       color: var(--warm);
       filter: drop-shadow(0 0 12px rgba(255,210,140,0.18));
@@ -107,6 +107,10 @@
     .tp-word.active{
       color: rgba(255,245,235,0.98);
       filter: drop-shadow(0 0 18px rgba(255,210,140,0.26));
+    }
+    .tp-br{
+      display:block;
+      height: 0.35em;
     }
 
     .tp-meta{
@@ -138,13 +142,35 @@
       background: linear-gradient(90deg, rgba(255,220,170,0.65), rgba(255,255,255,0.55));
       transition: width 220ms ease;
     }
-    
-    .privacy-hint{
-  margin: 8px 0 0 0;
-  text-align: center;
-  font-size: 12px;
-  color: rgba(255,255,255,0.55);
-}
+
+    /* Single Share Button */
+    .share-single{
+      display:flex;
+      justify-content:center;
+      margin-top:12px;
+    }
+    .share-main-btn{
+      padding:14px 22px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.92);
+      font-size:14px;
+      font-weight:500;
+      letter-spacing:0.02em;
+      cursor:pointer;
+      backdrop-filter: blur(10px);
+      transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+    }
+    .share-main-btn:hover{
+      background: rgba(255,255,255,0.14);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    }
+    .share-main-btn:active{
+      transform: translateY(0);
+      box-shadow:none;
+    }
 
     /* --- Map --- */
     .mapWrap{
@@ -156,12 +182,8 @@
       background:#0a0b10;
     }
     #map{ width:100%; height: min(62vh, 520px); }
-    #map, #map *{
-  cursor: crosshair !important;   /* oder: default, cellhair, move */
-}
+    #map, #map *{ cursor: crosshair !important; }
 
-
-    /* On-screen: Graustufe + dunkler */
     .leaflet-tile{
       filter:
         grayscale(1)
@@ -209,8 +231,10 @@
       letter-spacing:0.2px;
     }
     .hud button:hover{ background: rgba(0,0,0,0.32); transform: translateY(-1px); }
+    .hud button:disabled{ opacity:0.55; cursor:default; transform:none; }
 
     .hint{ text-align:center; margin:4px 0 0 0; color: rgba(255,255,255,0.60); font-size:14px; }
+    .privacy-hint{ text-align:center; margin:8px 0 0 0; color: rgba(255,255,255,0.55); font-size:12px; }
     .status{ text-align:center; color: rgba(255,255,255,0.70); font-size:13px; margin-top:6px; }
 
     @media (max-width:600px){
@@ -218,80 +242,47 @@
       .teleprompter{ padding:14px 12px 12px 12px; border-radius:18px; }
       .tp-btn{ width:40px; height:40px; border-radius:14px; }
       #map{ height:52vh; }
-      
     }
+
     #langBadge{
-  position: fixed;
-  left: 10px;
-  top: 10px;
-  z-index: 9999;
-  padding: 6px 8px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(0,0,0,0.25);
-  color: rgba(255,255,255,0.85);
-  font: 600 12px/1 ui-sans-serif, system-ui, -apple-system, "Inter", "Segoe UI", Arial, sans-serif;
-  letter-spacing: 0.08em;
-  backdrop-filter: blur(8px);
-}
-    .share-single{
-  display:flex;
-  justify-content:center;
-  margin:26px 0 10px 0;
-}
-
-.share-main-btn{
-  padding:14px 22px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,0.18);
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.92);
-  font-size:14px;
-  font-weight:500;
-  letter-spacing:0.02em;
-  cursor:pointer;
-  backdrop-filter: blur(10px);
-  transition: 
-    background 160ms ease,
-    transform 160ms ease,
-    box-shadow 160ms ease;
-}
-
-.share-main-btn:hover{
-  background: rgba(255,255,255,0.14);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-}
-
-.share-main-btn:active{
-  transform: translateY(0);
-  box-shadow: none;
-}
+      position: fixed;
+      left: 10px;
+      top: 10px;
+      z-index: 9999;
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.25);
+      color: rgba(255,255,255,0.85);
+      font: 600 12px/1 ui-sans-serif, system-ui, -apple-system, "Inter", "Segoe UI", Arial, sans-serif;
+      letter-spacing: 0.08em;
+      backdrop-filter: blur(8px);
+    }
   </style>
 </head>
 
 <body>
   <div id="langBadge" aria-label="Language"></div>
-  <div class="wrap">
 
+  <div class="wrap">
     <div class="teleprompter" aria-label="Text">
       <p class="tp-text" id="tp-text"></p>
+
       <div class="tp-meta">
-        <button class="tp-btn" id="tp-prev" title="Zurück" aria-label="Zurück">←</button>
+        <button class="tp-btn" id="tp-prev" title="Previous" aria-label="Previous">←</button>
         <div class="tp-progress"><div class="tp-progress-bar" id="tp-bar"></div></div>
-        <button class="tp-btn" id="tp-next" title="Weiter" aria-label="Weiter">→</button>
+        <button class="tp-btn" id="tp-next" title="Next" aria-label="Next">→</button>
       </div>
-     <div class="share-single">
-  <button id="shareMain" class="share-main-btn">
-    <span class="label"></span>
-  </button>
-</div>
+
+      <div class="share-single">
+        <button id="shareMain" class="share-main-btn" type="button"></button>
+      </div>
     </div>
 
     <div class="mapWrap" id="mapWrap">
       <div class="hud">
-        <button id="btnWorld" title="Ein Erdball (ohne Wrap / ohne doppelte Kontinente)">Weltansicht</button>
-        <button id="btnCard" title="Screenshot vom Erdball (Graustufe, dunkel, mit Lichtern)">Karte generieren</button>
+        <button id="btnWorld" type="button"></button>
+        <button id="btnCard" type="button"></button>
       </div>
 
       <div id="map"></div>
@@ -300,15 +291,14 @@
     </div>
 
     <p class="hint" id="hint"></p>
-    <p id="privacyHint" class="privacy-hint"></p>
+    <p class="privacy-hint" id="privacyHint"></p>
     <p class="status" id="status"></p>
   </div>
 
 <script>
 /* -------------------------
-   1) PROMPTER (unverändert, mit Zeilenumbruch)
+   1) Language
 -------------------------- */
-// --- Language selection (URL override ?lang=xx, otherwise browser) ---
 function getLangFromUrl() {
   const p = new URLSearchParams(location.search);
   const v = (p.get("lang") || "").trim();
@@ -318,67 +308,38 @@ function getLangFromUrl() {
 function normalizeLang(tag) {
   if (!tag) return "en";
   const t = tag.toLowerCase();
-
-  // Chinese script handling
   if (t.startsWith("zh")) return "zh";
-
-  // Map "in" to "id" (old code), "iw" to "he" etc.
   if (t.startsWith("in")) return "id";
   if (t.startsWith("iw")) return "he";
-
-  // Use primary subtag: "de-de" -> "de"
+  if (t.startsWith("pt")) return "pt";
   return t.split("-")[0];
 }
 
-/*const SUPPORTED = ["en","es","hi","zh","ar","ru","de"]; // de optional for you*/
-  // Alle unterstützten Sprachen (Basis + Ergänzungen 1–9)
-const SUPPORTED = [
-  "en", // English
-  "de", // Deutsch
-  "es", // Español
-  "fr", // Français
-  "pt", // Português (pt-BR wird auf pt normalisiert)
-  "ru", // Русский
-  "ar", // العربية
-  "hi", // हिन्दी
-  "bn", // বাংলা
-  "ur", // اردو
-  "zh", // 中文 (zh-*, zh-Hans, zh-Hant -> zh)
-  "ja", // 日本語
-  "ko", // 한국어
-  "vi", // Tiếng Việt
-  "tr", // Türkçe
-  "sw", // Kiswahili
-  "id"  // Bahasa Indonesia
-];
+const SUPPORTED = ["en","de","es","fr","pt","ru","ar","hi","bn","ur","zh","ja","ko","vi","tr","sw","id"];
 
 function pickLanguage() {
-  // 1) URL override – absoluter Vorrang
   const urlLang = normalizeLang(getLangFromUrl());
-  if (urlLang && SUPPORTED.includes(urlLang)) {
-    return urlLang;
-  }
+  if (urlLang && SUPPORTED.includes(urlLang)) return urlLang;
 
   const prefs = (navigator.languages && navigator.languages.length)
     ? navigator.languages.map(normalizeLang)
     : [normalizeLang(navigator.language || "en")];
 
-  // 3) Erste unterstützte Sprache aus den Preferences
   for (const lang of prefs) {
     if (SUPPORTED.includes(lang)) return lang;
   }
-
-  // 4) Fallback
   return "en";
 }
 
 const LANG = pickLanguage();
+document.documentElement.lang = LANG;
+
 const badge = document.getElementById("langBadge");
 if (badge) badge.textContent = LANG.toUpperCase();
 
-const CHAR_BASED_LANGS = ["zh", "ja", "ko"];
-
-// --- Teleprompter texts per language ---
+/* -------------------------
+   2) Texts
+-------------------------- */
 const TP = {
   de: [
     "Wir denken fast nie daran.",
@@ -388,7 +349,6 @@ const TP = {
     "Das macht uns alle besonders.\nUnd es verbindet uns.",
     "Hier kannst du ein Licht setzen.\nUnd sehen,\ndass viele dasselbe fühlen."
   ],
-
   en: [
     "We almost never think about it.",
     "Our lives\non this small blue planet in space.",
@@ -397,7 +357,6 @@ const TP = {
     "That makes us all special.\nAnd it connects us.",
     "Here you can place a light.\nAnd see\nthat many feel the same."
   ],
-
   es: [
     "Casi nunca pensamos en ello.",
     "Nuestra vida\nen esta pequeña esfera azul en el espacio.",
@@ -406,7 +365,6 @@ const TP = {
     "Eso nos hace especiales a todos.\nY nos conecta.",
     "Aquí puedes colocar una luz.\nY ver\nque muchos sienten lo mismo."
   ],
-
   fr: [
     "Nous n’y pensons presque jamais.",
     "À notre vie\nsur cette petite planète bleue dans l’espace.",
@@ -415,7 +373,6 @@ const TP = {
     "Cela nous rend tous particuliers.\nEt nous relie.",
     "Ici, tu peux placer une lumière.\nEt voir\nque beaucoup ressentent la même chose."
   ],
-
   pt: [
     "Quase nunca pensamos nisso.",
     "Na nossa vida\nneste pequeno planeta azul no espaço.",
@@ -424,7 +381,6 @@ const TP = {
     "Isso nos torna especiais.\nE nos conecta.",
     "Aqui você pode colocar uma luz.\nE ver\nque muitos sentem o mesmo."
   ],
-
   ru: [
     "Мы почти никогда об этом не думаем.",
     "О нашей жизни\nна этой маленькой голубой планете в космосе.",
@@ -433,7 +389,6 @@ const TP = {
     "Это делает нас всех особенными.\nИ соединяет нас.",
     "Здесь ты можешь зажечь свет.\nИ увидеть,\nчто многие чувствуют то же самое."
   ],
-
   ar: [
     "نادرًا ما نفكر في ذلك.",
     "في حياتنا\nعلى هذا الكوكب الأزرق الصغير في الفضاء.",
@@ -442,7 +397,6 @@ const TP = {
     "هذا يجعلنا جميعًا مميزين.\nويربطنا.",
     "هنا يمكنك أن تضع نورًا.\nوترى\nأن كثيرين يشعرون بالشيء نفسه."
   ],
-
   hi: [
     "हम लगभग कभी इसके बारे में नहीं सोचते।",
     "अपने जीवन के बारे में\nइस छोटे से नीले ग्रह पर।",
@@ -451,7 +405,6 @@ const TP = {
     "यह हम सभी को खास बनाता है।\nऔर हमें जोड़ता है।",
     "यहाँ आप एक रोशनी रख सकते हैं।\nऔर देख सकते हैं\nकि बहुत से लोग वही महसूस करते हैं।"
   ],
-
   bn: [
     "আমরা প্রায় কখনোই এটা নিয়ে ভাবি না।",
     "আমাদের জীবন\nএই ছোট নীল গ্রহে।",
@@ -460,7 +413,6 @@ const TP = {
     "এটি আমাদের সবাইকে বিশেষ করে তোলে।\nএবং আমাদের যুক্ত করে।",
     "এখানে তুমি একটি আলো বসাতে পারো।\nএবং দেখতে পারো\nযে অনেকেই একই অনুভব করে।"
   ],
-
   ur: [
     "ہم تقریباً کبھی اس کے بارے میں نہیں سوچتے۔",
     "اپنی زندگی کے بارے میں\nاس چھوٹے سے نیلے سیارے پر۔",
@@ -469,7 +421,6 @@ const TP = {
     "یہ ہم سب کو خاص بناتا ہے۔\nاور ہمیں جوڑتا ہے۔",
     "یہاں آپ ایک روشنی رکھ سکتے ہیں۔\nاور دیکھ سکتے ہیں\nکہ بہت سے لوگ یہی محسوس کرتے ہیں۔"
   ],
-
   zh: [
     "我们几乎从不去想这些。",
     "关于我们的生活\n在这颗小小的蓝色星球上。",
@@ -478,7 +429,6 @@ const TP = {
     "这让我们每个人都很特别。\n也将我们连接在一起。",
     "在这里，你可以点亮一盏灯。\n并看到\n有许多人有着同样的感受。"
   ],
-
   ja: [
     "私たちはほとんど考えません。",
     "この小さな青い惑星での\n私たちの暮らしについて。",
@@ -487,7 +437,6 @@ const TP = {
     "それは私たち皆を特別にし、\n私たちをつなぎます。",
     "ここで光を置くことができます。\nそして\n多くの人が同じように\n感じていることが見えます。"
   ],
-
   ko: [
     "우리는 거의 생각하지 않습니다.",
     "이 작은 푸른 행성에서의\n우리의 삶에 대해.",
@@ -496,7 +445,6 @@ const TP = {
     "그것은 우리 모두를 특별하게 만들고,\n우리를 연결합니다.",
     "여기에서 빛을 놓을 수 있습니다.\n그리고\n많은 이들이 같은 감정을\n느끼고 있음을 볼 수 있습니다."
   ],
-
   vi: [
     "Chúng ta hầu như không bao giờ nghĩ đến điều đó.",
     "Về cuộc sống của mình\ntrên hành tinh xanh nhỏ bé này.",
@@ -505,7 +453,6 @@ const TP = {
     "Điều đó khiến tất cả chúng ta trở nên đặc biệt.\nVà kết nối chúng ta.",
     "Tại đây, bạn có thể đặt một ánh sáng.\nVà thấy\nrằng nhiều người cảm nhận điều tương tự."
   ],
-
   tr: [
     "Bunu neredeyse hiç düşünmeyiz.",
     "Bu küçük mavi gezegendeki\nhayatımızı.",
@@ -514,7 +461,6 @@ const TP = {
     "Bu hepimizi özel kılar.\nVe birbirimize bağlar.",
     "Burada bir ışık bırakabilirsin.\nVe görebilirsin\nki birçok kişi aynı şeyi hissediyor."
   ],
-
   sw: [
     "Karibu hatufikirii kuhusu hilo.",
     "Kuhusu maisha yetu\nkwenye sayari hii ndogo ya buluu.",
@@ -523,7 +469,6 @@ const TP = {
     "Hilo hutufanya sote tuwe wa pekee.\nNa hutunganisha.",
     "Hapa unaweza kuweka mwanga.\nNa kuona\nkwamba wengi wanahisi vivyo hivyo."
   ],
-
   id: [
     "Kita hampir tidak pernah memikirkannya.",
     "Tentang kehidupan kita\ndi planet biru kecil ini.",
@@ -534,218 +479,234 @@ const TP = {
   ]
 };
 
-  const UI = {
+const UI = {
   en: {
     world: "World view",
     card: "Generate map",
     hint: "Click on the map to place or move your light. (One light per browser.)",
     status_set: "Your light is set. You can move it by clicking on the map.",
     status_empty: "Place your light by clicking on the map.",
-    status_error_load: "Could not load lights.",
-    status_error_save: "Saving failed.",
+    status_error_load: "Could not load lights. Check Supabase URL/Key and table/policies.",
+    status_error_save: "Saving failed. Check Supabase policies (RLS).",
     status_export: "Creating image…",
-    status_done: "Done."
+    status_done: "Done.",
+    copy_ok: "Link copied",
+    share_title: "Together We Are One"
   },
-
   de: {
     world: "Weltansicht",
     card: "Karte generieren",
     hint: "Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Nur ein Licht pro Browser.)",
     status_set: "Dein Licht ist gesetzt. Du kannst es durch Klicken verschieben.",
     status_empty: "Setze dein Licht mit einem Klick auf die Karte.",
-    status_error_load: "Konnte Lichter nicht laden.",
-    status_error_save: "Speichern fehlgeschlagen.",
+    status_error_load: "Konnte Lichter nicht laden. Prüfe Supabase URL/Key und Tabelle/Policies.",
+    status_error_save: "Speichern fehlgeschlagen. Prüfe Supabase-Policies (RLS).",
     status_export: "Erzeuge Bild…",
-    status_done: "Fertig."
+    status_done: "Fertig.",
+    copy_ok: "Link kopiert",
+    share_title: "Together We Are One"
   },
-
   es: {
-    world: "Vista mundial",
-    card: "Generar mapa",
-    hint: "Haz clic en el mapa para colocar o mover tu luz. (Una luz por navegador.)",
-    status_set: "Tu luz está colocada. Puedes moverla haciendo clic.",
-    status_empty: "Coloca tu luz haciendo clic en el mapa.",
-    status_error_load: "No se pudieron cargar las luces.",
-    status_error_save: "Error al guardar.",
-    status_export: "Creando imagen…",
-    status_done: "Listo."
+    world:"Vista mundial", card:"Generar mapa",
+    hint:"Haz clic en el mapa para colocar o mover tu luz. (Una luz por navegador.)",
+    status_set:"Tu luz está colocada. Puedes moverla haciendo clic.",
+    status_empty:"Coloca tu luz haciendo clic en el mapa.",
+    status_error_load:"No se pudieron cargar las luces.",
+    status_error_save:"Error al guardar.",
+    status_export:"Creando imagen…",
+    status_done:"Listo.",
+    copy_ok:"Enlace copiado",
+    share_title:"Together We Are One"
   },
-
   fr: {
-    world: "Vue du monde",
-    card: "Générer la carte",
-    hint: "Cliquez sur la carte pour placer ou déplacer votre lumière.",
-    status_set: "Votre lumière est placée. Vous pouvez la déplacer.",
-    status_empty: "Placez votre lumière en cliquant sur la carte.",
-    status_error_load: "Impossible de charger les lumières.",
-    status_error_save: "Échec de l’enregistrement.",
-    status_export: "Création de l’image…",
-    status_done: "Terminé."
+    world:"Vue du monde", card:"Générer la carte",
+    hint:"Cliquez sur la carte pour placer ou déplacer votre lumière. (Une lumière par navigateur.)",
+    status_set:"Votre lumière est placée. Vous pouvez la déplacer.",
+    status_empty:"Placez votre lumière en cliquant sur la carte.",
+    status_error_load:"Impossible de charger les lumières.",
+    status_error_save:"Échec de l’enregistrement.",
+    status_export:"Création de l’image…",
+    status_done:"Terminé.",
+    copy_ok:"Lien copié",
+    share_title:"Together We Are One"
   },
-
   pt: {
-    world: "Visão mundial",
-    card: "Gerar mapa",
-    hint: "Clique no mapa para colocar ou mover sua luz.",
-    status_set: "Sua luz foi colocada. Você pode movê-la.",
-    status_empty: "Coloque sua luz clicando no mapa.",
-    status_error_load: "Não foi possível carregar as luzes.",
-    status_error_save: "Falha ao salvar.",
-    status_export: "Gerando imagem…",
-    status_done: "Concluído."
+    world:"Visão mundial", card:"Gerar mapa",
+    hint:"Clique no mapa para colocar ou mover sua luz. (Uma luz por navegador.)",
+    status_set:"Sua luz foi colocada. Você pode movê-la.",
+    status_empty:"Coloque sua luz clicando no mapa.",
+    status_error_load:"Não foi possível carregar as luzes.",
+    status_error_save:"Falha ao salvar.",
+    status_export:"Gerando imagem…",
+    status_done:"Concluído.",
+    copy_ok:"Link copiado",
+    share_title:"Together We Are One"
   },
-
   ru: {
-    world: "Вид мира",
-    card: "Создать карту",
-    hint: "Нажмите на карту, чтобы разместить или переместить свет.",
-    status_set: "Ваш свет установлен. Вы можете его переместить.",
-    status_empty: "Нажмите на карту, чтобы установить свет.",
-    status_error_load: "Не удалось загрузить огни.",
-    status_error_save: "Ошибка сохранения.",
-    status_export: "Создание изображения…",
-    status_done: "Готово."
+    world:"Вид мира", card:"Создать карту",
+    hint:"Нажмите на карту, чтобы разместить или переместить свет. (Один свет на браузер.)",
+    status_set:"Ваш свет установлен. Вы можете его переместить.",
+    status_empty:"Нажмите на карту, чтобы установить свет.",
+    status_error_load:"Не удалось загрузить огни.",
+    status_error_save:"Ошибка сохранения.",
+    status_export:"Создание изображения…",
+    status_done:"Готово.",
+    copy_ok:"Ссылка скопирована",
+    share_title:"Together We Are One"
   },
-
   ar: {
-    world: "عرض العالم",
-    card: "إنشاء الخريطة",
-    hint: "انقر على الخريطة لوضع الضوء أو تحريكه.",
-    status_set: "تم وضع ضوئك. يمكنك تحريكه.",
-    status_empty: "ضع ضوءك بالنقر على الخريطة.",
-    status_error_load: "تعذر تحميل الأضواء.",
-    status_error_save: "فشل الحفظ.",
-    status_export: "جارٍ إنشاء الصورة…",
-    status_done: "تم."
+    world:"عرض العالم", card:"إنشاء الخريطة",
+    hint:"انقر على الخريطة لوضع الضوء أو تحريكه. (ضوء واحد لكل متصفح.)",
+    status_set:"تم وضع ضوئك. يمكنك تحريكه.",
+    status_empty:"ضع ضوءك بالنقر على الخريطة.",
+    status_error_load:"تعذر تحميل الأضواء.",
+    status_error_save:"فشل الحفظ.",
+    status_export:"جارٍ إنشاء الصورة…",
+    status_done:"تم.",
+    copy_ok:"تم نسخ الرابط",
+    share_title:"Together We Are One"
   },
-
   hi: {
-    world: "विश्व दृश्य",
-    card: "मानचित्र बनाएँ",
-    hint: "अपनी रोशनी लगाने या स्थान बदलने के लिए मानचित्र पर क्लिक करें।",
-    status_set: "आपकी रोशनी सेट है। आप इसे बदल सकते हैं।",
-    status_empty: "मानचित्र पर क्लिक करके अपनी रोशनी लगाएँ।",
-    status_error_load: "रोशनियाँ लोड नहीं हो सकीं।",
-    status_error_save: "सहेजना विफल रहा।",
-    status_export: "चित्र बनाया जा रहा है…",
-    status_done: "पूर्ण।"
+    world:"विश्व दृश्य", card:"मानचित्र बनाएँ",
+    hint:"अपनी रोशनी लगाने या स्थान बदलने के लिए मानचित्र पर क्लिक करें। (प्रति ब्राउज़र एक रोशनी.)",
+    status_set:"आपकी रोशनी सेट है। आप इसे बदल सकते हैं।",
+    status_empty:"मानचित्र पर क्लिक करके अपनी रोशनी लगाएँ।",
+    status_error_load:"रोशनियाँ लोड नहीं हो सकीं।",
+    status_error_save:"सहेजना विफल रहा।",
+    status_export:"चित्र बनाया जा रहा है…",
+    status_done:"पूर्ण।",
+    copy_ok:"लिंक कॉपी हुआ",
+    share_title:"Together We Are One"
   },
-
   bn: {
-    world: "বিশ্ব দৃশ্য",
-    card: "মানচিত্র তৈরি করুন",
-    hint: "আপনার আলো বসাতে বা সরাতে মানচিত্রে ক্লিক করুন।",
-    status_set: "আপনার আলো বসানো হয়েছে। আপনি এটি সরাতে পারেন।",
-    status_empty: "মানচিত্রে ক্লিক করে আপনার আলো বসান।",
-    status_error_load: "আলো লোড করা যায়নি।",
-    status_error_save: "সংরক্ষণ ব্যর্থ হয়েছে।",
-    status_export: "ছবি তৈরি করা হচ্ছে…",
-    status_done: "সম্পন্ন।"
+    world:"বিশ্ব দৃশ্য", card:"মানচিত্র তৈরি করুন",
+    hint:"আপনার আলো বসাতে বা সরাতে মানচিত্রে ক্লিক করুন। (প্রতি ব্রাউজারে একটি আলো.)",
+    status_set:"আপনার আলো বসানো হয়েছে। আপনি এটি সরাতে পারেন।",
+    status_empty:"মানচিত্রে ক্লিক করে আপনার আলো বসান।",
+    status_error_load:"আলো লোড করা যায়নি।",
+    status_error_save:"সংরক্ষণ ব্যর্থ হয়েছে।",
+    status_export:"ছবি তৈরি করা হচ্ছে…",
+    status_done:"সম্পন্ন।",
+    copy_ok:"লিংক কপি হয়েছে",
+    share_title:"Together We Are One"
   },
-
   ur: {
-    world: "عالمی منظر",
-    card: "نقشہ بنائیں",
-    hint: "اپنی روشنی رکھنے یا منتقل کرنے کے لیے نقشے پر کلک کریں۔",
-    status_set: "آپ کی روشنی سیٹ ہو گئی ہے۔",
-    status_empty: "نقشے پر کلک کر کے اپنی روشنی رکھیں۔",
-    status_error_load: "روشنی لوڈ نہیں ہو سکی۔",
-    status_error_save: "محفوظ کرنا ناکام رہا۔",
-    status_export: "تصویر بنائی جا رہی ہے…",
-    status_done: "مکمل۔"
+    world:"عالمی منظر", card:"نقشہ بنائیں",
+    hint:"اپنی روشنی رکھنے یا منتقل کرنے کے لیے نقشے پر کلک کریں۔ (ہر براؤزر کے لیے ایک روشنی.)",
+    status_set:"آپ کی روشنی سیٹ ہو گئی ہے۔",
+    status_empty:"نقشے پر کلک کر کے اپنی روشنی رکھیں۔",
+    status_error_load:"روشنی لوڈ نہیں ہو سکی۔",
+    status_error_save:"محفوظ کرنا ناکام رہا۔",
+    status_export:"تصویر بنائی جا رہی ہے…",
+    status_done:"مکمل۔",
+    copy_ok:"لنک کاپی ہو گیا",
+    share_title:"Together We Are One"
   },
-
   zh: {
-    world: "世界视图",
-    card: "生成地图",
-    hint: "点击地图以放置或移动你的光点。",
-    status_set: "你的光点已设置，可以移动。",
-    status_empty: "点击地图放置你的光点。",
-    status_error_load: "无法加载光点。",
-    status_error_save: "保存失败。",
-    status_export: "正在生成图片…",
-    status_done: "完成。"
+    world:"世界视图", card:"生成地图",
+    hint:"点击地图以放置或移动你的光点。（每个浏览器一个光点。）",
+    status_set:"你的光点已设置，可以移动。",
+    status_empty:"点击地图放置你的光点。",
+    status_error_load:"无法加载光点。",
+    status_error_save:"保存失败。",
+    status_export:"正在生成图片…",
+    status_done:"完成。",
+    copy_ok:"链接已复制",
+    share_title:"Together We Are One"
   },
-
   ja: {
-    world: "世界表示",
-    card: "地図を生成",
-    hint: "地図をクリックして光を置いたり動かしたりしてください。",
-    status_set: "光が設定されました。移動できます。",
-    status_empty: "地図をクリックして光を置いてください。",
-    status_error_load: "光を読み込めませんでした。",
-    status_error_save: "保存に失敗しました。",
-    status_export: "画像を作成中…",
-    status_done: "完了。"
+    world:"世界表示", card:"地図を生成",
+    hint:"地図をクリックして光を置いたり動かしたりしてください。（ブラウザごとに1つ）",
+    status_set:"光が設定されました。移動できます。",
+    status_empty:"地図をクリックして光を置いてください。",
+    status_error_load:"光を読み込めませんでした。",
+    status_error_save:"保存に失敗しました。",
+    status_export:"画像を作成中…",
+    status_done:"完了。",
+    copy_ok:"リンクをコピーしました",
+    share_title:"Together We Are One"
   },
-
   ko: {
-    world: "세계 보기",
-    card: "지도 생성",
-    hint: "지도를 클릭하여 빛을 놓거나 이동하세요.",
-    status_set: "빛이 설정되었습니다. 이동할 수 있습니다.",
-    status_empty: "지도를 클릭하여 빛을 놓으세요.",
-    status_error_load: "빛을 불러오지 못했습니다.",
-    status_error_save: "저장에 실패했습니다.",
-    status_export: "이미지 생성 중…",
-    status_done: "완료."
+    world:"세계 보기", card:"지도 생성",
+    hint:"지도를 클릭하여 빛을 놓거나 이동하세요. (브라우저당 1개)",
+    status_set:"빛이 설정되었습니다. 이동할 수 있습니다.",
+    status_empty:"지도를 클릭하여 빛을 놓으세요.",
+    status_error_load:"빛을 불러오지 못했습니다.",
+    status_error_save:"저장에 실패했습니다.",
+    status_export:"이미지 생성 중…",
+    status_done:"완료.",
+    copy_ok:"링크가 복사되었습니다",
+    share_title:"Together We Are One"
   },
-
   vi: {
-    world: "Chế độ xem thế giới",
-    card: "Tạo bản đồ",
-    hint: "Nhấp vào bản đồ để đặt hoặc di chuyển ánh sáng.",
-    status_set: "Ánh sáng của bạn đã được đặt.",
-    status_empty: "Nhấp vào bản đồ để đặt ánh sáng.",
-    status_error_load: "Không thể tải ánh sáng.",
-    status_error_save: "Lưu thất bại.",
-    status_export: "Đang tạo hình ảnh…",
-    status_done: "Hoàn tất."
+    world:"Chế độ xem thế giới", card:"Tạo bản đồ",
+    hint:"Nhấp vào bản đồ để đặt hoặc di chuyển ánh sáng. (Một ánh sáng mỗi trình duyệt.)",
+    status_set:"Ánh sáng của bạn đã được đặt.",
+    status_empty:"Nhấp vào bản đồ để đặt ánh sáng.",
+    status_error_load:"Không thể tải ánh sáng.",
+    status_error_save:"Lưu thất bại.",
+    status_export:"Đang tạo hình ảnh…",
+    status_done:"Hoàn tất.",
+    copy_ok:"Đã sao chép liên kết",
+    share_title:"Together We Are One"
   },
-
   tr: {
-    world: "Dünya görünümü",
-    card: "Harita oluştur",
-    hint: "Işığınızı yerleştirmek veya taşımak için haritaya tıklayın.",
-    status_set: "Işığınız yerleştirildi.",
-    status_empty: "Haritaya tıklayarak ışığınızı yerleştirin.",
-    status_error_load: "Işıklar yüklenemedi.",
-    status_error_save: "Kaydetme başarısız.",
-    status_export: "Görsel oluşturuluyor…",
-    status_done: "Tamamlandı."
+    world:"Dünya görünümü", card:"Harita oluştur",
+    hint:"Işığınızı yerleştirmek veya taşımak için haritaya tıklayın. (Tarayıcı başına bir ışık.)",
+    status_set:"Işığınız yerleştirildi.",
+    status_empty:"Haritaya tıklayarak ışığınızı yerleştirin.",
+    status_error_load:"Işıklar yüklenemedi.",
+    status_error_save:"Kaydetme başarısız.",
+    status_export:"Görsel oluşturuluyor…",
+    status_done:"Tamamlandı.",
+    copy_ok:"Bağlantı kopyalandı",
+    share_title:"Together We Are One"
   },
-
   sw: {
-    world: "Mtazamo wa dunia",
-    card: "Tengeneza ramani",
-    hint: "Bofya ramani ili kuweka au kusogeza mwanga wako.",
-    status_set: "Mwanga wako umewekwa.",
-    status_empty: "Bofya ramani kuweka mwanga wako.",
-    status_error_load: "Imeshindikana kupakia taa.",
-    status_error_save: "Kuhifadhi kumeshindikana.",
-    status_export: "Inaunda picha…",
-    status_done: "Imekamilika."
+    world:"Mtazamo wa dunia", card:"Tengeneza ramani",
+    hint:"Bofya ramani ili kuweka au kusogeza mwanga wako. (Mwanga mmoja kwa kivinjari.)",
+    status_set:"Mwanga wako umewekwa.",
+    status_empty:"Bofya ramani kuweka mwanga wako.",
+    status_error_load:"Imeshindikana kupakia taa.",
+    status_error_save:"Kuhifadhi kumeshindikana.",
+    status_export:"Inaunda picha…",
+    status_done:"Imekamilika.",
+    copy_ok:"Kiungo kimenakiliwa",
+    share_title:"Together We Are One"
   },
-
   id: {
-    world: "Tampilan dunia",
-    card: "Buat peta",
-    hint: "Klik peta untuk menempatkan atau memindahkan cahaya Anda.",
-    status_set: "Cahaya Anda telah ditempatkan.",
-    status_empty: "Klik peta untuk menempatkan cahaya Anda.",
-    status_error_load: "Tidak dapat memuat cahaya.",
-    status_error_save: "Gagal menyimpan.",
-    status_export: "Membuat gambar…",
-    status_done: "Selesai."
+    world:"Tampilan dunia", card:"Buat peta",
+    hint:"Klik peta untuk menempatkan atau memindahkan cahaya Anda. (Satu cahaya per browser.)",
+    status_set:"Cahaya Anda telah ditempatkan.",
+    status_empty:"Klik peta untuk menempatkan cahaya Anda.",
+    status_error_load:"Tidak dapat memuat cahaya.",
+    status_error_save:"Gagal menyimpan.",
+    status_export:"Membuat gambar…",
+    status_done:"Selesai.",
+    copy_ok:"Tautan disalin",
+    share_title:"Together We Are One"
   }
 };
 
-  const UI_TEXT = UI[LANG] || UI.en;
-
-const tpTexts = TP[LANG] || TP.en;
-
-// Optional: set <html lang="..."> for accessibility
-document.documentElement.lang = LANG;
+const PRIVACY_HINT = {
+  de: "Lichter sind anonym und auf etwa 10 km gerundet.",
+  en: "Lights are anonymous and rounded to about 10 km.",
+  fr: "Les lumières sont anonymes et arrondies à environ 10 km.",
+  es: "Las luces son anónimas y están redondeadas a unos 10 km.",
+  pt: "As luzes são anônimas e arredondadas para cerca de 10 km.",
+  ru: "Огни анонимны и округлены примерно до 10 км.",
+  ar: "الأضواء مجهولة الهوية ومقربة إلى حوالي 10 كم.",
+  hi: "लाइट्स गुमनाम हैं और लगभग 10 किमी तक गोल की गई हैं।",
+  bn: "আলো গুলো গোপনীয় এবং প্রায় ১০ কিমি পর্যন্ত রাউন্ড করা হয়েছে।",
+  ur: "لائٹس گمنام ہیں اور تقریباً 10 کلومیٹر تک گول کی گئی ہیں۔",
+  zh: "灯光是匿名的，并四舍五入到约10公里。",
+  ja: "ライトは匿名で、約10km単位に丸められています。",
+  ko: "빛은 익명이며 약 10km 단위로 반올림됩니다.",
+  vi: "Các ánh sáng là ẩn danh và được làm tròn khoảng 10 km.",
+  tr: "Işıklar anonimdir ve yaklaşık 10 km’ye yuvarlanır.",
+  sw: "Taa ni za siri na zimezungushwa hadi takriban km 10.",
+  id: "Cahaya bersifat anonim dan dibulatkan hingga sekitar 10 km."
+};
 
 const SHARE_MAIN_LABEL = {
   de: "Mit einer Freundin oder einem Freund teilen",
@@ -767,149 +728,7 @@ const SHARE_MAIN_LABEL = {
   id: "Bagikan dengan seorang teman"
 };
 
-document.querySelector("#shareMain .label").textContent =
-  SHARE_MAIN_LABEL[LANG] || SHARE_MAIN_LABEL.en;
-  
-  const SHARE_LABELS = {
-  de: {
-    whatsapp: "WhatsApp",
-    signal: "Signal",
-    telegram: "Telegram",
-    facebook: "Facebook",
-    copy: "Link kopieren",
-    native: "teilen"
-  },
-  en: {
-    whatsapp: "WhatsApp",
-    signal: "Signal",
-    telegram: "Telegram",
-    facebook: "Facebook",
-    copy: "Copy link",
-    native: "Share"
-  },
-  fr: {
-    whatsapp: "WhatsApp",
-    signal: "Signal",
-    telegram: "Telegram",
-    facebook: "Facebook",
-    copy: "Copier le lien", 
-    native: "Partager"
-  },
-  es: {
-    whatsapp: "WhatsApp",
-    signal: "Signal",
-    telegram: "Telegram",
-    facebook: "Facebook",
-    copy: "Copiar enlace", 
-    native: "Compartir"
-  },
-  pt: {
-    whatsapp: "WhatsApp",
-    signal: "Signal",
-    telegram: "Telegram",
-    facebook: "Facebook",
-    copy: "Copiar link", 
-    native: "Compartilhar"
-  },
-  ru: {
-    whatsapp: "WhatsApp",
-    signal: "Signal",
-    telegram: "Telegram",
-    facebook: "Facebook",
-    copy: "Скопировать ссылку",
-    native: "Поделиться"
-  },
-  ar: {
-    whatsapp: "واتساب",
-    signal: "سيغنال",
-    telegram: "تيليغرام",
-    facebook: "فيسبوك",
-    copy: "نسخ الرابط", 
-    native: "مشاركة"
-  },
-  hi: {
-    whatsapp: "व्हाट्सएप",
-    signal: "सिग्नल",
-    telegram: "टेलीग्राम",
-    facebook: "फ़ेसबुक",
-    copy: "लिंक कॉपी करें", 
-    native: "साझा करें"
-  },
-  bn: {
-    whatsapp: "হোয়াটসঅ্যাপ",
-    signal: "সিগন্যাল",
-    telegram: "টেলিগ্রাম",
-    facebook: "ফেসবুক",
-    copy: "লিংক কপি করুন", 
-    native: "শেয়ার করুন"
-  },
-  ur: {
-    whatsapp: "واٹس ایپ",
-    signal: "سگنل",
-    telegram: "ٹیلیگرام",
-    facebook: "فیس بک",
-    copy: "لنک کاپی کریں", 
-    native: "شیئر کریں"
-  },
-  zh: {
-    whatsapp: "WhatsApp",
-    signal: "Signal",
-    telegram: "Telegram",
-    facebook: "Facebook",
-    copy: "复制链接", 
-    native: "分享"
-  },
-  ja: {
-    whatsapp: "WhatsApp",
-    signal: "Signal",
-    telegram: "Telegram",
-    facebook: "Facebook",
-    copy: "リンクをコピー", 
-    native: "共有"
-  },
-  ko: {
-    whatsapp: "WhatsApp",
-    signal: "Signal",
-    telegram: "Telegram",
-    facebook: "Facebook",
-    copy: "링크 복사", 
-    native: "공유"
-  },
-  vi: {
-    whatsapp: "WhatsApp",
-    signal: "Signal",
-    telegram: "Telegram",
-    facebook: "Facebook",
-    copy: "Sao chép liên kết", 
-    native: "Chia sẻ"
-  },
-  tr: {
-    whatsapp: "WhatsApp",
-    signal: "Signal",
-    telegram: "Telegram",
-    facebook: "Facebook",
-    copy: "Bağlantıyı kopyala", 
-    native: "Paylaş"
-  },
-  sw: {
-    whatsapp: "WhatsApp",
-    signal: "Signal",
-    telegram: "Telegram",
-    facebook: "Facebook",
-    copy: "Nakili kiungo", 
-    native: "Shiriki"
-  },
-  id: {
-    whatsapp: "WhatsApp",
-    signal: "Signal",
-    telegram: "Telegram",
-    facebook: "Facebook",
-    copy: "Salin tautan", 
-    native: "Bagikan"
-  }
-};
-  
-  const SHARE_TEXT = {
+const SHARE_TEXT = {
   de: "Eine stille Seite. Man setzt ein Licht und sieht, dass viele dasselbe fühlen.",
   en: "A quiet place. You set a light and see that many feel the same.",
   es: "Un lugar tranquilo. Pones una luz y ves que muchos sienten lo mismo.",
@@ -928,208 +747,129 @@ document.querySelector("#shareMain .label").textContent =
   sw: "Mahali tulivu. Unaweka mwanga na kuona kwamba wengi wanahisi vivyo hivyo.",
   id: "Tempat yang tenang. Kamu menempatkan sebuah cahaya dan melihat bahwa banyak yang merasakan hal yang sama."
 };
-  const SHARE_URL = location.origin + "/?lang=" + LANG;
 
- const text = SHARE_TEXT[LANG] || SHARE_TEXT.en;
-const url  = location.origin + "/?lang=" + LANG;
+const UI_TEXT = UI[LANG] || UI.en;
+const tpTexts = TP[LANG] || TP.en;
 
-  document.getElementById("shareMain").addEventListener("click", async () => {
-  const text = SHARE_TEXT[LANG] || SHARE_TEXT.en;
-  const url  = location.origin + "/?lang=" + LANG;
+document.getElementById("btnWorld").textContent = UI_TEXT.world;
+document.getElementById("btnCard").textContent  = UI_TEXT.card;
+document.getElementById("hint").textContent     = UI_TEXT.hint;
+document.getElementById("privacyHint").textContent = PRIVACY_HINT[LANG] || PRIVACY_HINT.en;
+document.getElementById("shareMain").textContent = SHARE_MAIN_LABEL[LANG] || SHARE_MAIN_LABEL.en;
 
-  // 1) Native Share (iOS, Android, moderne Browser)
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: "Together We Are One",
-        text: text,
-        url: url
-      });
-      return;
-    } catch (e) {
-      // User cancelled → silently ignore
-      return;
-    }
-  }
-
-  // 2) Fallback: einfaches Auswahl-Menü
-  openShareModal(text, url);
-});
-
-  function openShareModal(text, url) {
-  const payload = encodeURIComponent(text + "\n" + url);
-
-  const options = [
-    { label: "WhatsApp", action: () => window.open(`https://wa.me/?text=${payload}`) },
-    { label: "Signal", action: () => window.open(`https://signal.me/#text=${payload}`) },
-    { label: "Telegram", action: () => window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`) },
-    { label: "Facebook", action: () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`) },
-    { label: "Link kopieren", action: () => navigator.clipboard.writeText(url) }
-  ];
-
-    const PRIVACY_HINT = {
-  de: "Lichter sind anonym und auf etwa 10 km gerundet.",
-  en: "Lights are anonymous and rounded to about 10 km.",
-  fr: "Les lumières sont anonymes et arrondies à environ 10 km.",
-  es: "Las luces son anónimas y están redondeadas a unos 10 km.",
-  pt: "As luzes são anônimas e arredondadas para cerca de 10 km.",
-  ru: "Огни анонимны и округлены примерно до 10 км.",
-  ar: "الأضواء مجهولة الهوية ومقربة إلى حوالي 10 كم.",
-  hi: "लाइट्स गुमनाम हैं और लगभग 10 किमी तक गोल की गई हैं।",
-  bn: "আলো গুলো গোপনীয় এবং প্রায় ১০ কিমি পর্যন্ত রাউন্ড করা হয়েছে।",
-  ur: "لائٹس گمنام ہیں اور تقریباً 10 کلومیٹر تک گول کی گئی ہیں۔",
-  zh: "灯光是匿名的，并四舍五入到约10公里。",
-  ja: "ライトは匿名で、約10km単位に丸められています。",
-  ko: "빛은 익명이며 약 10km 단위로 반올림됩니다.",
-  vi: "Các ánh sáng là ẩn danh và được làm tròn khoảng 10 km.",
-  tr: "Işıklar anonimdir ve yaklaşık 10 km’ye yuvarlanır.",
-  sw: "Taa ni za siri na zimezungushwa hadi takriban km 10.",
-  id: "Cahaya bersifat anonim dan dibulatkan hingga sekitar 10 km."
-};
-
-  // hier: sehr simples Prompt (oder eigenes Modal)
-  const choice = prompt(
-    options.map((o, i) => `${i + 1}: ${o.label}`).join("\n")
-  );
-
-  const idx = parseInt(choice, 10) - 1;
-  if (options[idx]) options[idx].action();
-}
-
-document.querySelectorAll(".share-btn").forEach(btn => {
-  btn.addEventListener("click", async () => {
-    const type = btn.dataset.share;
-    const text = SHARE_TEXT[LANG] || SHARE_TEXT.en;
-    const url  = location.origin + "/?lang=" + LANG;
-
-    // 1) iOS / Native Share Sheet
-    if (type === "native" && navigator.share) {
-      try {
-        await navigator.share({
-          title: "Together We Are One",
-          text: text,
-          url: url
-        });
-      } catch (err) {
-        // User cancelled – silently ignore
-      }
-      return;
-    }
-
-    // 2) Fallbacks (bestehende Buttons)
-    const payload = encodeURIComponent(text + "\n" + url);
-
-    if (type === "whatsapp") {
-      window.open(`https://wa.me/?text=${payload}`, "_blank");
-    }
-    if (type === "signal") {
-      window.open(`https://signal.me/#text=${payload}`, "_blank");
-    }
-    if (type === "telegram") {
-      window.open(
-        `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
-        "_blank"
-      );
-    }
-    if (type === "facebook") {
-      window.open(
-        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
-        "_blank"
-      );
-    }
-    if (type === "copy") {
-      navigator.clipboard.writeText(url);
-      alert(
-        LANG === "de" ? "Link kopiert"
-        : LANG === "fr" ? "Lien copié"
-        : LANG === "es" ? "Enlace copiado"
-        : "Link copied"
-      );
-    }
-  });
-});
-
-//const WORD_MS = 240;
-  const WORD_MS = {
-  zh: 120,
-  ja: 130,
-  ko: 140
-}[LANG] || 240;
+/* -------------------------
+   3) Teleprompter (word-by-word + line breaks)
+-------------------------- */
+const CHAR_BASED_LANGS = ["zh","ja","ko"];
+const WORD_MS = (CHAR_BASED_LANGS.includes(LANG) ? 190 : 240);
 const SENTENCE_PAUSE = 900;
 
-let tpIndex = 0, tpWordIdx = 0, tpTimer = null;
+let tpIndex = 0, tpUnitIdx = 0, tpTimer = null;
 const tpTextEl = document.getElementById("tp-text");
 const tpBarEl  = document.getElementById("tp-bar");
 
 function renderSentence(sentence){
-  const tokens = sentence.split(/(\s+)/);
+  // Split into tokens incl spaces + newline markers
+  const s = sentence.replace(/\n/g, " \n ");
+  const tokens = s.split(/(\s+)/);
+
   tpTextEl.innerHTML = tokens.map(t => {
+    if (t === "\n") return `<span class="tp-br"></span>`;
     if (/^\s+$/.test(t)) return `<span class="tp-space">${t}</span>`;
     return `<span class="tp-word">${t}</span>`;
   }).join("");
 }
-function markProgress(activeWordIdx){
+
+function getUnits(sentence){
+  if (CHAR_BASED_LANGS.includes(LANG)) {
+    // characters excluding whitespace/newlines
+    return Array.from(sentence.replace(/\s+/g, ""));
+  }
+  // words excluding newline markers
+  return sentence
+    .replace(/\n/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function markProgress(activeIdx){
   const wordSpans = Array.from(tpTextEl.querySelectorAll(".tp-word"));
   wordSpans.forEach((w, i) => {
     w.classList.remove("active");
-    if (i <= activeWordIdx) w.classList.add("done");
+    if (i <= activeIdx) w.classList.add("done");
     else w.classList.remove("done");
   });
-  if (wordSpans[activeWordIdx]) wordSpans[activeWordIdx].classList.add("active");
+  if (wordSpans[activeIdx]) wordSpans[activeIdx].classList.add("active");
 }
+
 function updateProgress(){
   tpBarEl.style.width = `${100 * (tpIndex + 1) / tpTexts.length}%`;
 }
+
 function playSentence(idx, auto=true){
   clearInterval(tpTimer);
-  tpIndex = idx; tpWordIdx = 0;
+  tpIndex = idx;
+  tpUnitIdx = 0;
+
   renderSentence(tpTexts[tpIndex]);
   updateProgress();
 
-  const isCharBased = CHAR_BASED_LANGS.includes(LANG);
+  const units = getUnits(tpTexts[tpIndex]);
+  markProgress(0);
 
-const units = isCharBased
-  ? Array.from(tpTexts[tpIndex])   // einzelne Zeichen
-  : tpTexts[tpIndex].split(/\s+/).filter(Boolean);
- markProgress(0);
-
-tpTimer = setInterval(() => {
-  tpWordIdx++;
-  if (tpWordIdx < units.length) markProgress(tpWordIdx);
-  else {
-    clearInterval(tpTimer);
-    markProgress(units.length - 1);
-    if(auto){
-      setTimeout(() => {
-        if(tpIndex < tpTexts.length - 1) playSentence(tpIndex + 1, true);
-      }, SENTENCE_PAUSE);
+  tpTimer = setInterval(() => {
+    tpUnitIdx++;
+    if (tpUnitIdx < units.length) markProgress(tpUnitIdx);
+    else {
+      clearInterval(tpTimer);
+      markProgress(Math.max(0, units.length - 1));
+      if (auto) {
+        setTimeout(() => {
+          if (tpIndex < tpTexts.length - 1) playSentence(tpIndex + 1, true);
+        }, SENTENCE_PAUSE);
+      }
     }
-  }
-}, WORD_MS);
+  }, WORD_MS);
 }
-document.getElementById("tp-prev").addEventListener("click", () => {
-  if (tpIndex > 0) playSentence(tpIndex - 1, false);
-});
 
-document.getElementById("tp-next").addEventListener("click", () => {
-  if (tpIndex < tpTexts.length - 1) playSentence(tpIndex + 1, false);
-});
-document.getElementById("tp-prev").title =
-document.getElementById("tp-prev").ariaLabel =
-document.getElementById("tp-prev").textContent = "←";
-
-document.getElementById("tp-next").title =
-document.getElementById("tp-next").ariaLabel =
-document.getElementById("tp-next").textContent = "→";
-
-document.getElementById("btnWorld").textContent = UI_TEXT.world;
-document.getElementById("btnCard").textContent = UI_TEXT.card;
-document.getElementById("hint").textContent = UI_TEXT.hint;
-document.getElementById("privacyHint").textContent =  PRIVACY_HINT[LANG] || PRIVACY_HINT.en;
+document.getElementById("tp-prev").addEventListener("click", () => { if (tpIndex > 0) playSentence(tpIndex - 1, false); });
+document.getElementById("tp-next").addEventListener("click", () => { if (tpIndex < tpTexts.length - 1) playSentence(tpIndex + 1, false); });
 playSentence(0, true);
 
 /* -------------------------
-   2) SUPABASE
+   4) Share (native share sheet + fallback copy)
+-------------------------- */
+function shareUrlForLang() {
+  return `${location.origin}/?lang=${encodeURIComponent(LANG)}`;
+}
+
+document.getElementById("shareMain").addEventListener("click", async () => {
+  const url = shareUrlForLang();
+  const text = SHARE_TEXT[LANG] || SHARE_TEXT.en;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: UI_TEXT.share_title || "Together We Are One",
+        text,
+        url
+      });
+    } catch (_) {}
+    return;
+  }
+
+  // Fallback: copy link
+  try {
+    await navigator.clipboard.writeText(url);
+    alert(UI_TEXT.copy_ok || "Link copied");
+  } catch (_) {
+    // last resort
+    prompt("", url);
+  }
+});
+
+/* -------------------------
+   5) Supabase
 -------------------------- */
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -1138,20 +878,22 @@ function uuidv4() {
   });
 }
 
-const SUPABASE_URL = 'https://gwfqdukbcgtcefqtgnbl.supabase.co';  // <-- DEIN Project URL
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3ZnFkdWtiY2d0Y2VmcXRnbmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MDU2MTMsImV4cCI6MjA4NDI4MTYxM30.ePyuDxhVoc1ol5lQ8JbRKaybgpEPozBR3Wf71oFj040';  // <-- DEIN anon public key
-
-const statusEl = document.getElementById("status");
-function setStatus(msg){ statusEl.textContent = msg || ""; }
-function setStatus(key){ statusEl.textContent = UI_TEXT[key] || ""; }
+// Your Supabase project URL/key (as provided earlier)
+const SUPABASE_URL = 'https://gwfqdukbcgtcefqtgnbl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3ZnFkdWtiY2d0Y2VmcXRnbmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MDU2MTMsImV4cCI6MjA4NDI4MTYxM30.ePyuDxhVoc1ol5lQ8JbRKaybgpEPozBR3Wf71oFj040';
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let session = localStorage.getItem('myLightSession');
 if(!session) { session = uuidv4(); localStorage.setItem('myLightSession', session); }
 
+const statusEl = document.getElementById("status");
+function setStatus(key){
+  statusEl.textContent = UI_TEXT[key] || key || "";
+}
+
 /* -------------------------
-   3) MAP (WICHTIG: zuerst map initialisieren!)
+   6) Map
 -------------------------- */
 const WORLD_BOUNDS = L.latLngBounds(L.latLng(-60, -180), L.latLng(85, 180));
 const WORLD_VIEW = { center: [20, 0], zoom: 2.0 };
@@ -1166,10 +908,8 @@ const map = L.map('map', {
   maxBoundsViscosity: 1.0
 }).setView(WORLD_VIEW.center, WORLD_VIEW.zoom);
 
-/* Tile layers (mit/ohne Labels) */
 const tileUrlLabels   = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 const tileUrlNoLabels = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
-// Alternative heller: 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
 
 const baseWithLabels = L.tileLayer(tileUrlLabels, {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
@@ -1187,18 +927,25 @@ const baseNoLabels = L.tileLayer(tileUrlNoLabels, {
   crossOrigin: true
 });
 
-/* Lights layer */
 const canvasRenderer = L.canvas({ padding: 0.5 });
 const lightsLayer = L.layerGroup().addTo(map);
 
-// Ghost-Light: folgt dem Cursor, zeigt "hier wird das Licht gesetzt"
+function anonymize(lat, lng) {
+  const GRID = 0.1; // ~11km
+  return {
+    lat: Math.round(lat / GRID) * GRID,
+    lng: Math.round(lng / GRID) * GRID
+  };
+}
+
+// Ghost light (cursor)
 const ghost = L.circleMarker([0,0], {
   renderer: canvasRenderer,
   radius: 10,
   stroke: false,
   fill: true,
-  fillOpacity: 0.06, /*0.10*/
-  fillColor: "rgba(255,240,220,1)",/*fillColor: "rgba(255,220,170,1)"*/
+  fillOpacity: 0.10,
+  fillColor: "rgba(255,220,170,1)",
   interactive: false
 }).addTo(map);
 
@@ -1212,7 +959,6 @@ const ghostCore = L.circleMarker([0,0], {
   interactive: false
 }).addTo(map);
 
-// nur anzeigen, wenn Maus über der Karte ist
 map.on("mouseover", () => {
   ghost.setStyle({ fillOpacity: 0.10 });
   ghostCore.setStyle({ fillOpacity: 0.75 });
@@ -1221,14 +967,11 @@ map.on("mouseout", () => {
   ghost.setStyle({ fillOpacity: 0.0 });
   ghostCore.setStyle({ fillOpacity: 0.0 });
 });
-
-// Cursor-Bewegung
 map.on("mousemove", (e) => {
   ghost.setLatLng(e.latlng);
   ghostCore.setLatLng(e.latlng);
 });
-  
-/* sehr kleine Punkte für andere */
+
 function addLight(latlng, isMine=false){
   if(!isMine){
     L.circleMarker(latlng, {
@@ -1242,7 +985,6 @@ function addLight(latlng, isMine=false){
     }).addTo(lightsLayer);
     return;
   }
-  // mein Punkt minimal größer
   L.circleMarker(latlng, {
     renderer: canvasRenderer,
     radius: 2.6,
@@ -1254,31 +996,25 @@ function addLight(latlng, isMine=false){
   }).addTo(lightsLayer);
 }
 
-let allLightPoints = [];
+async function loadMyLight(){
+  const { data } = await sb.from('lights').select('*').eq('session', session).maybeSingle();
+  return data;
+}
 
-/* Load */
 async function loadLights(){
   try{
-    const b = map.getBounds();
-    const { data, error } = await sb
-      .from('lights')
-      .select('lat,lng,session') // nicht unbedingt *
-      .gte('lat', b.getSouth())
-      .lte('lat', b.getNorth())
-      .gte('lng', b.getWest())
-      .lte('lng', b.getEast());
-
+    const { data, error } = await sb.from('lights').select('*');
     if(error) throw error;
 
-    allLightPoints = data || [];
     lightsLayer.clearLayers();
 
     let mine = null;
-    for(const row of allLightPoints){
+    for(const row of (data || [])){
       const isMine = (row.session === session);
       if(isMine) mine = row;
       addLight([row.lat, row.lng], isMine);
     }
+
     setStatus(mine ? "status_set" : "status_empty");
   } catch(e){
     console.error(e);
@@ -1286,123 +1022,82 @@ async function loadLights(){
   }
 }
 
-async function loadMyLight(){
-  const { data } = await sb.from('lights').select('*').eq('session', session).maybeSingle();
-  return data;
-}
-
-function anonymize(lat, lng) {
-  const GRID = 0.1; // Grad ≈ 11 km
-
-  return {
-    lat: Math.round(lat / GRID) * GRID,
-    lng: Math.round(lng / GRID) * GRID
-  };
-}
-
-  function waitForMapIdle(map) {
-  return new Promise(resolve => {
-    let moveDone = false;
-    let tilesDone = false;
-
-    function check() {
-      if (moveDone && tilesDone) {
-        map.off("moveend", onMoveEnd);
-        map.off("load", onLoad);
-        resolve();
-      }
-    }
-
-    function onMoveEnd() {
-      moveDone = true;
-      check();
-    }
-
-    function onLoad() {
-      tilesDone = true;
-      check();
-    }
-
-    map.on("moveend", onMoveEnd);
-    map.on("load", onLoad);
-  });
-}
-/* Click: speichern, Zoom bleibt */
 map.on('click', async (e) => {
-  try {
+  try{
     const pos = anonymize(e.latlng.lat, e.latlng.lng);
-
     const existing = await loadMyLight();
 
-    if (existing) {
-      await sb
-        .from('lights')
-        .update({ lat: pos.lat, lng: pos.lng })
-        .eq('session', session);
+    if(existing){
+      await sb.from('lights').update({ lat: pos.lat, lng: pos.lng }).eq('session', session);
     } else {
-      await sb
-        .from('lights')
-        .insert({ lat: pos.lat, lng: pos.lng, session });
+      await sb.from('lights').insert({ lat: pos.lat, lng: pos.lng, session });
     }
-
     await loadLights();
-  } catch (err) {
+  } catch(err){
     console.error(err);
     setStatus("status_error_save");
   }
 });
 
-/* Weltansicht Button */
 document.getElementById("btnWorld").addEventListener("click", () => {
-  map.fitBounds(WORLD_BOUNDS, {
-  padding: [20, 20],
-  animate: false
-});
+  map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
 });
 
-/* Export: Screenshot der Weltansicht, kurz ohne Labels */
+/* -------------------------
+   7) Export (robust)
+-------------------------- */
+function waitMoveEnd(m) {
+  return new Promise(resolve => {
+    let done = false;
+    const finish = () => { if(done) return; done = true; m.off("moveend", finish); resolve(); };
+    m.once("moveend", finish);
+    // fallback in case moveend doesn't fire for same view
+    setTimeout(finish, 350);
+  });
+}
+
 function waitTiles(layer){
   return new Promise(resolve => {
     let done = false;
     const finish = () => {
       if(done) return;
       done = true;
+      layer.off('load', finish);
       requestAnimationFrame(() => requestAnimationFrame(resolve));
     };
     layer.once('load', finish);
-    setTimeout(finish, 1200); // Fallback
+    setTimeout(finish, 1600);
   });
 }
 
-document.getElementById("btnCard").addEventListener("click", async () => {
-  try {
-    setStatus("Erzeuge Weltansicht…");
+const btnCard = document.getElementById("btnCard");
+btnCard.addEventListener("click", async () => {
+  try{
+    btnCard.disabled = true;
+    setStatus("status_export");
 
-    // 1) auf komplette Welt zoomen
-    map.fitBounds(WORLD_BOUNDS, {
-      padding: [20, 20],
-      animate: false
-    });
+    // 1) fit world to viewport
+    map.fitBounds(WORLD_BOUNDS, { padding: [20,20], animate: false });
+    await waitMoveEnd(map);
 
-    // 2) warten bis Bewegung + Tiles fertig
-    await waitForMapIdle(map);
-
-    // 3) Label-Layer aus, No-Labels an
-    if (map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
+    // 2) switch to no-labels for export
+    if(map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
     baseNoLabels.addTo(map);
 
-    // 4) warten bis neue Tiles geladen
-    await waitForMapIdle(map);
+    // 3) wait tiles
+    await waitTiles(baseNoLabels);
 
-    // 5) Screenshot
-    leafletImage(map, (err, canvas) => {
-      // Layer zurück
+    // 4) screenshot
+    leafletImage(map, function(err, canvas){
+      // restore
       map.removeLayer(baseNoLabels);
       baseWithLabels.addTo(map);
 
-      if (err) {
+      btnCard.disabled = false;
+
+      if(err){
         console.error(err);
-        setStatus("Export fehlgeschlagen.");
+        setStatus("status_error_save");
         return;
       }
 
@@ -1411,18 +1106,18 @@ document.getElementById("btnCard").addEventListener("click", async () => {
       a.href = png;
       a.download = "together-we-are-one.png";
       a.click();
-
-      setStatus("Fertig.");
+      setStatus("status_done");
     });
-
-  } catch (e) {
+  } catch(e){
     console.error(e);
-    setStatus("Export fehlgeschlagen.");
+    btnCard.disabled = false;
+    setStatus("status_error_save");
   }
 });
 
-  
-/* Start */
+/* -------------------------
+   8) Start
+-------------------------- */
 loadLights();
 setInterval(loadLights, 30000);
 </script>
