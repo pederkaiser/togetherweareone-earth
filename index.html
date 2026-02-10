@@ -258,6 +258,13 @@
       letter-spacing: 0.08em;
       backdrop-filter: blur(8px);
     }
+    #hint{
+  transition: opacity 300ms ease;
+}
+#hint.hidden{
+  opacity:0;
+  pointer-events:none;
+}
   </style>
 </head>
 
@@ -1015,7 +1022,15 @@ async function loadLights(){
       addLight([row.lat, row.lng], isMine);
     }
 
-    setStatus(mine ? "status_set" : "status_empty");
+    const hintEl = document.getElementById("hint");
+
+if (mine) {
+  hintEl.classList.add("hidden");
+  setStatus("status_set");
+} else {
+  hintEl.classList.remove("hidden");
+  setStatus("status_empty");
+}
   } catch(e){
     console.error(e);
     setStatus("status_error_load");
