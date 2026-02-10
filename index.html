@@ -286,35 +286,9 @@
         <div class="tp-progress"><div class="tp-progress-bar" id="tp-bar"></div></div>
         <button class="tp-btn" id="tp-next" title="Weiter" aria-label="Weiter">→</button>
       </div>
-     <div class="share">
-  <button class="share-btn" data-share="native">
-    <span class="icon">📤</span>
-    <span class="label"></span>
-  </button>
-
-  <button class="share-btn" data-share="whatsapp">
-    <span class="icon">🟢</span>
-    <span class="label"></span>
-  </button>
-
-  <button class="share-btn" data-share="signal">
-    <span class="icon">🔵</span>
-    <span class="label"></span>
-  </button>
-
-  <button class="share-btn" data-share="telegram">
-    <span class="icon">✈️</span>
-    <span class="label"></span>
-  </button>
-
-  <button class="share-btn" data-share="facebook">
-    <span class="icon">📘</span>
-    <span class="label"></span>
-  </button>
-
-  <button class="share-btn" data-share="copy">
-    <span class="icon">🔗</span>
-    <span class="label"></span>
+     <div class="share-single">
+  <button id="shareMain" class="share-main-btn">
+    📤 <span class="label"></span>
   </button>
 </div>
     </div>
@@ -777,6 +751,29 @@ const tpTexts = TP[LANG] || TP.en;
 // Optional: set <html lang="..."> for accessibility
 document.documentElement.lang = LANG;
 
+const SHARE_MAIN_LABEL = {
+  de: "Teilen",
+  en: "Share",
+  fr: "Partager",
+  es: "Compartir",
+  pt: "Compartilhar",
+  ru: "Поделиться",
+  ar: "مشاركة",
+  hi: "साझा करें",
+  bn: "শেয়ার করুন",
+  ur: "شیئر کریں",
+  zh: "分享",
+  ja: "共有",
+  ko: "공유",
+  vi: "Chia sẻ",
+  tr: "Paylaş",
+  sw: "Shiriki",
+  id: "Bagikan"
+};
+
+document.querySelector("#shareMain .label").textContent =
+  SHARE_MAIN_LABEL[LANG] || SHARE_MAIN_LABEL.en;
+  
   const SHARE_LABELS = {
   de: {
     whatsapp: "WhatsApp",
@@ -939,6 +936,49 @@ document.documentElement.lang = LANG;
 
  const text = SHARE_TEXT[LANG] || SHARE_TEXT.en;
 const url  = location.origin + "/?lang=" + LANG;
+
+  document.getElementById("shareMain").addEventListener("click", async () => {
+  const text = SHARE_TEXT[LANG] || SHARE_TEXT.en;
+  const url  = location.origin + "/?lang=" + LANG;
+
+  // 1) Native Share (iOS, Android, moderne Browser)
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: "Together We Are One",
+        text: text,
+        url: url
+      });
+      return;
+    } catch (e) {
+      // User cancelled → silently ignore
+      return;
+    }
+  }
+
+  // 2) Fallback: einfaches Auswahl-Menü
+  openShareModal(text, url);
+});
+
+  function openShareModal(text, url) {
+  const payload = encodeURIComponent(text + "\n" + url);
+
+  const options = [
+    { label: "WhatsApp", action: () => window.open(`https://wa.me/?text=${payload}`) },
+    { label: "Signal", action: () => window.open(`https://signal.me/#text=${payload}`) },
+    { label: "Telegram", action: () => window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`) },
+    { label: "Facebook", action: () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`) },
+    { label: "Link kopieren", action: () => navigator.clipboard.writeText(url) }
+  ];
+
+  // hier: sehr simples Prompt (oder eigenes Modal)
+  const choice = prompt(
+    options.map((o, i) => `${i + 1}: ${o.label}`).join("\n")
+  );
+
+  const idx = parseInt(choice, 10) - 1;
+  if (options[idx]) options[idx].action();
+}
 
 document.querySelectorAll(".share-btn").forEach(btn => {
   btn.addEventListener("click", async () => {
