@@ -1262,6 +1262,13 @@ async function loadMyLight(){
   return data;
 }
 
+function anonymize(lat, lng) {
+  const jitter = () => (Math.random() - 0.5) * 0.05; // ~5 km
+  return {
+    lat: lat + jitter(),
+    lng: lng + jitter()
+  };
+}
 /* Click: speichern, Zoom bleibt */
 map.on('click', async (e) => {
   try{
