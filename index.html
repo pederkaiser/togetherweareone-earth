@@ -909,70 +909,34 @@ document.getElementById("btnWorld").addEventListener("click", () => {
 });
 
 /* -------------------------
-   7) Export (aligned): SVG points only during export
+   7) Export (clean, stable)
 -------------------------- */
-function waitMoveEnd(m) {
-  return new Promise(resolve => {
-    let done = false;
-    const finish = () => { if(done) return; done = true; resolve(); };
-    m.once("moveend", finish);
-    setTimeout(finish, 450);
-  });
-}
 
-function waitTiles(layer){
-  return new Promise(resolve => {
-    let done = false;
-    const finish = () => {
-      if(done) return;
-      done = true;
-      requestAnimationFrame(() => requestAnimationFrame(resolve));
-    };
-    layer.once('load', finish);
-    setTimeout(finish, 1800);
-  });
-}
+const btnCard = document.getElementById("btnCard");
 
-function buildExportLightsLayer(points, mySession) {
-  const exportLayer = L.layerGroup();
-  for (const row of (points || [])) {
-    const isMine = row.session === mySession;
-    L.circleMarker([row.lat, row.lng], {
-      // no renderer -> SVG (leaflet-image gets it right)
-      radius: isMine ? 3.0 : 1.5,
-      stroke: false,
-      fill: true,
-      fillOpacity: isMine ? 1.0 : 0.85,
-      fillColor: "rgba(255,255,255,1)",
-      interactive: false
-    }).addTo(exportLayer);
-  }
-  return exportLayer;
-}
-
-const btnCard = document.getElementById("btnCard").addEventListener("click", async () => {
-  try{
+btnCard.addEventListener("click", async () => {
+  try {
     setStatus("status_export");
 
-    // 1) Weltansicht (wie bisher – funktioniert!)
-    map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
+    // 1) stabile Weltansicht (KEIN fitBounds)
+    map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: false });
 
     // 2) Labels aus
     if (map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
     baseNoLabels.addTo(map);
 
-    // 3) Clean Export: Overlays + Ghost AUS
-    ghost.setStyle({ fillOpacity: 0.0 });
-    ghostCore.setStyle({ fillOpacity: 0.0 });
+    // 3) Ghost & Overlays aus
+    ghost.setStyle({ fillOpacity: 0 });
+    ghostCore.setStyle({ fillOpacity: 0 });
 
-    document.querySelector(".mapTint")?.style.setProperty("display","none");
-    document.querySelector(".mapShade")?.style.setProperty("display","none");
+    document.querySelector(".mapTint")?.style.setProperty("display", "none");
+    document.querySelector(".mapShade")?.style.setProperty("display", "none");
 
-    // 4) Warten bis Tiles da sind
-    await waitTiles(baseNoLabels);
+    // 4) warten bis Tiles da sind
+    await new Promise(r => setTimeout(r, 1200));
 
-    // 5) Screenshot (Canvas bleibt unberührt!)
-    leafletImage(map, function(err, canvas){
+    // 5) Screenshot
+    leafletImage(map, (err, canvas) => {
 
       // --- Restore IMMER ---
       document.querySelector(".mapTint")?.style.removeProperty("display");
@@ -980,44 +944,6 @@ const btnCard = document.getElementById("btnCard").addEventListener("click", asy
 
       map.removeLayer(baseNoLabels);
       baseWithLabels.addTo(map);
-
-      if(err){
-        console.error(err);
-        setStatus("status_error_save");
-        return;
-      }
-
-      const png = canvas.toDataURL("image/png");
-      const a = document.createElement("a");
-      a.href = png;
-      a.download = "weltansicht-clean.png";
-      a.click();
-
-      setStatus("status_done");
-    });
-
-  } catch(e){
-    console.error(e);
-    setStatus("status_error_save");
-  }
-});
-
-    /* 6) Screenshot */
-    leafletImage(map, (err, canvas) => {
-
-      /* --- Restore (IMMER) --- */
-      try {
-        if (exportLights) map.removeLayer(exportLights);
-        if (!map.hasLayer(lightsLayer)) lightsLayer.addTo(map);
-
-        map.removeLayer(baseNoLabels);
-        baseWithLabels.addTo(map);
-
-        document.querySelector(".mapTint")?.style.removeProperty("display");
-        document.querySelector(".mapShade")?.style.removeProperty("display");
-      } catch(_) {}
-
-      btnCard.disabled = false;
 
       if (err) {
         console.error(err);
@@ -1036,69 +962,9 @@ const btnCard = document.getElementById("btnCard").addEventListener("click", asy
 
   } catch (e) {
     console.error(e);
-
-    try {
-      if (exportLights) map.removeLayer(exportLights);
-      if (!map.hasLayer(lightsLayer)) lightsLayer.addTo(map);
-      if (map.hasLayer(baseNoLabels)) map.removeLayer(baseNoLabels);
-      if (!map.hasLayer(baseWithLabels)) baseWithLabels.addTo(map);
-      document.querySelector(".mapTint")?.style.removeProperty("display");
-      document.querySelector(".mapShade")?.style.removeProperty("display");
-    } catch(_) {}
-
-    btnCard.disabled = false;
     setStatus("status_error_save");
   }
 });
-
-  function buildExportLightsLayer(points, mySession) {
-  const layer = L.layerGroup();
-
-  for (const row of (points || [])) {
-    const isMine = row.session === mySession;
-
-    L.circleMarker([row.lat, row.lng], {
-      // SVG (kein canvasRenderer!)
-      radius: isMine ? 2.6 : 1.4,
-      stroke: false,
-      fill: true,
-      fillOpacity: isMine ? 0.95 : 0.75,
-      fillColor: "#ffffff",
-      interactive: false
-    }).addTo(layer);
-  }
-  return layer;
-}
-
-  function waitMoveEnd(map) {
-  return new Promise(resolve => {
-    let done = false;
-    const finish = () => {
-      if (done) return;
-      done = true;
-      map.off("moveend", finish);
-      resolve();
-    };
-    map.once("moveend", finish);
-    setTimeout(finish, 400); // Fallback
-  });
-}
-
-function waitTiles(layer) {
-  return new Promise(resolve => {
-    let done = false;
-    const finish = () => {
-      if (done) return;
-      done = true;
-      layer.off("load", finish);
-      requestAnimationFrame(() =>
-        requestAnimationFrame(resolve)
-      );
-    };
-    layer.once("load", finish);
-    setTimeout(finish, 1600);
-  });
-}
 
 /* -------------------------
    8) Start
