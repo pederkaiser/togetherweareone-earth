@@ -214,6 +214,30 @@
   letter-spacing: 0.08em;
   backdrop-filter: blur(8px);
 }
+    .share{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin:18px 0 6px 0;
+  flex-wrap:wrap;
+}
+
+.share-btn{
+  padding:10px 14px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.85);
+  cursor:pointer;
+  backdrop-filter: blur(8px);
+  font-weight:600;
+  transition: background 140ms ease, transform 140ms ease;
+}
+
+.share-btn:hover{
+  background: rgba(255,255,255,0.10);
+  transform: translateY(-1px);
+}
   </style>
 </head>
 
@@ -227,6 +251,11 @@
         <button class="tp-btn" id="tp-prev" title="Zurück" aria-label="Zurück">←</button>
         <div class="tp-progress"><div class="tp-progress-bar" id="tp-bar"></div></div>
         <button class="tp-btn" id="tp-next" title="Weiter" aria-label="Weiter">→</button>
+      </div>
+      <div class="share">
+        <button class="share-btn" data-share="whatsapp">WhatsApp</button>
+        <button class="share-btn" data-share="facebook">Facebook</button>
+        <button class="share-btn" data-share="copy">Link kopieren</button>
       </div>
     </div>
 
@@ -681,12 +710,65 @@ const TP = {
   }
 };
 
-const UI_TEXT = UI[LANG] || UI.en;
+  const UI_TEXT = UI[LANG] || UI.en;
 
 const tpTexts = TP[LANG] || TP.en;
 
 // Optional: set <html lang="..."> for accessibility
 document.documentElement.lang = LANG;
+  
+  const SHARE_TEXT = {
+  de: "Eine stille Seite. Man setzt ein Licht und sieht, dass viele dasselbe fühlen.",
+  en: "A quiet place. You set a light and see that many feel the same.",
+  es: "Un lugar tranquilo. Pones una luz y ves que muchos sienten lo mismo.",
+  fr: "Un endroit calme. On y place une lumière et on voit que beaucoup ressentent la même chose.",
+  pt: "Um lugar tranquilo. Você coloca uma luz e vê que muitos sentem o mesmo.",
+  ru: "Тихое место. Ты зажигаешь свет и видишь, что многие чувствуют то же самое.",
+  ar: "مكان هادئ. تضع نورًا وترى أن كثيرين يشعرون بالشيء نفسه.",
+  hi: "एक शांत जगह। आप एक रोशनी रखते हैं और देखते हैं कि बहुत से लोग वही महसूस करते हैं।",
+  bn: "একটি শান্ত জায়গা। তুমি একটি আলো বসাও এবং দেখো যে অনেকেই একই অনুভব করে।",
+  ur: "ایک خاموش جگہ۔ آپ ایک روشنی رکھتے ہیں اور دیکھتے ہیں کہ بہت سے لوگ وہی محسوس کرتے ہیں۔",
+  zh: "一个安静的地方。你点亮一盏灯，看到许多人有着相同的感受。",
+  ja: "静かな場所。光を置くと、同じように感じている人がたくさんいることがわかります。",
+  ko: "조용한 공간. 빛을 놓으면 많은 사람들이 같은 감정을 느끼고 있음을 볼 수 있습니다.",
+  vi: "Một nơi yên tĩnh. Bạn đặt một ánh sáng và thấy rằng nhiều người cũng cảm nhận như vậy.",
+  tr: "Sessiz bir yer. Bir ışık bırakırsın ve birçok kişinin aynı şeyi hissettiğini görürsün.",
+  sw: "Mahali tulivu. Unaweka mwanga na kuona kwamba wengi wanahisi vivyo hivyo.",
+  id: "Tempat yang tenang. Kamu menempatkan sebuah cahaya dan melihat bahwa banyak yang merasakan hal yang sama."
+};
+  const SHARE_URL = location.origin + "/?lang=" + LANG;
+
+  document.querySelectorAll(".share-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const type = btn.dataset.share;
+    const text = SHARE_TEXT[LANG] || SHARE_TEXT.en;
+    const url  = SHARE_URL;
+
+    if (type === "whatsapp") {
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(text + "\n" + url)}`,
+        "_blank"
+      );
+    }
+
+    if (type === "facebook") {
+      window.open(
+        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+        "_blank"
+      );
+    }
+
+    if (type === "copy") {
+      navigator.clipboard.writeText(url);
+      alert(
+        LANG === "de" ? "Link kopiert"
+        : LANG === "fr" ? "Lien copié"
+        : LANG === "es" ? "Enlace copiado"
+        : "Link copied"
+      );
+    }
+  });
+});
 
 //const WORD_MS = 240;
   const WORD_MS = {
@@ -746,6 +828,13 @@ tpTimer = setInterval(() => {
   }
 }, WORD_MS);
 }
+document.getElementById("tp-prev").addEventListener("click", () => {
+  if (tpIndex > 0) playSentence(tpIndex - 1, false);
+});
+
+document.getElementById("tp-next").addEventListener("click", () => {
+  if (tpIndex < tpTexts.length - 1) playSentence(tpIndex + 1, false);
+});
 document.getElementById("tp-prev").title =
 document.getElementById("tp-prev").ariaLabel =
 document.getElementById("tp-prev").textContent = "←";
@@ -940,7 +1029,10 @@ map.on('click', async (e) => {
 
 /* Weltansicht Button */
 document.getElementById("btnWorld").addEventListener("click", () => {
-  map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
+  map.fitBounds(WORLD_BOUNDS, {
+  padding: [20, 20],
+  animate: false
+});
 });
 
 /* Export: Screenshot der Weltansicht, kurz ohne Labels */
@@ -996,6 +1088,7 @@ document.getElementById("btnCard").addEventListener("click", async () => {
     alert("status_error_save");
   }
 });
+
 
 /* Start */
 loadLights();
