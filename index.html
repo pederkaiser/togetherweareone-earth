@@ -1037,6 +1037,7 @@ async function loadLights(){
       if(isMine) mine = row;
       addLight([row.lat, row.lng], isMine);
     }
+    allLightPoints = data || [];
 
     const hintEl = document.getElementById("hint");
 
@@ -1101,36 +1102,75 @@ function waitTiles(layer){
   });
 }
 
+  function buildExportLightsLayer(points, mySession) {
+  const exportLayer = L.layerGroup();
+
+  for (const row of (points || [])) {
+    const isMine = row.session === mySession;
+
+    L.circleMarker([row.lat, row.lng], {
+      // KEIN renderer: canvasRenderer -> so nutzt Leaflet SVG
+      radius: isMine ? 2.6 : 1.35,
+      stroke: false,
+      fill: true,
+      fillOpacity: isMine ? 0.95 : 0.70,
+      fillColor: "rgba(255,250,245,1)",
+      interactive: false
+    }).addTo(exportLayer);
+  }
+
+  return exportLayer;
+}
+
 const btnCard = document.getElementById("btnCard");
+
 btnCard.addEventListener("click", async () => {
-  try{
+  let exportLights = null;
+
+  try {
     btnCard.disabled = true;
     setStatus("status_export");
 
-    // 1) fit world to viewport
-    map.fitBounds(WORLD_BOUNDS, { animate:false });
+    // 1) Weltansicht (stabil)
+    map.fitBounds(WORLD_BOUNDS, { padding: [20,20], animate: false });
     await waitMoveEnd(map);
-    await waitForFullRedraw(map); // ← DAS ist der Schlüssel
 
-    // 2) switch to no-labels for export
-    if(map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
+    // 2) Tiles ohne Labels
+    if (map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
     baseNoLabels.addTo(map);
-
-    await waitTiles(baseNoLabels);
-    await waitForFullRedraw(map); // ← wichtig für Canvas-Layer
-
-    // 3) wait tiles
     await waitTiles(baseNoLabels);
 
-    // 4) screenshot
-    leafletImage(map, function(err, canvas){
-      // restore
-      map.removeLayer(baseNoLabels);
-      baseWithLabels.addTo(map);
+    // 3) WICHTIG: Canvas-Lichter für Export entfernen (sonst verrutschen sie)
+    //    und stattdessen SVG-Lichter temporär hinzufügen
+    if (map.hasLayer(lightsLayer)) map.removeLayer(lightsLayer);
+
+    // Ghost ausblenden (optional, aber sauber)
+    ghost.setStyle({ fillOpacity: 0.0 });
+    ghostCore.setStyle({ fillOpacity: 0.0 });
+
+    exportLights = buildExportLightsLayer(allLightPoints, session);
+    exportLights.addTo(map);
+
+    // 4) Ein Frame warten, damit SVG sicher gerendert ist
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    // 5) Screenshot
+    leafletImage(map, function(err, canvas) {
+      // Restore always
+      try {
+        if (exportLights) map.removeLayer(exportLights);
+        if (!map.hasLayer(lightsLayer)) lightsLayer.addTo(map);
+
+        map.removeLayer(baseNoLabels);
+        baseWithLabels.addTo(map);
+
+        // Ghost wieder aktiv (Mouseover steuert später sowieso)
+        // (wir setzen hier nur auf "aus" – sobald Maus rein geht, geht es wieder an)
+      } catch(e) {}
 
       btnCard.disabled = false;
 
-      if(err){
+      if (err) {
         console.error(err);
         setStatus("status_error_save");
         return;
@@ -1143,8 +1183,17 @@ btnCard.addEventListener("click", async () => {
       a.click();
       setStatus("status_done");
     });
-  } catch(e){
+
+  } catch (e) {
     console.error(e);
+
+    try {
+      if (exportLights) map.removeLayer(exportLights);
+      if (!map.hasLayer(lightsLayer)) lightsLayer.addTo(map);
+      if (map.hasLayer(baseNoLabels)) map.removeLayer(baseNoLabels);
+      if (!map.hasLayer(baseWithLabels)) baseWithLabels.addTo(map);
+    } catch(_) {}
+
     btnCard.disabled = false;
     setStatus("status_error_save");
   }
@@ -1158,6 +1207,9 @@ function waitForFullRedraw(map) {
     });
   });
 }
+
+  let allLightPoints = [];
+  
   
 /* -------------------------
    8) Start
