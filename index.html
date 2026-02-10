@@ -227,50 +227,38 @@
   letter-spacing: 0.08em;
   backdrop-filter: blur(8px);
 }
-.share{
+    .share-single{
   display:flex;
   justify-content:center;
-  gap:14px;
-  margin:22px 0 8px 0;
-  flex-wrap:wrap;
+  margin:26px 0 10px 0;
 }
 
-.share-btn{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  width:64px;
-  padding:10px 6px;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.85);
+.share-main-btn{
+  padding:14px 22px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.92);
+  font-size:14px;
+  font-weight:500;
+  letter-spacing:0.02em;
   cursor:pointer;
-  backdrop-filter: blur(8px);
-  transition: background 140ms ease, transform 140ms ease;
+  backdrop-filter: blur(10px);
+  transition: 
+    background 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
 }
 
-.share-btn:hover{
-  background: rgba(255,255,255,0.10);
+.share-main-btn:hover{
+  background: rgba(255,255,255,0.14);
   transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
 }
 
-.share-btn .icon{
-  font-size:22px;
-  line-height:1;
-  margin-bottom:6px;
-}
-
-.share-btn .label{
-  font-size:11px;
-  opacity:0.75;
-  text-align:center;
-  line-height:1.2;
-}
-.share-btn[data-share="native"]{
-  background: rgba(255,255,255,0.10);
-  border-color: rgba(255,255,255,0.18);
+.share-main-btn:active{
+  transform: translateY(0);
+  box-shadow: none;
 }
   </style>
 </head>
@@ -288,7 +276,7 @@
       </div>
      <div class="share-single">
   <button id="shareMain" class="share-main-btn">
-    📤 <span class="label"></span>
+    <span class="label"></span>
   </button>
 </div>
     </div>
@@ -752,23 +740,23 @@ const tpTexts = TP[LANG] || TP.en;
 document.documentElement.lang = LANG;
 
 const SHARE_MAIN_LABEL = {
-  de: "Teilen",
-  en: "Share",
-  fr: "Partager",
-  es: "Compartir",
-  pt: "Compartilhar",
-  ru: "Поделиться",
-  ar: "مشاركة",
-  hi: "साझा करें",
-  bn: "শেয়ার করুন",
-  ur: "شیئر کریں",
-  zh: "分享",
-  ja: "共有",
-  ko: "공유",
-  vi: "Chia sẻ",
-  tr: "Paylaş",
-  sw: "Shiriki",
-  id: "Bagikan"
+  de: "Mit einer Freundin oder einem Freund teilen",
+  en: "Share with a friend",
+  fr: "Partager avec un ami",
+  es: "Compartir con un amigo",
+  pt: "Compartilhar com um amigo",
+  ru: "Поделиться с другом",
+  ar: "شارك مع صديق",
+  hi: "किसी दोस्त के साथ साझा करें",
+  bn: "একজন বন্ধুর সাথে শেয়ার করুন",
+  ur: "کسی دوست کے ساتھ شیئر کریں",
+  zh: "分享给朋友",
+  ja: "友だちと共有する",
+  ko: "친구와 공유하기",
+  vi: "Chia sẻ với một người bạn",
+  tr: "Bir arkadaşınla paylaş",
+  sw: "Shiriki na rafiki",
+  id: "Bagikan dengan seorang teman"
 };
 
 document.querySelector("#shareMain .label").textContent =
