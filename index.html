@@ -828,27 +828,15 @@ map.on("mousemove", (e) => {
   ghostCore.setLatLng(e.latlng);
 });
 
-function addLight(latlng, isMine=false){
-  if(!isMine){
-    L.circleMarker(latlng, {
-      renderer: canvasRenderer,
-      radius: 1.5,
-      stroke: false,
-      fill: true,
-      fillOpacity: 0.85,
-      fillColor: "rgba(255,255,255,1)",
-      interactive: false
-    }).addTo(lightsLayer);
-    return;
-  }
+function addLight(latlng, isMine = false) {
   L.circleMarker(latlng, {
-    renderer: canvasRenderer,
-    radius: 3.0,
+    renderer: canvasRenderer,      // Canvas (stabil + schnell)
+    radius: isMine ? 2.6 : 1.25,    // 👈 HIER: andere kleiner
     stroke: false,
     fill: true,
-    fillOpacity: 1.0,
+    fillOpacity: isMine ? 0.95 : 0.60,
     fillColor: "rgba(255,255,255,1)",
-    interactive: true
+    interactive: isMine
   }).addTo(lightsLayer);
 }
 
