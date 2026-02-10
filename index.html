@@ -1269,6 +1269,34 @@ function anonymize(lat, lng) {
     lng: lng + jitter()
   };
 }
+
+  function waitForMapIdle(map) {
+  return new Promise(resolve => {
+    let moveDone = false;
+    let tilesDone = false;
+
+    function check() {
+      if (moveDone && tilesDone) {
+        map.off("moveend", onMoveEnd);
+        map.off("load", onLoad);
+        resolve();
+      }
+    }
+
+    function onMoveEnd() {
+      moveDone = true;
+      check();
+    }
+
+    function onLoad() {
+      tilesDone = true;
+      check();
+    }
+
+    map.on("moveend", onMoveEnd);
+    map.on("load", onLoad);
+  });
+}
 /* Click: speichern, Zoom bleibt */
 map.on('click', async (e) => {
   try{
@@ -1308,46 +1336,53 @@ function waitTiles(layer){
 }
 
 document.getElementById("btnCard").addEventListener("click", async () => {
-  try{
-    setStatus("status_export");
+  try {
+    setStatus("Erzeuge Weltansicht…");
 
-    // 1) auf Weltansicht
-    map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
+    // 1) auf komplette Welt zoomen
+    map.fitBounds(WORLD_BOUNDS, {
+      padding: [20, 20],
+      animate: false
+    });
 
-    // 2) no-labels Layer rein
-    if(map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
+    // 2) warten bis Bewegung + Tiles fertig
+    await waitForMapIdle(map);
+
+    // 3) Label-Layer aus, No-Labels an
+    if (map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
     baseNoLabels.addTo(map);
 
-    // 3) warten bis Tiles geladen
-    await waitTiles(baseNoLabels);
+    // 4) warten bis neue Tiles geladen
+    await waitForMapIdle(map);
 
-    // 4) Screenshot
-    leafletImage(map, function(err, canvas){
-      // 5) Layer zurück
+    // 5) Screenshot
+    leafletImage(map, (err, canvas) => {
+      // Layer zurück
       map.removeLayer(baseNoLabels);
       baseWithLabels.addTo(map);
 
-      if(err){
+      if (err) {
         console.error(err);
-        setStatus("status_error_save");
-        alert("status_error_save");
+        setStatus("Export fehlgeschlagen.");
         return;
       }
+
       const png = canvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = png;
-      a.download = "weltansicht-ohne-labels.png";
+      a.download = "together-we-are-one.png";
       a.click();
-      setStatus("status_done");
+
+      setStatus("Fertig.");
     });
-  } catch(e){
+
+  } catch (e) {
     console.error(e);
-    setStatus("status_error_save");
-    alert("status_error_save");
+    setStatus("Export fehlgeschlagen.");
   }
 });
 
-
+  
 /* Start */
 loadLights();
 setInterval(loadLights, 30000);
