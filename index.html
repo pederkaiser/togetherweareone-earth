@@ -954,45 +954,58 @@ const btnCard = document.getElementById("btnCard");
 btnCard.addEventListener("click", async () => {
   let exportLights = null;
 
-  try{
+  try {
     btnCard.disabled = true;
     setStatus("status_export");
 
-    // 1) Stable world view (no animation)
+    /* 1) Auf saubere Weltansicht */
     map.fitBounds(WORLD_BOUNDS, { padding: [20,20], animate: false });
     await waitMoveEnd(map);
 
-    // 2) Switch to no-label tiles
-    if(map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
+    /* 2) Kartenlayer OHNE Labels */
+    if (map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
     baseNoLabels.addTo(map);
     await waitTiles(baseNoLabels);
 
-    // 3) Remove live canvas points and add SVG export points
+    /* 3) ALLES entfernen, was NICHT ins Export soll */
     if (map.hasLayer(lightsLayer)) map.removeLayer(lightsLayer);
 
-    // Hide ghost for export
-    ghost.setStyle({ fillOpacity: 0.0 });
-    ghostCore.setStyle({ fillOpacity: 0.0 });
+    ghost.setStyle({ fillOpacity: 0 });
+    ghostCore.setStyle({ fillOpacity: 0 });
 
+    /* Optional: Overlays NICHT exportieren */
+    document.querySelector(".mapTint")?.style.setProperty("display","none");
+    document.querySelector(".mapShade")?.style.setProperty("display","none");
+
+    /* 4) SVG-Lichter für Export hinzufügen */
     exportLights = buildExportLightsLayer(allLightPoints, session);
     exportLights.addTo(map);
 
-    // wait a frame for SVG render
-    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    /* 5) Ein Render-Tick warten */
+    await new Promise(r =>
+      requestAnimationFrame(() =>
+        requestAnimationFrame(r)
+      )
+    );
 
-    leafletImage(map, function(err, canvas){
-      // restore
-      try{
-        if(exportLights) map.removeLayer(exportLights);
-        if(!map.hasLayer(lightsLayer)) lightsLayer.addTo(map);
+    /* 6) Screenshot */
+    leafletImage(map, (err, canvas) => {
+
+      /* --- Restore (IMMER) --- */
+      try {
+        if (exportLights) map.removeLayer(exportLights);
+        if (!map.hasLayer(lightsLayer)) lightsLayer.addTo(map);
 
         map.removeLayer(baseNoLabels);
         baseWithLabels.addTo(map);
-      }catch(e){}
+
+        document.querySelector(".mapTint")?.style.removeProperty("display");
+        document.querySelector(".mapShade")?.style.removeProperty("display");
+      } catch(_) {}
 
       btnCard.disabled = false;
 
-      if(err){
+      if (err) {
         console.error(err);
         setStatus("status_error_save");
         return;
@@ -1003,21 +1016,75 @@ btnCard.addEventListener("click", async () => {
       a.href = png;
       a.download = "together-we-are-one.png";
       a.click();
+
       setStatus("status_done");
     });
 
-  }catch(e){
+  } catch (e) {
     console.error(e);
-    try{
-      if(exportLights) map.removeLayer(exportLights);
-      if(!map.hasLayer(lightsLayer)) lightsLayer.addTo(map);
-      if(map.hasLayer(baseNoLabels)) map.removeLayer(baseNoLabels);
-      if(!map.hasLayer(baseWithLabels)) baseWithLabels.addTo(map);
-    }catch(_){}
+
+    try {
+      if (exportLights) map.removeLayer(exportLights);
+      if (!map.hasLayer(lightsLayer)) lightsLayer.addTo(map);
+      if (map.hasLayer(baseNoLabels)) map.removeLayer(baseNoLabels);
+      if (!map.hasLayer(baseWithLabels)) baseWithLabels.addTo(map);
+      document.querySelector(".mapTint")?.style.removeProperty("display");
+      document.querySelector(".mapShade")?.style.removeProperty("display");
+    } catch(_) {}
+
     btnCard.disabled = false;
     setStatus("status_error_save");
   }
 });
+
+  function buildExportLightsLayer(points, mySession) {
+  const layer = L.layerGroup();
+
+  for (const row of (points || [])) {
+    const isMine = row.session === mySession;
+
+    L.circleMarker([row.lat, row.lng], {
+      // SVG (kein canvasRenderer!)
+      radius: isMine ? 2.6 : 1.4,
+      stroke: false,
+      fill: true,
+      fillOpacity: isMine ? 0.95 : 0.75,
+      fillColor: "#ffffff",
+      interactive: false
+    }).addTo(layer);
+  }
+  return layer;
+}
+
+  function waitMoveEnd(map) {
+  return new Promise(resolve => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      map.off("moveend", finish);
+      resolve();
+    };
+    map.once("moveend", finish);
+    setTimeout(finish, 400); // Fallback
+  });
+}
+
+function waitTiles(layer) {
+  return new Promise(resolve => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      layer.off("load", finish);
+      requestAnimationFrame(() =>
+        requestAnimationFrame(resolve)
+      );
+    };
+    layer.once("load", finish);
+    setTimeout(finish, 1600);
+  });
+}
 
 /* -------------------------
    8) Start
