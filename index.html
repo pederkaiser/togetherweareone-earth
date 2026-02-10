@@ -233,9 +233,26 @@
     .hud button:hover{ background: rgba(0,0,0,0.32); transform: translateY(-1px); }
     .hud button:disabled{ opacity:0.55; cursor:default; transform:none; }
 
-    .hint{ text-align:center; margin:4px 0 0 0; color: rgba(255,255,255,0.60); font-size:14px; }
-    .privacy-hint{ text-align:center; margin:8px 0 0 0; color: rgba(255,255,255,0.55); font-size:12px; }
-    .status{ text-align:center; color: rgba(255,255,255,0.70); font-size:13px; margin-top:6px; }
+    .hint{
+  margin-top: 6px;
+  margin-bottom: 0;
+  text-align:center;
+  color: rgba(255,255,255,0.60);
+  font-size:14px;
+}
+    .privacy-hint{
+  margin-top: 10px;
+  text-align:center;
+  font-size:12px;
+  color: rgba(255,255,255,0.55);
+}
+    .status{
+  margin-top: 4px;   /* war zu groß */
+  margin-bottom: 0;
+  text-align: center;
+  color: rgba(255,255,255,0.70);
+  font-size: 13px;
+}
 
     @media (max-width:600px){
       .wrap{ padding:12px 10px; }
