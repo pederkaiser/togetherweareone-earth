@@ -831,10 +831,10 @@ map.on("mousemove", (e) => {
 function addLight(latlng, isMine = false) {
   L.circleMarker(latlng, {
     renderer: canvasRenderer,      // Canvas (stabil + schnell)
-    radius: isMine ? 0.5 : 2.6,    // 👈 HIER: andere kleiner
+    radius: isMine ? 0.8 : 2.6,    // 👈 HIER: andere kleiner
     stroke: false,
     fill: true,
-    fillOpacity: isMine ? 0.6 : 0.95,
+    fillOpacity: isMine ? 0.7 : 0.95,
     fillColor: "rgba(255,255,255,1)",
     interactive: isMine
   }).addTo(lightsLayer);
