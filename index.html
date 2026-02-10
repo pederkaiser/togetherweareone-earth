@@ -15,6 +15,19 @@
   <!-- PNG Export helper -->
   <script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
 
+<!-- Open Graph / WhatsApp / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Together We Are One">
+<meta property="og:description" content="A quiet place. You set a light and see that many feel the same.">
+<meta property="og:image" content="https://togetherweareone.earth/TogetherWeAreOneEarth.jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta property="og:url" content="https://togetherweareone.earth/">
+
+<!-- Twitter (optional, aber gut) -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://togetherweareone.earth/TogetherWeAreOneEarth.jpeg">
+
   <style>
    :root{
   --bg0:#0c0e13;
@@ -252,10 +265,25 @@
         <div class="tp-progress"><div class="tp-progress-bar" id="tp-bar"></div></div>
         <button class="tp-btn" id="tp-next" title="Weiter" aria-label="Weiter">→</button>
       </div>
-      <div class="share">
-        <button class="share-btn" data-share="whatsapp">WhatsApp</button>
-        <button class="share-btn" data-share="facebook">Facebook</button>
-        <button class="share-btn" data-share="copy">Link kopieren</button>
+     <div class="share">
+       <button class="share-btn" data-share="native">
+        <span class="icon">📤</span><span class="label"></span>
+       </button> 
+       <button class="share-btn" data-share="whatsapp">
+          <span class="icon">🟢</span><span class="label"></span>
+        </button>
+        <button class="share-btn" data-share="signal">
+          <span class="icon">🔵</span><span class="label"></span>
+        </button>
+        <button class="share-btn" data-share="telegram">
+          <span class="icon">✈️</span><span class="label"></span>
+        </button>
+        <button class="share-btn" data-share="facebook">
+          <span class="icon">📘</span><span class="label"></span>
+        </button>
+        <button class="share-btn" data-share="copy">
+          <span class="icon">🔗</span><span class="label"></span>
+        </button>
       </div>
     </div>
 
@@ -716,6 +744,145 @@ const tpTexts = TP[LANG] || TP.en;
 
 // Optional: set <html lang="..."> for accessibility
 document.documentElement.lang = LANG;
+
+  const SHARE_LABELS = {
+  de: {
+    whatsapp: "WhatsApp",
+    signal: "Signal",
+    telegram: "Telegram",
+    facebook: "Facebook",
+    copy: "Link kopieren",
+    native: "teilen"
+  },
+  en: {
+    whatsapp: "WhatsApp",
+    signal: "Signal",
+    telegram: "Telegram",
+    facebook: "Facebook",
+    copy: "Copy link",
+    native: "Share"
+  },
+  fr: {
+    whatsapp: "WhatsApp",
+    signal: "Signal",
+    telegram: "Telegram",
+    facebook: "Facebook",
+    copy: "Copier le lien", 
+    native: "Partager"
+  },
+  es: {
+    whatsapp: "WhatsApp",
+    signal: "Signal",
+    telegram: "Telegram",
+    facebook: "Facebook",
+    copy: "Copiar enlace", 
+    native: "Compartir"
+  },
+  pt: {
+    whatsapp: "WhatsApp",
+    signal: "Signal",
+    telegram: "Telegram",
+    facebook: "Facebook",
+    copy: "Copiar link", 
+    native: "Compartilhar"
+  },
+  ru: {
+    whatsapp: "WhatsApp",
+    signal: "Signal",
+    telegram: "Telegram",
+    facebook: "Facebook",
+    copy: "Скопировать ссылку",
+    native: "Поделиться"
+  },
+  ar: {
+    whatsapp: "واتساب",
+    signal: "سيغنال",
+    telegram: "تيليغرام",
+    facebook: "فيسبوك",
+    copy: "نسخ الرابط", 
+    native: "مشاركة"
+  },
+  hi: {
+    whatsapp: "व्हाट्सएप",
+    signal: "सिग्नल",
+    telegram: "टेलीग्राम",
+    facebook: "फ़ेसबुक",
+    copy: "लिंक कॉपी करें", 
+    native: "साझा करें"
+  },
+  bn: {
+    whatsapp: "হোয়াটসঅ্যাপ",
+    signal: "সিগন্যাল",
+    telegram: "টেলিগ্রাম",
+    facebook: "ফেসবুক",
+    copy: "লিংক কপি করুন", 
+    native: "শেয়ার করুন"
+  },
+  ur: {
+    whatsapp: "واٹس ایپ",
+    signal: "سگنل",
+    telegram: "ٹیلیگرام",
+    facebook: "فیس بک",
+    copy: "لنک کاپی کریں", 
+    native: "شیئر کریں"
+  },
+  zh: {
+    whatsapp: "WhatsApp",
+    signal: "Signal",
+    telegram: "Telegram",
+    facebook: "Facebook",
+    copy: "复制链接", 
+    native: "分享"
+  },
+  ja: {
+    whatsapp: "WhatsApp",
+    signal: "Signal",
+    telegram: "Telegram",
+    facebook: "Facebook",
+    copy: "リンクをコピー", 
+    native: "共有"
+  },
+  ko: {
+    whatsapp: "WhatsApp",
+    signal: "Signal",
+    telegram: "Telegram",
+    facebook: "Facebook",
+    copy: "링크 복사", 
+    native: "공유"
+  },
+  vi: {
+    whatsapp: "WhatsApp",
+    signal: "Signal",
+    telegram: "Telegram",
+    facebook: "Facebook",
+    copy: "Sao chép liên kết", 
+    native: "Chia sẻ"
+  },
+  tr: {
+    whatsapp: "WhatsApp",
+    signal: "Signal",
+    telegram: "Telegram",
+    facebook: "Facebook",
+    copy: "Bağlantıyı kopyala", 
+    native: "Paylaş"
+  },
+  sw: {
+    whatsapp: "WhatsApp",
+    signal: "Signal",
+    telegram: "Telegram",
+    facebook: "Facebook",
+    copy: "Nakili kiungo", 
+    native: "Shiriki"
+  },
+  id: {
+    whatsapp: "WhatsApp",
+    signal: "Signal",
+    telegram: "Telegram",
+    facebook: "Facebook",
+    copy: "Salin tautan", 
+    native: "Bagikan"
+  }
+};
   
   const SHARE_TEXT = {
   de: "Eine stille Seite. Man setzt ein Licht und sieht, dass viele dasselbe fühlen.",
@@ -738,26 +905,50 @@ document.documentElement.lang = LANG;
 };
   const SHARE_URL = location.origin + "/?lang=" + LANG;
 
-  document.querySelectorAll(".share-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
+ const text = SHARE_TEXT[LANG] || SHARE_TEXT.en;
+const url  = location.origin + "/?lang=" + LANG;
+
+document.querySelectorAll(".share-btn").forEach(btn => {
+  btn.addEventListener("click", async () => {
     const type = btn.dataset.share;
     const text = SHARE_TEXT[LANG] || SHARE_TEXT.en;
-    const url  = SHARE_URL;
+    const url  = location.origin + "/?lang=" + LANG;
+
+    // 1) iOS / Native Share Sheet
+    if (type === "native" && navigator.share) {
+      try {
+        await navigator.share({
+          title: "Together We Are One",
+          text: text,
+          url: url
+        });
+      } catch (err) {
+        // User cancelled – silently ignore
+      }
+      return;
+    }
+
+    // 2) Fallbacks (bestehende Buttons)
+    const payload = encodeURIComponent(text + "\n" + url);
 
     if (type === "whatsapp") {
+      window.open(`https://wa.me/?text=${payload}`, "_blank");
+    }
+    if (type === "signal") {
+      window.open(`https://signal.me/#text=${payload}`, "_blank");
+    }
+    if (type === "telegram") {
       window.open(
-        `https://wa.me/?text=${encodeURIComponent(text + "\n" + url)}`,
+        `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
         "_blank"
       );
     }
-
     if (type === "facebook") {
       window.open(
         `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
         "_blank"
       );
     }
-
     if (type === "copy") {
       navigator.clipboard.writeText(url);
       alert(
