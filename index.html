@@ -82,6 +82,31 @@
   width:100%;
   height:520px;
 }
+#map,
+#map * {
+  cursor: crosshair !important;
+}
+    
+.mapDarkOverlay{
+  pointer-events:none;
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(900px 500px at 50% 10%,
+      rgba(0,0,0,0.3),
+      rgba(0,0,0,0.8) 70%);
+  mix-blend-mode: multiply;
+}
+    
+.leaflet-container {
+  cursor: crosshair;
+  cursor: url('data:image/svg+xml;utf8,\
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">\
+  <line x1="12" y1="0" x2="12" y2="24" stroke="white" stroke-width="1"/>\
+  <line x1="0" y1="12" x2="24" y2="12" stroke="white" stroke-width="1"/>\
+  </svg>') 12 12, crosshair;
+  background: transparent !important;
+}
 
     .tp-text{
       text-align:center;
@@ -165,6 +190,7 @@
     <div class="hud">
       <button id="btnWorld"></button>
       <button id="btnCard"></button>
+      <div class="mapDarkOverlay"></div>
     </div>
     <div id="map"></div>
   </div>
