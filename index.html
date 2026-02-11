@@ -91,24 +91,24 @@ body{
 
 /* Cards */
 
-.teleprompter,
-.mapWrap{
-  position:relative;
-  overflow:hidden;
-  background:#0a0b10;
-  display:flex;
-  min-height:320px;   /* Fallback */
-}
-
 .teleprompter{
+  position:relative;
   padding:16px 20px;
-  margin-bottom:12px;
   backdrop-filter:blur(20px);
   background:linear-gradient(
     180deg,
     rgba(255,255,255,0.05),
     rgba(255,255,255,0.02)
   );
+}
+    
+.mapWrap{
+  position:relative;
+  overflow:hidden;
+  background:#0a0b10;
+
+  display:flex;
+  min-height:320px;   /* nur hier */
 }
     
 .mapTint,
@@ -257,22 +257,10 @@ body{
 }
 
 .tp-btn{
-  padding:8px 14px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.15);
-  background:rgba(255,255,255,0.06);
-  color:white;
-}
-
-    .tp-btn{
   background:transparent;
-  border:1px solid rgba(255,255,255,0.1);
-  padding:6px 10px;
-}
-
-.tp-btn{
   border:none;
   opacity:0.5;
+  padding:6px 10px;
 }
 .tp-btn:hover{
   opacity:1;
