@@ -38,10 +38,10 @@
   --ghost: rgba(255,255,255,0.25);
   --text: rgba(255,255,255,0.92);
   --warm: rgba(255,220,170,0.95);
-  --map-brightness: 0.9;   /* etwas heller als vorher */
-  --map-contrast: 1.15;
+  --shade-opacity: 0.18;
+  --map-brightness: 1.05;
+  --map-contrast: 1.05;
   --map-saturate: 0.0;
-  --shade-opacity: 0.58;
 }
 
 .leaflet-tile{
@@ -125,8 +125,13 @@ body{
   pointer-events:none;
   position:absolute;
   inset:0;
-  background: rgba(0,0,0,var(--shade-opacity));
   z-index:1;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(0,0,0,0.05),
+      rgba(0,0,0,0.15)
+    );
 }
 
 /* HUD */
