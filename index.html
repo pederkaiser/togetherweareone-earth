@@ -1082,7 +1082,12 @@ function addLight(latlng, isMine=false){
 }
 
 map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: false });
-function goWorld(){ map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: false }); }
+function goWorld(animate = false) {
+  map.fitBounds(WORLD_BOUNDS, {
+    animate: animate,
+    padding: [0, 0]
+  });
+}
 
 map.whenReady(() => {
   afterTwoFrames(() => {
@@ -1233,8 +1238,9 @@ document.getElementById("btnCard").addEventListener("click", async () => {
   try {
     setStatus("status_export");
 
-    goWorld();
+    goWorld(false);
     await waitMoveEnd(map);
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
     if (map.hasLayer(voyagerTiles)) map.removeLayer(voyagerTiles);
     exportTiles.addTo(map);
