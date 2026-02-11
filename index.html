@@ -787,7 +787,6 @@ const UI = {
 const UI_TEXT = UI[LANG] || UI.en;
 const tpTexts = TP[LANG] || TP.en;
 
-document.getElementById("btnWorld").textContent = UI_TEXT.world;
 document.getElementById("btnCard").textContent  = UI_TEXT.card;
 document.getElementById("hint").textContent     = UI_TEXT.hint;
 document.getElementById("privacyHint").textContent = UI_TEXT.privacy;
@@ -1096,7 +1095,16 @@ async function loadLights(){
       if (hintEl) hintEl.style.display = "block";
       setStatus("status_empty");
      const actions = document.querySelector(".map-actions");
-     if (actions) actions.style.opacity = "0.5";
+
+if (mine) {
+  if (hintEl) hintEl.style.display = "none";
+  setStatus("status_set");
+  if (actions) actions.style.opacity = "1";
+} else {
+  if (hintEl) hintEl.style.display = "block";
+  setStatus("status_empty");
+  if (actions) actions.style.opacity = "0.5";
+}
     }
 
   }catch(e){
@@ -1124,8 +1132,6 @@ map.on('click', async (e) => {
     console.error(err);
   }
 });
-
-document.getElementById("btnWorld").addEventListener("click", () => { goWorld(); });
 
 /* -------------------------
    8) Export
