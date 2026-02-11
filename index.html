@@ -780,14 +780,13 @@ map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: false });
 
 // WICHTIG: Funktion für stabile Weltansicht (immer komplett)
 function goWorld(animate=false){
-  map.fitBounds(WORLD_BOUNDS, { padding: [0,0], animate });
+  map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: false });
 }
 
 // Beim ersten Laden: Map-Container finalisieren + Weltansicht erzwingen
 map.whenReady(() => {
   afterTwoFrames(() => {
     map.invalidateSize(true);
-    map.setZoom(map.getZoom() + 0.1);
     goWorld(false);
   });
 });
