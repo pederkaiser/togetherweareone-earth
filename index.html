@@ -679,7 +679,6 @@ function afterTwoFrames(fn){
 // Map initialisieren (noch nicht setView -> wir fitten stabil in whenReady)
 const map = L.map('map', {
   zoomControl: true,
-  preferCanvas: true,
   worldCopyJump: false,
   zoomSnap: 0.25,
   zoomDelta: 0.25,
@@ -982,6 +981,13 @@ btnCard.addEventListener("click", async () => {
 
     // 🌍 Bildschirm-Tiles entfernen
     map.removeLayer(voyagerTiles);
+    
+    // Canvas-Lichter entfernen
+    map.removeLayer(lightsLayer);
+
+    // SVG-Lichter für Export erzeugen
+    const exportLights = buildExportLightsLayer(allLightPoints, session);
+    exportLights.addTo(map);
 
     // 🌑 Export-Tiles hinzufügen
     exportTiles.addTo(map);
@@ -997,6 +1003,11 @@ btnCard.addEventListener("click", async () => {
 
       // 🌍 Bildschirm-Tiles zurück
       voyagerTiles.addTo(map);
+      // Export-Lichter entfernen
+      map.removeLayer(exportLights);
+
+      // Canvas-Lichter wieder hinzufügen
+      lightsLayer.addTo(map);
 
       btnCard.disabled = false;
 
