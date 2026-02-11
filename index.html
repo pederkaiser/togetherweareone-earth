@@ -604,30 +604,45 @@ function shareUrlForLang() {
 }
 
 function ensureShareButton(){
-  let btn = document.getElementById("shareMain");
+
+  const btn = document.getElementById("shareMain");
   if (!btn) return;
 
   btn.textContent = SHARE_MAIN_LABEL[LANG] || SHARE_MAIN_LABEL.en;
 
   btn.addEventListener("click", async () => {
-    const url = shareUrlForLang();
-    const text = SHARE_TEXT[LANG] || SHARE_TEXT.en;
 
+    const url  = shareUrlForLang();
+    const text = SHARE_TEXT[LANG] || SHARE_TEXT.en;
+    const title = UI_TEXT.share_title || "Together We Are One";
+
+    // Native share (Mobile / modern browsers)
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Together We Are One", text, url });
-      } catch (_) {}
-      return;
+        await navigator.share({
+          title,
+          text,
+          url
+        });
+        return;
+      } catch (err) {
+        // user cancelled → no fallback needed
+        if (err && err.name === "AbortError") return;
+      }
     }
 
+    // Clipboard fallback
     try {
       await navigator.clipboard.writeText(url);
-      alert("Link copied");
-    } catch (_) {
-      prompt("", url);
-    }
+      setStatus("copy_ok");
+      return;
+    } catch (_) {}
+
+    // Last fallback (older browsers)
+    window.prompt("", url);
   });
 }
+
 ensureShareButton();
 
 /* -------------------------
