@@ -283,32 +283,45 @@ body{
 <div id="langBadge"></div>
 
 <div class="wrap">
-
   <div class="content">
 
+    <!-- TELEPROMPTER -->
     <div class="teleprompter">
       <p id="tp-text" class="tp-text"></p>
 
-     <div class="tp-meta">
-  <button id="tp-prev" class="tp-btn">←</button>
+      <div class="tp-meta">
+        <button id="tp-prev" class="tp-btn">←</button>
 
-  <div class="tp-progress">
-    <div class="tp-progress-bar" id="tp-bar"></div>
-  </div>
+        <div class="tp-progress">
+          <div class="tp-progress-bar" id="tp-bar"></div>
+        </div>
 
-  <button id="tp-next" class="tp-btn">→</button>
-</div>
+        <button id="tp-next" class="tp-btn">→</button>
+      </div>
+
+      <!-- Aktionen unter dem Progress -->
+      <div class="tp-actions">
+        <button id="shareMain" class="tp-btn share-btn"></button>
+        <button id="btnCard" class="tp-btn export-btn"></button>
+      </div>
     </div>
 
+
+    <!-- KARTE -->
     <div class="mapWrap">
+
+      <!-- World View Button mittig -->
       <div class="mapCenterControl">
-  <button id="btnWorld" class="world-btn"></button>
-</div>
+        <button id="btnWorld" class="world-btn"></button>
+      </div>
 
       <div id="map"></div>
       <div class="mapDarkOverlay"></div>
+
     </div>
 
+
+    <!-- Footer -->
     <p id="privacyHint" class="privacy-hint"></p>
     <p id="status" class="status"></p>
     <p id="hint" class="hint"></p>
