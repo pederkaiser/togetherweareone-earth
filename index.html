@@ -276,6 +276,31 @@ body{
   opacity:0.6;
   z-index:2000;
 }
+
+.map-actions {
+  position:absolute;
+  right:14px;
+  bottom:14px;
+  z-index:600;
+}
+
+.map-actions button{
+  padding:12px 20px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.10);
+  color:white;
+  font-weight:600;
+  backdrop-filter: blur(10px);
+  cursor:pointer;
+  transition: all 160ms ease;
+}
+
+.map-actions button:hover{
+  background: rgba(255,255,255,0.18);
+  transform: translateY(-1px);
+}
+  
   </style>
 </head>
 
@@ -305,9 +330,6 @@ body{
         <div class="tp-actions-center">
           <button id="shareMain" class="tp-btn share-btn" type="button"></button>
         </div>
-        <div class="tp-actions-right">
-          <button id="btnCard" class="tp-btn export-btn" type="button"></button>
-        </div>
       </div>
     </div>
 
@@ -318,6 +340,9 @@ body{
       </div>
 
       <div id="map"></div>
+      <div class="map-actions">
+        <button id="btnCard" type="button"></button>
+      </div>
 
       <!-- FIX: overlay existiert jetzt -->
       <div class="mapDarkOverlay"></div>
@@ -409,6 +434,110 @@ const TP = {
     "Le fait que cela existe – selon ce que nous savons – est unique.",
     "Cela nous rend tous particuliers. Et nous relie.",
     "Ici, tu peux placer une lumière. Et voir que beaucoup ressentent la même chose."
+  ],
+  pt: [
+    "Quase nunca pensamos nisso.",
+    "Nossa vida neste pequeno planeta azul no espaço.",
+    "Neste breve instante muito depois do Big Bang.",
+    "Que ele exista – pelo que sabemos – é algo único.",
+    "Isso nos torna especiais. E nos conecta.",
+    "Aqui você pode colocar uma luz. E ver que muitos sentem o mesmo."
+  ],
+  ru: [
+    "Мы почти никогда об этом не думаем.",
+    "О нашей жизни на этой маленькой голубой планете.",
+    "В этом кратком мгновении спустя долгое время после Большого взрыва.",
+    "То, что она существует – насколько мы знаем – уникально.",
+    "Это делает нас особенными. И соединяет нас.",
+    "Здесь ты можешь зажечь свет. И увидеть, что многие чувствуют то же самое."
+  ],
+  ar: [
+    "نادراً ما نفكر في ذلك.",
+    "في حياتنا على هذا الكوكب الأزرق الصغير.",
+    "في هذه اللحظة القصيرة بعد زمن طويل من الانفجار العظيم.",
+    "أن وجوده – حسب ما نعرف – أمر فريد.",
+    "هذا يجعلنا جميعاً مميزين. ويربطنا.",
+    "هنا يمكنك أن تضع نوراً. وترى أن كثيرين يشعرون بالشيء نفسه."
+  ],
+  hi: [
+    "हम लगभग कभी इसके बारे में नहीं सोचते।",
+    "इस छोटे नीले ग्रह पर हमारे जीवन के बारे में।",
+    "इस छोटे से क्षण में, महाविस्फोट के बहुत बाद।",
+    "कि इसका अस्तित्व है – जितना हम जानते हैं – अद्वितीय है।",
+    "यह हमें विशेष बनाता है। और जोड़ता है।",
+    "यहाँ आप एक रोशनी रख सकते हैं। और देख सकते हैं कि कई लोग वही महसूस करते हैं।"
+  ],
+  bn: [
+    "আমরা প্রায় কখনোই এটা নিয়ে ভাবি না।",
+    "এই ছোট নীল গ্রহে আমাদের জীবন নিয়ে।",
+    "এই ক্ষণিক মুহূর্তে, বিগ ব্যাংয়ের অনেক পরে।",
+    "এর অস্তিত্ব – যতটুকু আমরা জানি – অনন্য।",
+    "এটি আমাদের বিশেষ করে তোলে। এবং যুক্ত করে।",
+    "এখানে তুমি একটি আলো বসাতে পারো। এবং দেখতে পারো যে অনেকেই একই অনুভব করে।"
+  ],
+  ur: [
+    "ہم تقریباً کبھی اس کے بارے میں نہیں سوچتے۔",
+    "اس چھوٹے نیلے سیارے پر اپنی زندگی کے بارے میں۔",
+    "اس مختصر لمحے میں، بگ بینگ کے بہت بعد۔",
+    "کہ اس کا وجود ہے – جتنا ہم جانتے ہیں – منفرد ہے۔",
+    "یہ ہمیں خاص بناتا ہے۔ اور جوڑتا ہے۔",
+    "یہاں آپ ایک روشنی رکھ سکتے ہیں۔ اور دیکھ سکتے ہیں کہ بہت سے لوگ یہی محسوس کرتے ہیں۔"
+  ],
+  zh: [
+    "我们几乎从不去想这些。",
+    "关于我们在这颗小小蓝色星球上的生活。",
+    "在宇宙大爆炸之后漫长岁月中的这一瞬间。",
+    "它的存在——据我们所知——是独一无二的。",
+    "这让我们与众不同，也让我们彼此连接。",
+    "在这里，你可以点亮一盏灯，看到许多人有着同样的感受。"
+  ],
+  ja: [
+    "私たちはほとんど考えません。",
+    "この小さな青い惑星での私たちの暮らしについて。",
+    "ビッグバンから長い時間が過ぎたこの一瞬について。",
+    "それが存在していること自体が、私たちの知る限り特別です。",
+    "それは私たちを特別にし、つなげます。",
+    "ここで光を置くことができます。そして多くの人が同じように感じていることが見えます。"
+  ],
+  ko: [
+    "우리는 거의 생각하지 않습니다.",
+    "이 작은 푸른 행성에서의 우리의 삶에 대해.",
+    "빅뱅 이후 오랜 시간이 지난 이 짧은 순간에 대해.",
+    "그 존재 자체가 우리가 아는 한 특별합니다.",
+    "그것은 우리를 특별하게 만들고 연결합니다.",
+    "여기에서 빛을 놓을 수 있습니다. 그리고 많은 이들이 같은 감정을 느끼고 있음을 볼 수 있습니다."
+  ],
+  vi: [
+    "Chúng ta hầu như không bao giờ nghĩ đến điều đó.",
+    "Về cuộc sống của mình trên hành tinh xanh nhỏ bé này.",
+    "Trong khoảnh khắc ngắn ngủi rất lâu sau Vụ Nổ Lớn.",
+    "Việc nó tồn tại – theo những gì chúng ta biết – là điều độc nhất.",
+    "Điều đó khiến chúng ta trở nên đặc biệt. Và kết nối chúng ta.",
+    "Tại đây, bạn có thể đặt một ánh sáng và thấy rằng nhiều người cũng cảm nhận như vậy."
+  ],
+  tr: [
+    "Bunu neredeyse hiç düşünmeyiz.",
+    "Bu küçük mavi gezegendeki hayatımızı.",
+    "Büyük Patlama’dan çok sonra bu kısa an içinde.",
+    "Onun var olması – bildiğimiz kadarıyla – benzersizdir.",
+    "Bu bizi özel kılar. Ve birbirimize bağlar.",
+    "Burada bir ışık bırakabilirsin ve birçok kişinin aynı şeyi hissettiğini görebilirsin."
+  ],
+  sw: [
+    "Karibu hatufikirii kuhusu hilo.",
+    "Kuhusu maisha yetu kwenye sayari hii ndogo ya buluu.",
+    "Katika mng’ao huu mfupi muda mrefu baada ya Mlipo Mkuu.",
+    "Kwamba yapo – kadiri tunavyojua – ni ya kipekee.",
+    "Hilo hutufanya tuwe wa pekee na hutunganisha.",
+    "Hapa unaweza kuweka mwanga na kuona kwamba wengi wanahisi vivyo hivyo."
+  ],
+  id: [
+    "Kita hampir tidak pernah memikirkannya.",
+    "Tentang kehidupan kita di planet biru kecil ini.",
+    "Dalam kedipan singkat ini lama setelah Dentuman Besar.",
+    "Bahwa itu ada – sejauh yang kita ketahui – adalah sesuatu yang unik.",
+    "Hal itu membuat kita istimewa dan menghubungkan kita.",
+    "Di sini kamu bisa menempatkan sebuah cahaya dan melihat bahwa banyak yang merasakan hal yang sama."
   ]
 };
 
