@@ -58,10 +58,11 @@
 }
 
 .content {
-  width: 100%;
-  max-width: 1000px;
+  width:100%;
+  max-width:1000px;
+  margin:0 auto;
 }
-
+    
 .teleprompter,
 .mapWrap {
   width: 100%;
@@ -177,28 +178,35 @@
 <div id="langBadge"></div>
 
 <div class="wrap">
- <div class="content">
-  <div class="teleprompter">
-    <p id="tp-text" class="tp-text"></p>
 
-    <div class="tp-meta">
-      <button id="tp-prev" class="tp-btn">←</button>
-      <button id="tp-next" class="tp-btn">→</button>
+  <div class="content">
+
+    <div class="teleprompter">
+      <p id="tp-text" class="tp-text"></p>
+
+      <div class="tp-meta">
+        <button id="tp-prev" class="tp-btn">←</button>
+        <button id="tp-next" class="tp-btn">→</button>
+      </div>
     </div>
-  </div>
-  <div class="mapWrap">
-    <div class="hud">
-      <button id="btnWorld"></button>
-      <button id="btnCard"></button>
+
+    <div class="mapWrap">
+      <div class="hud">
+        <button id="btnWorld"></button>
+        <button id="btnCard"></button>
+      </div>
+
+      <div id="map"></div>
+      <div class="mapDarkOverlay"></div>
     </div>
-    <div id="map"></div>
-    <div class="mapDarkOverlay"></div>
+
+    <p id="privacyHint" class="privacy-hint"></p>
+    <p id="status" class="status"></p>
+    <p id="hint" class="hint"></p>
+
   </div>
 </div>
-  <p id="privacyHint" class="privacy-hint"></p>
-  <p id="status" class="status"></p>
-  <p id="hint" class="hint"></p>
-</div>
+
 <script>
 
 /* -------------------------
