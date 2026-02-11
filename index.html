@@ -335,6 +335,7 @@
    Globals
 -------------------------- */
 let allLightPoints = []; // IMPORTANT: global (used by export)
+let myExactLatLng = null;
 
 /* -------------------------
    1) Language
@@ -873,20 +874,35 @@ async function loadLights(){
     console.error(e);
     setStatus("status_error_load");
   }
+  for (const row of allLightPoints) {
+  const isMine = (row.session === session);
+
+  if (isMine && myExactLatLng) {
+    addLight(myExactLatLng, true);   // 👈 exakt unter Cursor
+  } else {
+    addLight([row.lat, row.lng], false); // 👈 anonymisierte anderen
+  }
+}
 }
 
 map.on('click', async (e) => {
-  try{
+  try {
+    myExactLatLng = e.latlng; // 👈 merken (nur lokal!)
+
     const pos = anonymize(e.latlng.lat, e.latlng.lng);
     const existing = await loadMyLight();
 
-    if(existing){
-      await sb.from('lights').update({ lat: pos.lat, lng: pos.lng }).eq('session', session);
+    if (existing) {
+      await sb.from('lights')
+        .update({ lat: pos.lat, lng: pos.lng })
+        .eq('session', session);
     } else {
-      await sb.from('lights').insert({ lat: pos.lat, lng: pos.lng, session });
+      await sb.from('lights')
+        .insert({ lat: pos.lat, lng: pos.lng, session });
     }
+
     await loadLights();
-  } catch(err){
+  } catch (err) {
     console.error(err);
     setStatus("status_error_save");
   }
