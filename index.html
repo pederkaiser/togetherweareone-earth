@@ -1030,7 +1030,7 @@ document.getElementById("btnCard").addEventListener("click", async () => {
   try {
     setStatus("status_export");
 
-    // 1️⃣ Weltansicht OHNE Animation
+    // 1️⃣ Weltansicht ohne Animation
     goWorld(false);
     await waitMoveEnd(map);
 
@@ -1039,17 +1039,21 @@ document.getElementById("btnCard").addEventListener("click", async () => {
     exportTiles.addTo(map);
     await waitTiles(exportTiles);
 
-    // 3️⃣ WICHTIG: Zwei Frames warten
+    // 3️⃣ Export-Lichter als SVG-Layer hinzufügen
+    const exportLights = buildExportLightsLayer(allLightPoints, session);
+    exportLights.addTo(map);
+
     await new Promise(r =>
       requestAnimationFrame(() =>
         requestAnimationFrame(r)
       )
     );
-
+    await waitIdle(map);
     // 4️⃣ Screenshot
     leafletImage(map, function(err, canvas){
 
-      // Restore
+      // 🔁 Restore
+      map.removeLayer(exportLights);
       map.removeLayer(exportTiles);
       voyagerTiles.addTo(map);
 
