@@ -65,18 +65,31 @@ body{
   display: flex;
   flex-direction: column;
 }
+    
+body{
+  margin:0;
+  color:var(--text);
+  background:linear-gradient(180deg,var(--bg1),var(--bg0));
+  font-family:system-ui,-apple-system,"Inter",sans-serif;
+  min-height:100dvh;   /* besser für Mobile */
+  display:flex;
+  background:
+  radial-gradient(circle at 50% 20%, rgba(255,255,255,0.03), transparent 60%),
+  linear-gradient(180deg,var(--bg1),var(--bg0));
+}
 
 /* Layout */
 
 .wrap{
   flex:1;
-  grid-template-rows:auto 1fr auto;
-  gap:18px;
-  padding:24px 0;
+  display:flex;
+  align-items:center;      /* vertikal ruhiger */
+  justify-content:center;  /* horizontal zentriert */
+  padding:20px 16px;
 }
 
 .content{
-  width:100%;
+  width:min(100%, 1000px);
   max-width:1000px;
   margin:0 auto;
   display:grid;
@@ -269,7 +282,21 @@ body{
   background:rgba(255,255,255,0.06);
   color:white;
 }
-    
+
+    .tp-btn{
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.1);
+  padding:6px 10px;
+}
+
+.tp-btn{
+  border:none;
+  opacity:0.5;
+}
+.tp-btn:hover{
+  opacity:1;
+}
+
 .tp-progress{
   width: min(500px, 60vw);
   height: 4px;
@@ -318,6 +345,16 @@ body{
   border:1px solid rgba(255,220,170,0.35);
 }
 
+.export-btn{
+  position:absolute;
+  bottom:14px;
+  right:14px;
+  padding:6px 10px;
+  font-size:12px;
+  border-radius:10px;
+  opacity:0.6;
+}
+
 .share-btn{
   font-weight:500;
   letter-spacing:0.02em;
@@ -354,13 +391,18 @@ body{
   opacity:0.6;
 }
 
+.share-btn{
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.12);
+  padding:8px 18px;
+  font-size:14px;
+  border-radius:999px;
+}
+
 </style>
 </head>
 
 <body>
-
-<div id="langBadge"></div>
-
 <div class="wrap">
   <div class="content">
 
