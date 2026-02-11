@@ -92,6 +92,8 @@ body{
     rgba(255,255,255,0.05),
     rgba(255,255,255,0.02)
   );
+  border-radius: 22px;
+  overflow: hidden; 
 }
 
 .mapWrap{
@@ -100,6 +102,16 @@ body{
   background:#0a0b10;
   display:flex;
   min-height:320px;
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+.teleprompter,
+.mapWrap{
+  border-radius: 26px;
+  box-shadow: 
+    0 20px 60px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
 .mapTint,
@@ -294,6 +306,7 @@ body{
   backdrop-filter: blur(10px);
   cursor:pointer;
   transition: all 160ms ease;
+  border-radius: 999px;
 }
 
 .map-actions button:hover{
