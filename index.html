@@ -752,12 +752,28 @@ function afterTwoFrames(fn){
 // Map initialisieren (noch nicht setView -> wir fitten stabil in whenReady)
 const map = L.map('map', {
   zoomControl: true,
+  preferCanvas: true,   // 🔥 DAS IST PFLICHT
   worldCopyJump: false,
   zoomSnap: 0.25,
   zoomDelta: 0.25,
   maxBounds: WORLD_BOUNDS,
   maxBoundsViscosity: 1.0
 });
+
+const canvasRenderer = L.canvas({ padding: 0.5 });
+const lightsLayer = L.layerGroup().addTo(map);
+
+function addLight(latlng, isMine=false){
+  L.circleMarker(latlng, {
+    renderer: canvasRenderer,   // 🔥 GANZ WICHTIG
+    radius: isMine ? 2.6 : 1.35,
+    stroke: false,
+    fill: true,
+    fillOpacity: isMine ? 0.95 : 0.70,
+    fillColor: "rgba(255,250,245,1)",
+    interactive: isMine
+  }).addTo(lightsLayer);
+}
 
 // definierter Start
 map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: false });
@@ -1029,29 +1045,20 @@ document.getElementById("btnCard").addEventListener("click", async () => {
   try{
     setStatus("status_export");
 
-    // 0) Map size stabilisieren
-    map.invalidateSize(true);
-    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    // Weltansicht
+    map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
 
-    // 1) Weltansicht
-    goWorld(false);
-    await waitMoveEnd(map);
-    await waitIdle(map);
-
-    // 2) Tiles wechseln
-    if (map.hasLayer(voyagerTiles)) map.removeLayer(voyagerTiles);
+    // Labels aus
+    if(map.hasLayer(voyagerTiles)) map.removeLayer(voyagerTiles);
     exportTiles.addTo(map);
 
     await waitTiles(exportTiles);
-    await waitIdle(map);
-    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-    // 3) Screenshot
     leafletImage(map, function(err, canvas){
 
-      // Restore Tiles
-      if (map.hasLayer(exportTiles)) map.removeLayer(exportTiles);
-      if (!map.hasLayer(voyagerTiles)) voyagerTiles.addTo(map);
+      // Restore
+      map.removeLayer(exportTiles);
+      voyagerTiles.addTo(map);
 
       if(err){
         console.error(err);
