@@ -956,10 +956,9 @@ function buildExportLightsLayer(points, mySession) {
   const exportLayer = L.layerGroup();
 
   for (const row of (points || [])) {
-    const isMine = (row.session === mySession);
+    const isMine = row.session === mySession;
 
     L.circleMarker([row.lat, row.lng], {
-      // KEIN renderer => Leaflet SVG
       radius: isMine ? 2.6 : 1.35,
       stroke: false,
       fill: true,
@@ -976,69 +975,44 @@ const btnCard = document.getElementById("btnCard");
 
 btnCard.addEventListener("click", async () => {
 
-  try {
+  btnCard.disabled = true;
+  setStatus("status_export");
 
-    btnCard.disabled = true;
-    setStatus("status_export");
+  goWorld(false);
+  await waitMoveEnd(map);
 
-    // 🌍 Bildschirm-Tiles entfernen
-    map.removeLayer(voyagerTiles);
-    
-    // Canvas-Lichter entfernen
-    map.removeLayer(lightsLayer);
+  // 1️⃣ Bildschirm-Lichter entfernen
+  map.removeLayer(lightsLayer);
 
-    // SVG-Lichter für Export erzeugen
-    const exportLights = buildExportLightsLayer(allLightPoints, session);
-    exportLights.addTo(map);
+  // 2️⃣ SVG-Lichter bauen
+  const exportLights = buildExportLightsLayer(allLightPoints, session);
+  exportLights.addTo(map);
 
-    // 🌑 Export-Tiles hinzufügen
-    exportTiles.addTo(map);
+  // 3️⃣ Zwei Frames warten (WICHTIG!)
+  await new Promise(r => requestAnimationFrame(() =>
+    requestAnimationFrame(r)
+  ));
 
-    goWorld(false);
-    await waitMoveEnd(map);
-    await new Promise(r => setTimeout(r, 600));
+  leafletImage(map, function(err, canvas) {
 
-    leafletImage(map, function(err, canvas) {
-
-      // 🔄 Export-Tiles wieder entfernen
-      map.removeLayer(exportTiles);
-
-      // 🌍 Bildschirm-Tiles zurück
-      voyagerTiles.addTo(map);
-      // Export-Lichter entfernen
-      map.removeLayer(exportLights);
-
-      // Canvas-Lichter wieder hinzufügen
-      lightsLayer.addTo(map);
-
-      btnCard.disabled = false;
-
-      if (err) {
-        console.error(err);
-        setStatus("status_error_save");
-        return;
-      }
-
-      const link = document.createElement("a");
-      link.href = canvas.toDataURL("image/png");
-      link.download = "together-we-are-one.png";
-      link.click();
-
-      setStatus("status_done");
-    });
-
-  } catch(e){
-    console.error(e);
-
-    // Falls etwas schiefgeht → Tiles zurücksetzen
-    if (map.hasLayer(exportTiles)) {
-      map.removeLayer(exportTiles);
-      voyagerTiles.addTo(map);
-    }
+    // Restore
+    map.removeLayer(exportLights);
+    lightsLayer.addTo(map);
 
     btnCard.disabled = false;
-    setStatus("status_error_save");
-  }
+
+    if (err) {
+      console.error(err);
+      return;
+    }
+
+    const link = document.createElement("a");
+    link.href = canvas.toDataURL("image/png");
+    link.download = "together-we-are-one.png";
+    link.click();
+
+    setStatus("status_done");
+  });
 
 });
 
