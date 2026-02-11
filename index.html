@@ -76,6 +76,7 @@
 .mapWrap{
   background:#0a0b10;
   overflow:hidden;
+  position:relative;
 }
 
 #map{
@@ -106,6 +107,11 @@
   <line x1="0" y1="12" x2="24" y2="12" stroke="white" stroke-width="1"/>\
   </svg>') 12 12, crosshair;
   background: transparent !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(0,0,0,0.5) !important;
+  color: rgba(255,255,255,0.7);
 }
 
     .tp-text{
@@ -190,9 +196,9 @@
     <div class="hud">
       <button id="btnWorld"></button>
       <button id="btnCard"></button>
-      <div class="mapDarkOverlay"></div>
     </div>
     <div id="map"></div>
+    <div class="mapDarkOverlay"></div>
   </div>
 
   <p id="privacyHint" class="privacy-hint"></p>
@@ -624,14 +630,17 @@ window.addEventListener("resize", () => {
 const tileUrlLabels   = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 const tileUrlNoLabels = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
 
-const baseWithLabels = L.tileLayer(tileUrlLabels, {
-  attribution: '&copy; OpenStreetMap &copy; CARTO',
-  maxZoom: 18,
-  noWrap: true,
-  bounds: WORLD_BOUNDS,
-  crossOrigin: true
-}).addTo(map);
-
+const baseWithLabels = L.tileLayer(
+  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 18,
+    noWrap: true,
+    bounds: WORLD_BOUNDS,
+    crossOrigin: true
+  }
+).addTo(map);
+  
 const baseNoLabels = L.tileLayer(tileUrlNoLabels, {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
   maxZoom: 18,
