@@ -1,34 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Together We Are One</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<title>Together We Are One</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
 
-  <!-- Supabase -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
-  <!-- PNG Export helper -->
-  <script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
-
-  <!-- Open Graph / WhatsApp / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Together We Are One">
-  <meta property="og:description" content="A quiet place. You set a light and see that many feel the same.">
-  <meta property="og:image" content="https://togetherweareone.earth/TogetherWeAreOneEarth.jpeg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="1200">
-  <meta property="og:url" content="https://togetherweareone.earth/">
-
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://togetherweareone.earth/TogetherWeAreOneEarth.jpeg">
-
-  <style>
+<style>
     :root{
       --bg0:#0b0d12;
       --bg1:#121526;
@@ -752,243 +734,106 @@ function setStatus(key){
 /* -------------------------
    6) Map
 -------------------------- */
-const WORLD_BOUNDS = L.latLngBounds(
-  [-85, -180],
-  [85, 180]
-);
-const WORLD_VIEW = { center: [20, 0], zoom: 2.0 };
 
-const map = L.map('map', {
-  zoomControl: true,
-  preferCanvas: true,
-  worldCopyJump: false,
-  zoomSnap: 0.25,
-  zoomDelta: 0.25
+const WORLD_BOUNDS = L.latLngBounds([-85,-180],[85,180]);
+const WORLD_VIEW = { center:[20,0], zoom:2.0 };
+
+const map = L.map('map',{
+  zoomControl:true,
+  preferCanvas:true,
+  worldCopyJump:false,
+  zoomSnap:0.25,
+  zoomDelta:0.25
 });
 
-const tileUrlLabels   = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-const tileUrlNoLabels = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
+const tileUrlLabels='https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+const tileUrlNoLabels='https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
 
-const baseWithLabels = L.tileLayer(tileUrlLabels, {
-  attribution: '&copy; OpenStreetMap &copy; CARTO',
-  maxZoom: 18,
-  noWrap: true,
-  bounds: WORLD_BOUNDS,
-  crossOrigin: true
+const baseWithLabels=L.tileLayer(tileUrlLabels,{
+  attribution:'&copy; OpenStreetMap &copy; CARTO',
+  maxZoom:18,
+  noWrap:true,
+  bounds:WORLD_BOUNDS,
+  crossOrigin:true
 }).addTo(map);
 
-const baseNoLabels = L.tileLayer(tileUrlNoLabels, {
-  attribution: '&copy; OpenStreetMap &copy; CARTO',
-  maxZoom: 18,
-  noWrap: true,
-  bounds: WORLD_BOUNDS,
-  crossOrigin: true
+const baseNoLabels=L.tileLayer(tileUrlNoLabels,{
+  attribution:'&copy; OpenStreetMap &copy; CARTO',
+  maxZoom:18,
+  noWrap:true,
+  bounds:WORLD_BOUNDS,
+  crossOrigin:true
 });
 
-const canvasRenderer = L.canvas({ padding: 0.5 });
-const lightsLayer = L.layerGroup().addTo(map);
+/* ---------- FIX 1: World Button ---------- */
 
-function anonymize(lat, lng) {
-  const GRID = 0.1; // ~10-11km
-  return {
-    lat: Math.round(lat / GRID) * GRID,
-    lng: Math.round(lng / GRID) * GRID
-  };
-}
-
-// Ghost light (cursor)
-const ghost = L.circleMarker([0,0], {
-  renderer: canvasRenderer,
-  radius: 10,
-  stroke: false,
-  fill: true,
-  fillOpacity: 0.10,
-  fillColor: "rgba(255,220,170,1)",
-  interactive: false
-}).addTo(map);
-
-const ghostCore = L.circleMarker([0,0], {
-  renderer: canvasRenderer,
-  radius: 2.2,
-  stroke: false,
-  fill: true,
-  fillOpacity: 0.75,
-  fillColor: "rgba(255,255,255,1)",
-  interactive: false
-}).addTo(map);
-
-map.on("mouseover", () => {
-  ghost.setStyle({ fillOpacity: 0.10 });
-  ghostCore.setStyle({ fillOpacity: 0.75 });
-});
-map.on("mouseout", () => {
-  ghost.setStyle({ fillOpacity: 0.0 });
-  ghostCore.setStyle({ fillOpacity: 0.0 });
-});
-map.on("mousemove", (e) => {
-  ghost.setLatLng(e.latlng);
-  ghostCore.setLatLng(e.latlng);
-});
-
-function addLight(latlng, isMine = false) {
-  L.circleMarker(latlng, {
-    renderer: canvasRenderer,
-    radius: isMine ? 2.4 : 1.3,      // 👈 sehr klein für andere
-    stroke: false,
-    fill: true,
-    fillOpacity: isMine ? 0.95 : 0.65, // 👈 andere bewusst leiser
-    fillColor: "rgba(255,255,255,1)",
-    interactive: isMine
-  }).addTo(lightsLayer);
-}
-
-async function loadMyLight(){
-  const { data } = await sb.from('lights').select('*').eq('session', session).maybeSingle();
-  return data;
-}
-
-async function loadLights(){
-  try{
-    const { data, error } = await sb.from('lights').select('*');
-    if(error) throw error;
-
-    allLightPoints = data || [];
-    lightsLayer.clearLayers();
-
-    let mine = null;
-    for(const row of allLightPoints){
-      const isMine = (row.session === session);
-      if(isMine) mine = row;
-      addLight([row.lat, row.lng], isMine);
-    }
-
-    const hintEl = document.getElementById("hint");
-    if (mine) {
-      hintEl.classList.add("hidden");
-      setStatus("status_set");
-    } else {
-      hintEl.classList.remove("hidden");
-      setStatus("status_empty");
-    }
-
-  } catch(e){
-    console.error(e);
-    setStatus("status_error_load");
-  }
-  for (const row of allLightPoints) {
-  const isMine = (row.session === session);
-
-  if (isMine && myExactLatLng) {
-    addLight(myExactLatLng, true);   // 👈 exakt unter Cursor
-  } else {
-    addLight([row.lat, row.lng], false); // 👈 anonymisierte anderen
-  }
-}
-}
-
-map.on('click', async (e) => {
-  try {
-    myExactLatLng = e.latlng; // 👈 merken (nur lokal!)
-
-    const pos = anonymize(e.latlng.lat, e.latlng.lng);
-    const existing = await loadMyLight();
-
-    if (existing) {
-      await sb.from('lights')
-        .update({ lat: pos.lat, lng: pos.lng })
-        .eq('session', session);
-    } else {
-      await sb.from('lights')
-        .insert({ lat: pos.lat, lng: pos.lng, session });
-    }
-
-    await loadLights();
-  } catch (err) {
-    console.error(err);
-    setStatus("status_error_save");
-  }
-});
-  
-  function showWholeWorld() {
-  map.fitBounds(WORLD_BOUNDS, {
-    padding: [10,10],
-    animate: false
-  });
-}
-
-document.getElementById("btnWorld").addEventListener("click", () => {
-  map.showWholeWorld(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
-  map.whenReady(() => {
-  showWholeWorld();
-});
+document.getElementById("btnWorld").addEventListener("click",()=>{
+  map.setView(WORLD_VIEW.center,WORLD_VIEW.zoom,{animate:true});
 });
 
 /* -------------------------
-   7) Export (clean, stable)
+   7) Export (FIXED)
 -------------------------- */
 
-const btnCard = document.getElementById("btnCard");
+const btnCard=document.getElementById("btnCard");
 
-btnCard.addEventListener("click", async () => {
-  try {
-    setStatus("status_export");
+btnCard.addEventListener("click",async()=>{
+try{
+setStatus("status_export");
 
-    // 1) stabile Weltansicht (KEIN fitBounds)
-    map.showWholeWorld(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: false });
+/* stabile Weltansicht */
+map.setView(WORLD_VIEW.center,WORLD_VIEW.zoom,{animate:false});
 
-    // 2) Labels aus
-    if (map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
-    baseNoLabels.addTo(map);
+/* Labels aus */
+if(map.hasLayer(baseWithLabels))map.removeLayer(baseWithLabels);
+baseNoLabels.addTo(map);
 
-    // 3) Ghost & Overlays aus
-    ghost.setStyle({ fillOpacity: 0 });
-    ghostCore.setStyle({ fillOpacity: 0 });
+/* Ghost & Overlays aus */
+ghost.setStyle({fillOpacity:0});
+ghostCore.setStyle({fillOpacity:0});
+document.querySelector(".mapTint")?.style.setProperty("display","none");
+document.querySelector(".mapShade")?.style.setProperty("display","none");
 
-    document.querySelector(".mapTint")?.style.setProperty("display", "none");
-    document.querySelector(".mapShade")?.style.setProperty("display", "none");
+/* warten bis Tiles geladen */
+await new Promise(r=>setTimeout(r,1200));
 
-    // 4) warten bis Tiles da sind
-    await new Promise(r => setTimeout(r, 1200));
-    await waitMoveEnd(map);
-    showWholeWorld();
-    await waitMoveEnd(map);
+leafletImage(map,(err,canvas)=>{
 
-    // 5) Screenshot
-    leafletImage(map, (err, canvas) => {
+/* Restore */
+document.querySelector(".mapTint")?.style.removeProperty("display");
+document.querySelector(".mapShade")?.style.removeProperty("display");
+map.removeLayer(baseNoLabels);
+baseWithLabels.addTo(map);
 
-      // --- Restore IMMER ---
-      document.querySelector(".mapTint")?.style.removeProperty("display");
-      document.querySelector(".mapShade")?.style.removeProperty("display");
+if(err){
+console.error(err);
+setStatus("status_error_save");
+return;
+}
 
-      map.removeLayer(baseNoLabels);
-      baseWithLabels.addTo(map);
+const png=canvas.toDataURL("image/png");
+const a=document.createElement("a");
+a.href=png;
+a.download="together-we-are-one.png";
+a.click();
 
-      if (err) {
-        console.error(err);
-        setStatus("status_error_save");
-        return;
-      }
-
-      const png = canvas.toDataURL("image/png");
-      const a = document.createElement("a");
-      a.href = png;
-      a.download = "together-we-are-one.png";
-      a.click();
-
-      setStatus("status_done");
-    });
-
-  } catch (e) {
-    console.error(e);
-    setStatus("status_error_save");
-  }
+setStatus("status_done");
 });
+
+}catch(e){
+console.error(e);
+setStatus("status_error_save");
+}
+});
+
 
 /* -------------------------
    8) Start
 -------------------------- */
+
 loadLights();
-setInterval(loadLights, 30000);
+setInterval(loadLights,30000);
+
 </script>
 </body>
 </html>
