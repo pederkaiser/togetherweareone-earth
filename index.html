@@ -1027,18 +1027,26 @@ function buildExportLightsLayer(points, mySession) {
 }
 
 document.getElementById("btnCard").addEventListener("click", async () => {
-  try{
+  try {
     setStatus("status_export");
 
-    // Weltansicht
-    map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
+    // 1️⃣ Weltansicht OHNE Animation
+    goWorld(false);
+    await waitMoveEnd(map);
 
-    // Labels aus
-    if(map.hasLayer(voyagerTiles)) map.removeLayer(voyagerTiles);
+    // 2️⃣ Tiles wechseln
+    if (map.hasLayer(voyagerTiles)) map.removeLayer(voyagerTiles);
     exportTiles.addTo(map);
-
     await waitTiles(exportTiles);
 
+    // 3️⃣ WICHTIG: Zwei Frames warten
+    await new Promise(r =>
+      requestAnimationFrame(() =>
+        requestAnimationFrame(r)
+      )
+    );
+
+    // 4️⃣ Screenshot
     leafletImage(map, function(err, canvas){
 
       // Restore
@@ -1064,7 +1072,6 @@ document.getElementById("btnCard").addEventListener("click", async () => {
     setStatus("status_error_save");
   }
 });
-
 
 /* -------------------------
    9) Start
