@@ -1044,75 +1044,41 @@ function buildExportLightsLayer(points, mySession) {
   return exportLayer;
 }
 
-const btnCard = document.getElementById("btnCard");
+document.getElementById("btnCard").addEventListener("click", async () => {
+  try{
+    setStatus("status_export");
 
-btnCard.addEventListener("click", async () => {
+    map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: false });
 
-  btnCard.disabled = true;
-  setStatus("status_export");
+    if(map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
+    baseNoLabels.addTo(map);
 
-  try {
+    await waitTiles(baseNoLabels);
 
-    // 1️⃣ Weltansicht
-    goWorld(false);
-    await waitMoveEnd(map);
+    leafletImage(map, function(err, canvas){
 
-    // 2️⃣ Screen-Lichter entfernen
-    map.removeLayer(lightsLayer);
+      map.removeLayer(baseNoLabels);
+      baseWithLabels.addTo(map);
 
-    // 3️⃣ Export-Lichter DIREKT zur Map (kein LayerGroup!)
-    const exportMarkers = [];
-
-    for (const row of (allLightPoints || [])) {
-
-      const isMine = row.session === session;
-
-      const m = L.circleMarker([row.lat, row.lng], {
-        radius: isMine ? 2.6 : 1.35,
-        stroke: false,
-        fill: true,
-        fillOpacity: isMine ? 0.95 : 0.7,
-        fillColor: "rgba(255,250,245,1)",
-        interactive: false
-      }).addTo(map);
-
-      exportMarkers.push(m);
-    }
-
-    // 4️⃣ Zwei Frames warten
-    await new Promise(r =>
-      requestAnimationFrame(() =>
-        requestAnimationFrame(r)
-      )
-    );
-
-    // 5️⃣ Screenshot
-    leafletImage(map, function(err, canvas) {
-
-      // Restore
-      exportMarkers.forEach(m => map.removeLayer(m));
-      lightsLayer.addTo(map);
-
-      btnCard.disabled = false;
-
-      if (err) {
+      if(err){
         console.error(err);
+        setStatus("status_error_save");
         return;
       }
 
-      const link = document.createElement("a");
-      link.href = canvas.toDataURL("image/png");
-      link.download = "together-we-are-one.png";
-      link.click();
+      const png = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = png;
+      a.download = "together-we-are-one.png";
+      a.click();
 
       setStatus("status_done");
     });
 
-  } catch (e) {
+  } catch(e){
     console.error(e);
-    btnCard.disabled = false;
+    setStatus("status_error_save");
   }
-
 });
 
 
