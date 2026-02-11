@@ -51,16 +51,21 @@
     }
 
 .wrap{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:60px 0;
+}
+
+.content{
+  width:100%;
   max-width:1000px;
-  margin:0 auto;
-  padding:40px 0 60px 0;  /* KEIN seitliches Padding */
 }
 
 .teleprompter,
 .mapWrap{
   width:100%;
-  max-width:1000px;
-  margin:0 auto 30px auto;
   border-radius:22px;
   border:1px solid rgba(255,255,255,0.08);
   box-shadow: 0 20px 60px rgba(0,0,0,0.45);
@@ -72,21 +77,21 @@
     rgba(255,255,255,0.06),
     rgba(255,255,255,0.03)
   );
-  padding:30px 40px;   
-  backdrop-filter: blur(14px);
+  padding:30px 40px;
+  margin-bottom:40px;
 }
 
 .mapWrap{
   position:relative;
   overflow:hidden;
   background:#0a0b10;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
 }
 
 #map{
   width:100%;
   height:520px;
 }
+    
 #map,
 #map * {
   cursor: crosshair !important;
@@ -96,7 +101,7 @@
   pointer-events:none;
   position:absolute;
   inset:0;
-  background: rgba(0,0,0,0.35);   /* heller als vorher */
+  background: rgba(0,0,0,0.15);  /* deutlich heller */
 }
     
 .leaflet-container {
@@ -182,7 +187,7 @@
 <div id="langBadge"></div>
 
 <div class="wrap">
-
+ <div class="content">
   <div class="teleprompter">
     <p id="tp-text" class="tp-text"></p>
 
@@ -191,6 +196,7 @@
       <button id="tp-next" class="tp-btn">→</button>
     </div>
   </div>
+ </div>
 
   <div class="mapWrap">
     <div class="hud">
