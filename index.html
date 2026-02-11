@@ -200,6 +200,7 @@ body{
     rgba(255,255,255,0.6)
   );
   transition: width 0.3s ease;
+  transition: width 0.6s cubic-bezier(.4,0,.2,1);
 }
 
 
@@ -439,6 +440,13 @@ let tpUnitIdx = 0;
 let tpTimer = null;
 
 const tpTextEl = document.getElementById("tp-text");
+const tpBarEl  = document.getElementById("tp-bar");
+
+function updateProgress(){
+  if(!tpBarEl) return;
+  tpBarEl.style.width =
+    `${100 * (tpIndex + 1) / tpTexts.length}%`;
+}
 
 function renderSentence(sentence){
   // keep old behavior: allow \n inside strings
@@ -507,13 +515,6 @@ document.getElementById("tp-next").addEventListener("click", () => {
 });
 
 playSentence(0, true);
-
-const tpBarEl = document.getElementById("tp-bar");
-
-function updateProgress(){
-  tpBarEl.style.width = `${100 * (tpIndex + 1) / tpTexts.length}%`;
-}
-
 
 /* -------------------------
    5) Share (native share sheet + fallback copy)
