@@ -1063,9 +1063,28 @@ document.getElementById("btnCard").addEventListener("click", async () => {
       )
     );
 
+    // 1️⃣ CSS Filter deaktivieren
+const tiles = document.querySelectorAll(".leaflet-tile");
+tiles.forEach(t => t.style.filter = "none");
+
+// 2️⃣ Overlay deaktivieren
+const overlay = document.querySelector(".mapDarkOverlay");
+if (overlay) overlay.style.display = "none";
+
+await new Promise(r =>
+  requestAnimationFrame(() =>
+    requestAnimationFrame(r)
+  )
+);
     leafletImage(map, function(err, canvas){
 
       // Restore
+// Restore Filter
+tiles.forEach(t => t.style.filter = "");
+
+// Restore Overlay
+if (overlay) overlay.style.display = "";
+      
       map.removeLayer(exportLayer);
       lightsLayer.addTo(map);
       map.removeLayer(exportTiles);
