@@ -631,21 +631,27 @@ window.addEventListener("resize", () => {
 const tileUrlLabels   = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 const tileUrlNoLabels = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
 
-const baseWithLabels = L.tileLayer(tileUrlLabels, {
-  attribution: '&copy; OpenStreetMap &copy; CARTO',
-  maxZoom: 18,
-  noWrap: true,
-  bounds: WORLD_BOUNDS,
-  crossOrigin: true
-}).addTo(map);
+const baseWithLabels = L.tileLayer(
+  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 18,
+    noWrap: true,
+    bounds: WORLD_BOUNDS,
+    crossOrigin: true
+  }
+).addTo(map);
 
-const baseNoLabels = L.tileLayer(tileUrlNoLabels, {
-  attribution: '&copy; OpenStreetMap &copy; CARTO',
-  maxZoom: 18,
-  noWrap: true,
-  bounds: WORLD_BOUNDS,
-  crossOrigin: true
-});
+const baseNoLabels = L.tileLayer(
+  'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+  {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 18,
+    noWrap: true,
+    bounds: WORLD_BOUNDS,
+    crossOrigin: true
+  }
+);
 
 // Canvas Renderer + Layergroup für Lichter
 const canvasRenderer = L.canvas({ padding: 0.5 });
