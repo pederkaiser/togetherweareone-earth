@@ -724,7 +724,7 @@ const tileUrlLabels = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}
 const tileUrlNoLabels = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
 
 const baseWithLabels = L.tileLayer(
-  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
+  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
   {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
     maxZoom: 18,
@@ -733,6 +733,7 @@ const baseWithLabels = L.tileLayer(
     crossOrigin: true
   }
 ).addTo(map);
+  
 
 const baseNoLabels = L.tileLayer(
   'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
