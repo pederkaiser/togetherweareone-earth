@@ -818,17 +818,6 @@ const exportTiles = L.tileLayer(
 );
   
 
-const baseNoLabels = L.tileLayer(
-  'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
-  {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-    maxZoom: 18,
-    noWrap: true,
-    bounds: WORLD_BOUNDS,
-    crossOrigin: true
-  }
-);
-
 // Canvas Renderer + Layergroup für Lichter
 const lightsLayer = L.layerGroup().addTo(map);
 let myExactLatLng = null;
@@ -879,7 +868,6 @@ map.on("mousemove", (e) => {
 
 // Lichter zeichnen
 function addLight(latlng, isMine=false){
-
   L.circleMarker(latlng, {
     radius: isMine ? 2.6 : 1.35,
     stroke: false,
@@ -887,17 +875,6 @@ function addLight(latlng, isMine=false){
     fillOpacity: isMine ? 0.95 : 0.70,
     fillColor: "rgba(255,250,245,1)",
     interactive: isMine
-  }).addTo(lightsLayer);
-
-}
-
-  L.circleMarker(latlng, {
-    radius: 2.6,
-    stroke: false,
-    fill: true,
-    fillOpacity: 0.95,
-    fillColor: "rgba(255,250,245,1)",
-    interactive: true
   }).addTo(lightsLayer);
 }
 
@@ -1018,6 +995,15 @@ function waitTiles(layer){
 }
 
 console.log("Export points:", allLightPoints);
+
+  function waitIdle(m){
+  return new Promise(resolve => {
+    let done = false;
+    const finish = () => { if(done) return; done = true; m.off("idle", finish); resolve(); };
+    m.once("idle", finish);
+    setTimeout(finish, 800);
+  });
+}
   
 // WICHTIG: Export-Lichter als SVG (kein Canvas Renderer) -> verhindert "Versatz" in leaflet-image
 function buildExportLightsLayer(points, mySession) {
@@ -1040,28 +1026,32 @@ function buildExportLightsLayer(points, mySession) {
 }
 
 document.getElementById("btnCard").addEventListener("click", async () => {
-
-  try {
-
+  try{
     setStatus("status_export");
 
-    // 1️⃣ Weltansicht
+    // 0) Map size stabilisieren
+    map.invalidateSize(true);
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    // 1) Weltansicht
     goWorld(false);
     await waitMoveEnd(map);
+    await waitIdle(map);
 
-    // 2️⃣ Bildschirm-Tiles entfernen
-    map.removeLayer(voyagerTiles);
-
-    // 3️⃣ Export-Tiles hinzufügen
+    // 2) Tiles wechseln
+    if (map.hasLayer(voyagerTiles)) map.removeLayer(voyagerTiles);
     exportTiles.addTo(map);
-    await waitTiles(exportTiles);
 
-    // 4️⃣ Screenshot
+    await waitTiles(exportTiles);
+    await waitIdle(map);
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    // 3) Screenshot
     leafletImage(map, function(err, canvas){
 
-      // 5️⃣ Tiles wieder zurückwechseln
-      map.removeLayer(exportTiles);
-      voyagerTiles.addTo(map);
+      // Restore Tiles
+      if (map.hasLayer(exportTiles)) map.removeLayer(exportTiles);
+      if (!map.hasLayer(voyagerTiles)) voyagerTiles.addTo(map);
 
       if(err){
         console.error(err);
@@ -1081,7 +1071,6 @@ document.getElementById("btnCard").addEventListener("click", async () => {
     console.error(e);
     setStatus("status_error_save");
   }
-
 });
 
 
