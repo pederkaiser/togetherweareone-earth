@@ -603,47 +603,41 @@ function shareUrlForLang() {
   return `${location.origin}/?lang=${encodeURIComponent(LANG)}`;
 }
 
-function ensureShareButton(){
+function initShareButton() {
 
   const btn = document.getElementById("shareMain");
   if (!btn) return;
 
   btn.textContent = SHARE_MAIN_LABEL[LANG] || SHARE_MAIN_LABEL.en;
 
-  btn.addEventListener("click", async () => {
+  btn.onclick = async function () {
 
-    const url  = shareUrlForLang();
-    const text = SHARE_TEXT[LANG] || SHARE_TEXT.en;
+    const url   = shareUrlForLang();
+    const text  = SHARE_TEXT[LANG] || SHARE_TEXT.en;
     const title = UI_TEXT.share_title || "Together We Are One";
 
-    // Native share (Mobile / modern browsers)
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title,
-          text,
-          url
-        });
-        return;
-      } catch (err) {
-        // user cancelled → no fallback needed
-        if (err && err.name === "AbortError") return;
-      }
-    }
-
-    // Clipboard fallback
     try {
+      if (navigator.share) {
+        await navigator.share({ title, text, url });
+        return;
+      }
+
       await navigator.clipboard.writeText(url);
       setStatus("copy_ok");
-      return;
-    } catch (_) {}
-
-    // Last fallback (older browsers)
-    window.prompt("", url);
-  });
+    }
+    catch (err) {
+      if (err?.name === "AbortError") return;
+      window.prompt("", url);
+    }
+  };
 }
 
-ensureShareButton();
+// DOM garantiert fertig
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initShareButton);
+} else {
+  initShareButton();
+}
 
 /* -------------------------
    6) Supabase + Status
