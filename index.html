@@ -1030,30 +1030,44 @@ document.getElementById("btnCard").addEventListener("click", async () => {
   try {
     setStatus("status_export");
 
-    // 1️⃣ Weltansicht ohne Animation
     goWorld(false);
     await waitMoveEnd(map);
 
-    // 2️⃣ Tiles wechseln
     if (map.hasLayer(voyagerTiles)) map.removeLayer(voyagerTiles);
     exportTiles.addTo(map);
     await waitTiles(exportTiles);
 
-    // 3️⃣ Export-Lichter als SVG-Layer hinzufügen
-    const exportLights = buildExportLightsLayer(allLightPoints, session);
-    exportLights.addTo(map);
+    // 👉 WICHTIG: Canvas-Layer entfernen
+    map.removeLayer(lightsLayer);
+
+    // 👉 SVG-Layer für Export
+    const exportLayer = L.layerGroup();
+    for (const row of allLightPoints) {
+      const isMine = row.session === session;
+
+      L.circleMarker([row.lat, row.lng], {
+        radius: isMine ? 2.6 : 1.35,
+        stroke: false,
+        fill: true,
+        fillOpacity: isMine ? 0.95 : 0.70,
+        fillColor: "rgba(255,250,245,1)"
+        // ⚠️ KEIN renderer setzen!
+      }).addTo(exportLayer);
+    }
+
+    exportLayer.addTo(map);
 
     await new Promise(r =>
       requestAnimationFrame(() =>
         requestAnimationFrame(r)
       )
     );
-    await waitIdle(map);
-    // 4️⃣ Screenshot
+
     leafletImage(map, function(err, canvas){
 
-      // 🔁 Restore
-      map.removeLayer(exportLights);
+      // Restore
+      map.removeLayer(exportLayer);
+      lightsLayer.addTo(map);
       map.removeLayer(exportTiles);
       voyagerTiles.addTo(map);
 
