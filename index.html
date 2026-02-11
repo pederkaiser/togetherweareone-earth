@@ -73,6 +73,10 @@
   box-shadow: 0 20px 60px rgba(0,0,0,0.45);
 }
 
+.mapWrap{
+  position:relative;
+  overflow:hidden;
+
 .teleprompter {
   background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
   padding: 30px 30px;  
@@ -92,8 +96,10 @@
   pointer-events:none;
   position:absolute;
   inset:0;
-  background: rgba(0,0,0,0.10);  /* deutlich heller */
+  background: rgba(0,0,0,0.18);
+  z-index: 1;
 }
+  
     
 .leaflet-container {
   cursor: crosshair;
@@ -139,20 +145,22 @@
 
     .hud{
       position:absolute;
-      top:10px;
-      left:10px;
-      z-index:500;
+      top:15px;
+      left:15px;
+      z-index:1000;
       display:flex;
-      gap:10px;
+      gap:12x;
     }
 
     .hud button{
-      padding:8px 12px;
-      border-radius:8px;
-      border:1px solid var(--stroke);
-      background:rgba(0,0,0,0.4);
+      padding:10px 16px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.2);
+      background:rgba(0,0,0,0.55);
       color:white;
       cursor:pointer;
+      font-size:14px;
+      backdrop-filter: blur(6px);
     }
 
     .status, .hint, .privacy-hint{
@@ -632,7 +640,7 @@ const tileUrlLabels   = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{
 const tileUrlNoLabels = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
 
 const baseWithLabels = L.tileLayer(
-  'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
   {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
     maxZoom: 18,
@@ -643,7 +651,7 @@ const baseWithLabels = L.tileLayer(
 ).addTo(map);
 
 const baseNoLabels = L.tileLayer(
-  'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',
+  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
   {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
     maxZoom: 18,
