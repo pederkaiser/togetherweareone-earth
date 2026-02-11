@@ -558,54 +558,228 @@ const TP = {
    3) UI Text
 -------------------------- */
 const UI = {
+
   en: {
     world: "World view",
-    card: "Generate map",
+    card: "Take a picture",
     hint: "Click on the map to place or move your light. (One light per browser.)",
-    privacy: "Lights are anonymous and rounded to about 10 km.",
-    status_empty: "Place your light by clicking on the map.",
-    status_set: "Your light is set. You can move it by clicking on the map.",
-    status_export: "Creating image…",
-    status_done: "Done.",
-    status_error_load: "Could not load lights.",
-    status_error_save: "Could not save image."
+    privacy: "Lights are anonymous and gently rounded to about 10 km.",
+    status_empty: "Place your light on the map.",
+    status_set: "Your light is glowing. You can move it anytime.",
+    status_export: "Capturing the moment…",
+    status_done: "Image saved.",
+    status_error_load: "Unable to load lights.",
+    status_error_save: "Unable to save image."
   },
+
   de: {
     world: "Weltansicht",
-    card: "Karte generieren",
-    hint: "Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben.",
-    privacy: "Lichter sind anonym und auf etwa 10 km gerundet.",
-    status_empty: "Setze dein Licht mit einem Klick.",
-    status_set: "Dein Licht ist gesetzt.",
-    status_export: "Erzeuge Bild…",
-    status_done: "Fertig.",
+    card: "Moment festhalten",
+    hint: "Klicke auf die Karte, um dein Licht zu setzen oder zu verschieben. (Ein Licht pro Browser.)",
+    privacy: "Lichter sind anonym und sanft auf etwa 10 km gerundet.",
+    status_empty: "Setze dein Licht auf der Karte.",
+    status_set: "Dein Licht leuchtet. Du kannst es jederzeit verschieben.",
+    status_export: "Moment wird festgehalten…",
+    status_done: "Bild gespeichert.",
     status_error_load: "Lichter konnten nicht geladen werden.",
     status_error_save: "Bild konnte nicht gespeichert werden."
   },
+
   es: {
     world: "Vista mundial",
-    card: "Generar mapa",
-    hint: "Haz clic en el mapa para colocar o mover tu luz.",
-    privacy: "Las luces son anónimas y redondeadas a unos 10 km.",
-    status_empty: "Coloca tu luz haciendo clic.",
-    status_set: "Tu luz está colocada.",
-    status_export: "Creando imagen…",
-    status_done: "Listo.",
+    card: "Capturar momento",
+    hint: "Haz clic en el mapa para colocar o mover tu luz. (Una luz por navegador.)",
+    privacy: "Las luces son anónimas y suavemente redondeadas a unos 10 km.",
+    status_empty: "Coloca tu luz en el mapa.",
+    status_set: "Tu luz está brillando. Puedes moverla cuando quieras.",
+    status_export: "Capturando el momento…",
+    status_done: "Imagen guardada.",
     status_error_load: "No se pudieron cargar las luces.",
     status_error_save: "No se pudo guardar la imagen."
   },
+
   fr: {
     world: "Vue du monde",
-    card: "Générer la carte",
-    hint: "Cliquez sur la carte pour placer ou déplacer votre lumière.",
-    privacy: "Les lumières sont anonymes et arrondies à environ 10 km.",
-    status_empty: "Placez votre lumière.",
-    status_set: "Votre lumière est placée.",
-    status_export: "Création de l’image…",
-    status_done: "Terminé.",
+    card: "Capturer l’instant",
+    hint: "Cliquez sur la carte pour placer ou déplacer votre lumière. (Une lumière par navigateur.)",
+    privacy: "Les lumières sont anonymes et doucement arrondies à environ 10 km.",
+    status_empty: "Placez votre lumière sur la carte.",
+    status_set: "Votre lumière brille. Vous pouvez la déplacer à tout moment.",
+    status_export: "Capture de l’instant…",
+    status_done: "Image enregistrée.",
     status_error_load: "Impossible de charger les lumières.",
     status_error_save: "Impossible d’enregistrer l’image."
+  },
+
+  pt: {
+    world: "Visão mundial",
+    card: "Capturar momento",
+    hint: "Clique no mapa para colocar ou mover sua luz. (Uma luz por navegador.)",
+    privacy: "As luzes são anônimas e suavemente arredondadas para cerca de 10 km.",
+    status_empty: "Coloque sua luz no mapa.",
+    status_set: "Sua luz está brilhando. Você pode movê-la a qualquer momento.",
+    status_export: "Capturando o momento…",
+    status_done: "Imagem salva.",
+    status_error_load: "Não foi possível carregar as luzes.",
+    status_error_save: "Não foi possível salvar a imagem."
+  },
+
+  ru: {
+    world: "Вид мира",
+    card: "Сохранить момент",
+    hint: "Нажмите на карту, чтобы разместить или переместить свет. (Один свет на браузер.)",
+    privacy: "Огни анонимны и мягко округлены примерно до 10 км.",
+    status_empty: "Разместите свой свет на карте.",
+    status_set: "Ваш свет сияет. Вы можете переместить его в любой момент.",
+    status_export: "Сохранение момента…",
+    status_done: "Изображение сохранено.",
+    status_error_load: "Не удалось загрузить огни.",
+    status_error_save: "Не удалось сохранить изображение."
+  },
+
+  ar: {
+    world: "عرض العالم",
+    card: "احفظ اللحظة",
+    hint: "انقر على الخريطة لوضع الضوء أو تحريكه. (ضوء واحد لكل متصفح.)",
+    privacy: "الأضواء مجهولة الهوية ومقربة بلطف إلى حوالي 10 كم.",
+    status_empty: "ضع نورك على الخريطة.",
+    status_set: "نورك يضيء الآن. يمكنك تحريكه في أي وقت.",
+    status_export: "جارٍ حفظ اللحظة…",
+    status_done: "تم حفظ الصورة.",
+    status_error_load: "تعذر تحميل الأضواء.",
+    status_error_save: "تعذر حفظ الصورة."
+  },
+
+  hi: {
+    world: "विश्व दृश्य",
+    card: "क्षण सहेजें",
+    hint: "मानचित्र पर क्लिक करके अपनी रोशनी रखें या बदलें। (प्रति ब्राउज़र एक रोशनी.)",
+    privacy: "लाइट्स गुमनाम हैं और लगभग 10 किमी तक हल्के रूप में गोल की गई हैं।",
+    status_empty: "मानचित्र पर अपनी रोशनी रखें।",
+    status_set: "आपकी रोशनी चमक रही है। आप इसे कभी भी बदल सकते हैं।",
+    status_export: "क्षण सहेजा जा रहा है…",
+    status_done: "चित्र सहेजा गया।",
+    status_error_load: "रोशनियाँ लोड नहीं हो सकीं।",
+    status_error_save: "चित्र सहेजा नहीं जा सका।"
+  },
+
+  bn: {
+    world: "বিশ্ব দৃশ্য",
+    card: "মুহূর্ত সংরক্ষণ করুন",
+    hint: "মানচিত্রে ক্লিক করে আপনার আলো বসান বা সরান। (প্রতি ব্রাউজারে একটি আলো.)",
+    privacy: "আলো গুলো গোপনীয় এবং প্রায় ১০ কিমি পর্যন্ত হালকা ভাবে রাউন্ড করা হয়েছে।",
+    status_empty: "মানচিত্রে আপনার আলো বসান।",
+    status_set: "আপনার আলো জ্বলছে। আপনি যেকোনো সময় সরাতে পারেন।",
+    status_export: "মুহূর্ত সংরক্ষণ করা হচ্ছে…",
+    status_done: "ছবি সংরক্ষিত হয়েছে।",
+    status_error_load: "আলো লোড করা যায়নি।",
+    status_error_save: "ছবি সংরক্ষণ করা যায়নি।"
+  },
+
+  ur: {
+    world: "عالمی منظر",
+    card: "لمحہ محفوظ کریں",
+    hint: "نقشے پر کلک کر کے اپنی روشنی رکھیں یا منتقل کریں۔ (ہر براؤزر کے لیے ایک روشنی.)",
+    privacy: "روشنی گمنام ہے اور تقریباً 10 کلومیٹر تک نرمی سے گول کی گئی ہے۔",
+    status_empty: "نقشے پر اپنی روشنی رکھیں۔",
+    status_set: "آپ کی روشنی چمک رہی ہے۔ آپ اسے کسی بھی وقت منتقل کر سکتے ہیں۔",
+    status_export: "لمحہ محفوظ کیا جا رہا ہے…",
+    status_done: "تصویر محفوظ ہو گئی۔",
+    status_error_load: "روشنی لوڈ نہیں ہو سکی۔",
+    status_error_save: "تصویر محفوظ نہ ہو سکی۔"
+  },
+
+  zh: {
+    world: "世界视图",
+    card: "保存这一刻",
+    hint: "点击地图以放置或移动你的光点。（每个浏览器一个光点。）",
+    privacy: "灯光是匿名的，并柔和地四舍五入到约10公里。",
+    status_empty: "在地图上放置你的光点。",
+    status_set: "你的光点正在闪耀。你可以随时移动它。",
+    status_export: "正在保存这一刻…",
+    status_done: "图片已保存。",
+    status_error_load: "无法加载光点。",
+    status_error_save: "无法保存图片。"
+  },
+
+  ja: {
+    world: "世界表示",
+    card: "この瞬間を保存",
+    hint: "地図をクリックして光を置いたり動かしたりしてください。（ブラウザごとに1つ）",
+    privacy: "ライトは匿名で、約10km単位にやわらかく丸められています。",
+    status_empty: "地図に光を置いてください。",
+    status_set: "あなたの光が輝いています。いつでも動かせます。",
+    status_export: "この瞬間を保存中…",
+    status_done: "画像を保存しました。",
+    status_error_load: "光を読み込めませんでした。",
+    status_error_save: "画像を保存できませんでした。"
+  },
+
+  ko: {
+    world: "세계 보기",
+    card: "이 순간 저장",
+    hint: "지도를 클릭하여 빛을 놓거나 이동하세요. (브라우저당 1개)",
+    privacy: "빛은 익명이며 약 10km 단위로 부드럽게 반올림됩니다.",
+    status_empty: "지도에 빛을 놓으세요.",
+    status_set: "빛이 빛나고 있습니다. 언제든 이동할 수 있습니다.",
+    status_export: "이 순간을 저장 중…",
+    status_done: "이미지가 저장되었습니다.",
+    status_error_load: "빛을 불러오지 못했습니다.",
+    status_error_save: "이미지를 저장할 수 없습니다."
+  },
+
+  vi: {
+    world: "Chế độ xem thế giới",
+    card: "Lưu khoảnh khắc",
+    hint: "Nhấp vào bản đồ để đặt hoặc di chuyển ánh sáng. (Một ánh sáng mỗi trình duyệt.)",
+    privacy: "Các ánh sáng là ẩn danh và được làm tròn nhẹ nhàng khoảng 10 km.",
+    status_empty: "Đặt ánh sáng của bạn trên bản đồ.",
+    status_set: "Ánh sáng của bạn đang tỏa sáng. Bạn có thể di chuyển nó bất cứ lúc nào.",
+    status_export: "Đang lưu khoảnh khắc…",
+    status_done: "Hình ảnh đã được lưu.",
+    status_error_load: "Không thể tải ánh sáng.",
+    status_error_save: "Không thể lưu hình ảnh."
+  },
+
+  tr: {
+    world: "Dünya görünümü",
+    card: "Anı kaydet",
+    hint: "Işığınızı yerleştirmek veya taşımak için haritaya tıklayın. (Tarayıcı başına bir ışık.)",
+    privacy: "Işıklar anonimdir ve yaklaşık 10 km’ye yumuşak şekilde yuvarlanır.",
+    status_empty: "Haritaya ışığınızı yerleştirin.",
+    status_set: "Işığınız parlıyor. İstediğiniz zaman taşıyabilirsiniz.",
+    status_export: "An kaydediliyor…",
+    status_done: "Görsel kaydedildi.",
+    status_error_load: "Işıklar yüklenemedi.",
+    status_error_save: "Görsel kaydedilemedi."
+  },
+
+  sw: {
+    world: "Mtazamo wa dunia",
+    card: "Hifadhi wakati huu",
+    hint: "Bofya ramani ili kuweka au kusogeza mwanga wako. (Mwanga mmoja kwa kivinjari.)",
+    privacy: "Taa ni za siri na zimezungushwa kwa upole hadi takriban km 10.",
+    status_empty: "Weka mwanga wako kwenye ramani.",
+    status_set: "Mwanga wako unang'aa. Unaweza kuusogeza wakati wowote.",
+    status_export: "Inahifadhi wakati huu…",
+    status_done: "Picha imehifadhiwa.",
+    status_error_load: "Imeshindikana kupakia taa.",
+    status_error_save: "Imeshindikana kuhifadhi picha."
+  },
+
+  id: {
+    world: "Tampilan dunia",
+    card: "Simpan momen",
+    hint: "Klik peta untuk menempatkan atau memindahkan cahaya Anda. (Satu cahaya per browser.)",
+    privacy: "Cahaya bersifat anonim dan dibulatkan secara lembut hingga sekitar 10 km.",
+    status_empty: "Tempatkan cahaya Anda di peta.",
+    status_set: "Cahaya Anda sedang bersinar. Anda bisa memindahkannya kapan saja.",
+    status_export: "Menyimpan momen…",
+    status_done: "Gambar disimpan.",
+    status_error_load: "Tidak dapat memuat cahaya.",
+    status_error_save: "Tidak dapat menyimpan gambar."
   }
+
 };
 
 const UI_TEXT = UI[LANG] || UI.en;
