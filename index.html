@@ -721,10 +721,8 @@ window.addEventListener("resize", () => {
 
 
 // Tiles (wie bei dir)
-const tileUrlLabels = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-const tileUrlNoLabels = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
-
-const baseWithLabels = L.tileLayer(
+// Bildschirm-Tiles (graue Version mit Labels)
+const voyagerTiles = L.tileLayer(
   'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
   {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
@@ -734,6 +732,18 @@ const baseWithLabels = L.tileLayer(
     crossOrigin: true
   }
 ).addTo(map);
+
+// Export-Tiles (echtes dunkles Grau)
+const exportTiles = L.tileLayer(
+  'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+  {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 18,
+    noWrap: true,
+    bounds: WORLD_BOUNDS,
+    crossOrigin: true
+  }
+);
   
 
 const baseNoLabels = L.tileLayer(
@@ -970,18 +980,23 @@ btnCard.addEventListener("click", async () => {
     btnCard.disabled = true;
     setStatus("status_export");
 
-    // CSS Filter temporär entfernen (wichtig!)
-    const tiles = document.querySelectorAll(".leaflet-tile");
-    tiles.forEach(t => t.style.filter = "none");
+    // 🌍 Bildschirm-Tiles entfernen
+    map.removeLayer(voyagerTiles);
+
+    // 🌑 Export-Tiles hinzufügen
+    exportTiles.addTo(map);
 
     goWorld(false);
     await waitMoveEnd(map);
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise(r => setTimeout(r, 600));
 
     leafletImage(map, function(err, canvas) {
 
-      // Filter wieder aktivieren
-      tiles.forEach(t => t.style.filter = "");
+      // 🔄 Export-Tiles wieder entfernen
+      map.removeLayer(exportTiles);
+
+      // 🌍 Bildschirm-Tiles zurück
+      voyagerTiles.addTo(map);
 
       btnCard.disabled = false;
 
@@ -1001,6 +1016,13 @@ btnCard.addEventListener("click", async () => {
 
   } catch(e){
     console.error(e);
+
+    // Falls etwas schiefgeht → Tiles zurücksetzen
+    if (map.hasLayer(exportTiles)) {
+      map.removeLayer(exportTiles);
+      voyagerTiles.addTo(map);
+    }
+
     btnCard.disabled = false;
     setStatus("status_error_save");
   }
