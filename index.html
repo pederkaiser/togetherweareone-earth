@@ -38,8 +38,20 @@
   --ghost: rgba(255,255,255,0.25);
   --text: rgba(255,255,255,0.92);
   --warm: rgba(255,220,170,0.95);
+  --map-brightness: 0.75;   /* etwas heller als vorher */
+  --map-contrast: 1.15;
+  --map-saturate: 0.0;
+  --shade-opacity: 0.58;
 }
 
+.leaflet-tile{
+  filter:
+    grayscale(1)
+    brightness(var(--map-brightness))
+    contrast(var(--map-contrast))
+    saturate(var(--map-saturate));
+}
+    
 html,body{
   height:100%;
   margin:0;
@@ -113,10 +125,9 @@ body{
   pointer-events:none;
   position:absolute;
   inset:0;
-  background:rgba(0,0,0,0.12);
+  background: rgba(0,0,0,var(--shade-opacity));
   z-index:1;
 }
-
 
 /* HUD */
 
@@ -704,7 +715,7 @@ window.addEventListener("resize", () => {
 
 
 // Tiles (wie bei dir)
-const tileUrlLabels   = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+const tileUrlLabels = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 const tileUrlNoLabels = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
 
 const baseWithLabels = L.tileLayer(
