@@ -291,27 +291,33 @@ body{
 
 .map-actions {
   position:absolute;
-  right:14px;
-  bottom:14px;
-  z-index:600;
+  left:16px;      /* ← statt right */
+  bottom:16px;
+  z-index:700;
+  transition: opacity 200ms ease;
 }
 
 .map-actions button{
-  padding:12px 20px;
+  padding:12px 22px;
   border-radius:999px;
   border:1px solid rgba(255,255,255,0.18);
-  background: rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.12);
   color:white;
   font-weight:600;
+  letter-spacing:0.02em;
   backdrop-filter: blur(10px);
   cursor:pointer;
   transition: all 160ms ease;
-  border-radius: 999px;
 }
 
 .map-actions button:hover{
-  background: rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.22);
   transform: translateY(-1px);
+}
+    
+.map-actions.disabled {
+  opacity: 0.4;
+  pointer-events: none;
 }
   
   </style>
@@ -348,11 +354,7 @@ body{
 
     <!-- KARTE -->
     <div class="mapWrap">
-      <div class="mapCenterControl">
-        <button id="btnWorld" class="world-btn" type="button"></button>
-      </div>
-
-      <div id="map"></div>
+     <div id="map"></div>
       <div class="map-actions">
         <button id="btnCard" type="button"></button>
       </div>
@@ -1093,6 +1095,8 @@ async function loadLights(){
     } else {
       if (hintEl) hintEl.style.display = "block";
       setStatus("status_empty");
+     const actions = document.querySelector(".map-actions");
+     if (actions) actions.style.opacity = "0.5";
     }
 
   }catch(e){
