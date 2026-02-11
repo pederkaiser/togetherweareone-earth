@@ -83,6 +83,7 @@ body{
   grid-template-rows:auto 1fr auto;
   gap:18px;
   min-height:0;
+  height:100%;
 }
 
 
@@ -111,8 +112,9 @@ body{
   position:relative;
   overflow:hidden;
   background:#0a0b10;
+  min-height: 320px;      /* Fallback */
+  flex: 1 1 auto;         /* nimmt restlichen Platz */
   display:flex;
-  min-height:0;
 }
     
 .mapTint,
@@ -146,8 +148,7 @@ body{
 /* Map */
 
 #map{
-  width:100%;
-  height:100%;
+  flex:1;
 }
 
 .status,
