@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Together We Are One</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <title>Together We Are One</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
 
-<style>
+  <style>
     :root{
       --bg0:#0b0d12;
       --bg1:#121526;
@@ -746,6 +746,9 @@ const map = L.map('map',{
   zoomDelta:0.25
 });
 
+/* ✅ STARTANSICHT KOMPLETTE WELT */
+map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom);
+
 const tileUrlLabels='https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 const tileUrlNoLabels='https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
 
@@ -765,14 +768,15 @@ const baseNoLabels=L.tileLayer(tileUrlNoLabels,{
   crossOrigin:true
 });
 
-/* ---------- FIX 1: World Button ---------- */
+/* ---------- World Button FIX ---------- */
 
 document.getElementById("btnWorld").addEventListener("click",()=>{
   map.setView(WORLD_VIEW.center,WORLD_VIEW.zoom,{animate:true});
 });
 
+
 /* -------------------------
-   7) Export (FIXED)
+   7) Export (stable)
 -------------------------- */
 
 const btnCard=document.getElementById("btnCard");
@@ -794,7 +798,7 @@ ghostCore.setStyle({fillOpacity:0});
 document.querySelector(".mapTint")?.style.setProperty("display","none");
 document.querySelector(".mapShade")?.style.setProperty("display","none");
 
-/* warten bis Tiles geladen */
+/* kurze Wartezeit für Tiles */
 await new Promise(r=>setTimeout(r,1200));
 
 leafletImage(map,(err,canvas)=>{
