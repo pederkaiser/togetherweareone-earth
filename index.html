@@ -51,18 +51,37 @@
     }
 
     .wrap{
-      max-width:1100px;
-      margin:0 auto;
-      padding:18px;
-    }
+  width:100%;
+  max-width:1000px;
+  margin:0 auto;
+  padding:24px 16px 40px 16px;
+  box-sizing:border-box;
+}
 
-    .teleprompter{
-      padding:18px;
-      border-radius:20px;
-      background: var(--card);
-      border:1px solid var(--stroke);
-      margin-bottom:18px;
-    }
+.teleprompter,
+.mapWrap{
+  width:100%;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  backdrop-filter: blur(12px);
+}
+
+.teleprompter{
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  padding:26px 22px;
+  margin-bottom:28px;
+}
+
+.mapWrap{
+  background:#0a0b10;
+  overflow:hidden;
+}
+
+#map{
+  width:100%;
+  height:520px;
+}
 
     .tp-text{
       text-align:center;
@@ -90,15 +109,6 @@
       color:white;
       cursor:pointer;
     }
-
-    .mapWrap{
-      position:relative;
-      border-radius:20px;
-      overflow:hidden;
-      border:1px solid var(--stroke);
-    }
-
-    #map{ height:60vh; width:100%; }
 
     .hud{
       position:absolute;
@@ -133,12 +143,6 @@
       opacity:0.6;
     }
 
-    .leaflet-tile{
-      filter: grayscale(1)
-              brightness(var(--map-brightness))
-              contrast(var(--map-contrast))
-              saturate(var(--map-saturate));
-    }
   </style>
 </head>
 
@@ -812,48 +816,24 @@ function buildExportLightsLayer(points, mySession) {
 const btnCard = document.getElementById("btnCard");
 
 btnCard.addEventListener("click", async () => {
-  let exportLights = null;
 
   try {
+
     btnCard.disabled = true;
     setStatus("status_export");
 
-    // 1) stabil zur Weltansicht
+    // CSS Filter temporär entfernen (wichtig!)
+    const tiles = document.querySelectorAll(".leaflet-tile");
+    tiles.forEach(t => t.style.filter = "none");
+
     goWorld(false);
     await waitMoveEnd(map);
-    await new Promise(r => setTimeout(r, 220));
+    await new Promise(r => setTimeout(r, 500));
 
-    // 2) Tiles ohne Labels aktivieren
-    if (map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
-    baseNoLabels.addTo(map);
-    await waitTiles(baseNoLabels);
-
-    // 3) Canvas-Lichter entfernen, damit leaflet-image keinen Versatz produziert
-    if (map.hasLayer(lightsLayer)) map.removeLayer(lightsLayer);
-
-    // Ghost ausblenden
-    ghost.setStyle({ fillOpacity: 0.0 });
-    ghostCore.setStyle({ fillOpacity: 0.0 });
-
-    // SVG-Export-Layer hinzufügen
-    exportLights = buildExportLightsLayer(allLightPoints, session);
-    exportLights.addTo(map);
-
-    // 4) 2 Frames warten (SVG sicher gerendert)
-    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-
-    // 5) Screenshot
     leafletImage(map, function(err, canvas) {
-      // Restore (immer)
-      try {
-        if (exportLights) map.removeLayer(exportLights);
-        if (!map.hasLayer(lightsLayer)) lightsLayer.addTo(map);
 
-        if (map.hasLayer(baseNoLabels)) map.removeLayer(baseNoLabels);
-        if (!map.hasLayer(baseWithLabels)) baseWithLabels.addTo(map);
-
-        // Ghost bleibt "aus", wird beim Mouseover wieder aktiviert
-      } catch(e) {}
+      // Filter wieder aktivieren
+      tiles.forEach(t => t.style.filter = "");
 
       btnCard.disabled = false;
 
@@ -863,30 +843,20 @@ btnCard.addEventListener("click", async () => {
         return;
       }
 
-      const png = canvas.toDataURL("image/png");
-      const a = document.createElement("a");
-      a.href = png;
-      a.download = "together-we-are-one.png";
-      a.click();
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "together-we-are-one.png";
+      link.click();
 
       setStatus("status_done");
     });
 
-  } catch (e) {
+  } catch(e){
     console.error(e);
-
-    // Restore auch im Fehlerfall
-    try {
-      if (exportLights) map.removeLayer(exportLights);
-      if (!map.hasLayer(lightsLayer)) lightsLayer.addTo(map);
-
-      if (map.hasLayer(baseNoLabels)) map.removeLayer(baseNoLabels);
-      if (!map.hasLayer(baseWithLabels)) baseWithLabels.addTo(map);
-    } catch(_) {}
-
     btnCard.disabled = false;
     setStatus("status_error_save");
   }
+
 });
 
 
