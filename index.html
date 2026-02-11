@@ -920,6 +920,78 @@ function shareUrlForLang() {
   return `${location.origin}/?lang=${encodeURIComponent(LANG)}`;
 }
 
+function createShareOverlay(url, text) {
+
+  // Overlay
+  const overlay = document.createElement("div");
+  overlay.style.position = "fixed";
+  overlay.style.inset = "0";
+  overlay.style.background = "rgba(0,0,0,0.55)";
+  overlay.style.backdropFilter = "blur(6px)";
+  overlay.style.display = "flex";
+  overlay.style.alignItems = "center";
+  overlay.style.justifyContent = "center";
+  overlay.style.zIndex = "5000";
+
+  // Box
+  const box = document.createElement("div");
+  box.style.background = "rgba(20,20,25,0.95)";
+  box.style.padding = "28px";
+  box.style.borderRadius = "24px";
+  box.style.display = "flex";
+  box.style.flexDirection = "column";
+  box.style.gap = "14px";
+  box.style.minWidth = "240px";
+  box.style.boxShadow = "0 20px 60px rgba(0,0,0,0.6)";
+
+  function makeBtn(label, href) {
+    const a = document.createElement("a");
+    a.href = href;
+    a.target = "_blank";
+    a.textContent = label;
+    a.style.padding = "10px 16px";
+    a.style.borderRadius = "999px";
+    a.style.textAlign = "center";
+    a.style.background = "rgba(255,255,255,0.08)";
+    a.style.color = "white";
+    a.style.textDecoration = "none";
+    a.style.transition = "0.2s";
+    a.onmouseenter = () => a.style.background = "rgba(255,255,255,0.18)";
+    a.onmouseleave = () => a.style.background = "rgba(255,255,255,0.08)";
+    return a;
+  }
+
+  const encoded = encodeURIComponent(text + " " + url);
+
+  box.appendChild(makeBtn("WhatsApp", `https://wa.me/?text=${encoded}`));
+  box.appendChild(makeBtn("Telegram", `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`));
+  box.appendChild(makeBtn("Email", `mailto:?subject=Together We Are One&body=${encoded}`));
+
+  const copyBtn = document.createElement("button");
+  copyBtn.textContent = "Copy link";
+  copyBtn.style.padding = "10px 16px";
+  copyBtn.style.borderRadius = "999px";
+  copyBtn.style.border = "1px solid rgba(255,255,255,0.15)";
+  copyBtn.style.background = "rgba(255,255,255,0.08)";
+  copyBtn.style.color = "white";
+  copyBtn.style.cursor = "pointer";
+
+  copyBtn.onclick = async () => {
+    await navigator.clipboard.writeText(url);
+    copyBtn.textContent = "Copied";
+    setTimeout(() => overlay.remove(), 900);
+  };
+
+  box.appendChild(copyBtn);
+  overlay.appendChild(box);
+
+  overlay.onclick = (e) => {
+    if (e.target === overlay) overlay.remove();
+  };
+
+  document.body.appendChild(overlay);
+}
+
 function initShareButton() {
 
   const btn = document.getElementById("shareMain");
@@ -931,31 +1003,24 @@ function initShareButton() {
 
     const url   = shareUrlForLang();
     const text  = SHARE_TEXT[LANG] || SHARE_TEXT.en;
-    const title = UI_TEXT.share_title || "Together We Are One";
+    const title = "Together We Are One";
 
-    try {
-      if (navigator.share) {
+    // Mobile → Native Share
+    if (navigator.share) {
+      try {
         await navigator.share({ title, text, url });
         return;
+      } catch (err) {
+        if (err?.name === "AbortError") return;
       }
+    }
 
-      await navigator.clipboard.writeText(url);
-      setStatus("copy_ok");
-    }
-    catch (err) {
-      if (err?.name === "AbortError") return;
-      window.prompt("", url);
-    }
+    // Desktop → Modern overlay
+    createShareOverlay(url, text);
   };
 }
 
-// DOM garantiert fertig
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initShareButton);
-} else {
-  initShareButton();
-}
-
+initShareButton();
 /* -------------------------
    6) Supabase + Status
 -------------------------- */
