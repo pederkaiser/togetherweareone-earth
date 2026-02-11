@@ -1045,20 +1045,28 @@ function buildExportLightsLayer(points, mySession) {
 }
 
 document.getElementById("btnCard").addEventListener("click", async () => {
-  try{
+
+  try {
+
     setStatus("status_export");
 
-    map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: false });
+    // 1️⃣ Weltansicht
+    goWorld(false);
+    await waitMoveEnd(map);
 
-    if(map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
-    baseNoLabels.addTo(map);
+    // 2️⃣ Bildschirm-Tiles entfernen
+    map.removeLayer(voyagerTiles);
 
-    await waitTiles(baseNoLabels);
+    // 3️⃣ Export-Tiles hinzufügen
+    exportTiles.addTo(map);
+    await waitTiles(exportTiles);
 
+    // 4️⃣ Screenshot
     leafletImage(map, function(err, canvas){
 
-      map.removeLayer(baseNoLabels);
-      baseWithLabels.addTo(map);
+      // 5️⃣ Tiles wieder zurückwechseln
+      map.removeLayer(exportTiles);
+      voyagerTiles.addTo(map);
 
       if(err){
         console.error(err);
@@ -1066,11 +1074,10 @@ document.getElementById("btnCard").addEventListener("click", async () => {
         return;
       }
 
-      const png = canvas.toDataURL("image/png");
-      const a = document.createElement("a");
-      a.href = png;
-      a.download = "together-we-are-one.png";
-      a.click();
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "together-we-are-one.png";
+      link.click();
 
       setStatus("status_done");
     });
@@ -1079,6 +1086,7 @@ document.getElementById("btnCard").addEventListener("click", async () => {
     console.error(e);
     setStatus("status_error_save");
   }
+
 });
 
 
