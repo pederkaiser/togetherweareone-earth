@@ -835,7 +835,6 @@ const exportTiles = L.tileLayer(
   
 
 // Canvas Renderer + Layergroup für Lichter
-const lightsLayer = L.layerGroup().addTo(map);
 let myExactLatLng = null;
 
 
@@ -880,20 +879,6 @@ map.on("mousemove", (e) => {
   ghost.setLatLng(e.latlng);
   ghostCore.setLatLng(e.latlng);
 });
-
-
-// Lichter zeichnen
-function addLight(latlng, isMine=false){
-  L.circleMarker(latlng, {
-    radius: isMine ? 2.6 : 1.35,
-    stroke: false,
-    fill: true,
-    fillOpacity: isMine ? 0.95 : 0.70,
-    fillColor: "rgba(255,250,245,1)",
-    interactive: isMine
-  }).addTo(lightsLayer);
-}
-
 
 // Supabase Daten holen
 async function loadMyLight(){
