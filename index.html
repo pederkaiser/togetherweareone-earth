@@ -244,6 +244,38 @@ body{
   transition: width 0.6s cubic-bezier(.4,0,.2,1);
 }
 
+.tp-actions{
+  position:relative;
+  margin-top:35px; /* mehr Abstand zum Progress */
+  min-height:48px;
+}
+
+.tp-actions-center{
+  text-align:center;
+}
+
+.tp-actions-right{
+  position:absolute;
+  right:0;
+  top:0;
+}
+
+.share-btn,
+.export-btn{
+  padding:10px 20px;
+  border-radius:999px;
+}
+
+.export-btn{
+  background:rgba(255,220,170,0.15);
+  border:1px solid rgba(255,220,170,0.35);
+}
+
+.share-btn{
+  font-weight:500;
+  letter-spacing:0.02em;
+}
+
 
 /* Footer text */
 
@@ -300,10 +332,17 @@ body{
       </div>
 
       <!-- Aktionen unter dem Progress -->
-      <div class="tp-actions">
-        <button id="shareMain" class="tp-btn share-btn"></button>
-        <button id="btnCard" class="tp-btn export-btn"></button>
-      </div>
+     <div class="tp-actions">
+
+  <div class="tp-actions-center">
+    <button id="shareMain" class="tp-btn share-btn"></button>
+  </div>
+
+  <div class="tp-actions-right">
+    <button id="btnCard" class="tp-btn export-btn"></button>
+  </div>
+
+</div>
     </div>
 
 
