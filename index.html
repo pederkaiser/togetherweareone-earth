@@ -752,7 +752,10 @@ function setStatus(key){
 /* -------------------------
    6) Map
 -------------------------- */
-const WORLD_BOUNDS = L.latLngBounds(L.latLng(-60, -180), L.latLng(85, 180));
+const WORLD_BOUNDS = L.latLngBounds(
+  [-85, -180],
+  [85, 180]
+);
 const WORLD_VIEW = { center: [20, 0], zoom: 2.0 };
 
 const map = L.map('map', {
@@ -760,10 +763,8 @@ const map = L.map('map', {
   preferCanvas: true,
   worldCopyJump: false,
   zoomSnap: 0.25,
-  zoomDelta: 0.25,
-  maxBounds: WORLD_BOUNDS,
-  maxBoundsViscosity: 1.0
-}).setView(WORLD_VIEW.center, WORLD_VIEW.zoom);
+  zoomDelta: 0.25
+});
 
 const tileUrlLabels   = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 const tileUrlNoLabels = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
@@ -907,9 +908,19 @@ map.on('click', async (e) => {
     setStatus("status_error_save");
   }
 });
+  
+  function showWholeWorld() {
+  map.fitBounds(WORLD_BOUNDS, {
+    padding: [10,10],
+    animate: false
+  });
+}
 
 document.getElementById("btnWorld").addEventListener("click", () => {
-  map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
+  map.showWholeWorld(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: true });
+  map.whenReady(() => {
+  showWholeWorld();
+});
 });
 
 /* -------------------------
@@ -923,7 +934,7 @@ btnCard.addEventListener("click", async () => {
     setStatus("status_export");
 
     // 1) stabile Weltansicht (KEIN fitBounds)
-    map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: false });
+    map.showWholeWorld(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: false });
 
     // 2) Labels aus
     if (map.hasLayer(baseWithLabels)) map.removeLayer(baseWithLabels);
@@ -938,6 +949,9 @@ btnCard.addEventListener("click", async () => {
 
     // 4) warten bis Tiles da sind
     await new Promise(r => setTimeout(r, 1200));
+    await waitMoveEnd(map);
+    showWholeWorld();
+    await waitMoveEnd(map);
 
     // 5) Screenshot
     leafletImage(map, (err, canvas) => {
