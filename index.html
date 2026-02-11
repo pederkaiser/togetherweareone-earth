@@ -58,24 +58,13 @@ html,body{
 }
 
 body{
-  color:var(--text);
-  background:linear-gradient(180deg,var(--bg1),var(--bg0));
-  font-family:system-ui,-apple-system,"Inter",sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-    
-body{
   margin:0;
   color:var(--text);
   background:linear-gradient(180deg,var(--bg1),var(--bg0));
   font-family:system-ui,-apple-system,"Inter",sans-serif;
-  min-height:100dvh;   /* besser für Mobile */
+  min-height:100dvh;
   display:flex;
-  background:
-  radial-gradient(circle at 50% 20%, rgba(255,255,255,0.03), transparent 60%),
-  linear-gradient(180deg,var(--bg1),var(--bg0));
+  flex-direction:column;
 }
 
 /* Layout */
@@ -83,31 +72,32 @@ body{
 .wrap{
   flex:1;
   display:flex;
-  align-items:center;      /* vertikal ruhiger */
-  justify-content:center;  /* horizontal zentriert */
+  flex-direction:column;
   padding:20px 16px;
 }
 
 .content{
-  width:min(100%, 1000px);
+  flex:1;
+  width:100%;
   max-width:1000px;
   margin:0 auto;
+
   display:grid;
   grid-template-rows:auto 1fr auto;
   gap:18px;
-  min-height:0;
-  height:100%;
-}
 
+  min-height:0; /* wichtig für Grid + Map */
+}
 
 /* Cards */
 
 .teleprompter,
 .mapWrap{
-  width:100%;
-  border-radius:22px;
-  border:1px solid rgba(255,255,255,0.08);
-  box-shadow:0 20px 60px rgba(0,0,0,0.45);
+  position:relative;
+  overflow:hidden;
+  background:#0a0b10;
+  display:flex;
+  min-height:320px;   /* Fallback */
 }
 
 .teleprompter{
@@ -119,15 +109,6 @@ body{
     rgba(255,255,255,0.05),
     rgba(255,255,255,0.02)
   );
-}
-  
-.mapWrap{
-  position:relative;
-  overflow:hidden;
-  background:#0a0b10;
-  min-height: 320px;      /* Fallback */
-  flex: 1 1 auto;         /* nimmt restlichen Platz */
-  display:flex;
 }
     
 .mapTint,
