@@ -830,7 +830,6 @@ const baseNoLabels = L.tileLayer(
 );
 
 // Canvas Renderer + Layergroup für Lichter
-const canvasRenderer = L.canvas({ padding: 0.5 });
 const lightsLayer = L.layerGroup().addTo(map);
 let myExactLatLng = null;
 
@@ -847,7 +846,6 @@ function anonymize(lat, lng) {
 
 // Ghost-Licht (Cursor)
 const ghost = L.circleMarker([0,0], {
-  renderer: canvasRenderer,
   radius: 10,
   stroke: false,
   fill: true,
@@ -857,7 +855,6 @@ const ghost = L.circleMarker([0,0], {
 }).addTo(map);
 
 const ghostCore = L.circleMarker([0,0], {
-  renderer: canvasRenderer,
   radius: 2.2,
   stroke: false,
   fill: true,
@@ -882,21 +879,19 @@ map.on("mousemove", (e) => {
 
 // Lichter zeichnen
 function addLight(latlng, isMine=false){
-  if(!isMine){
-    L.circleMarker(latlng, {
-      renderer: canvasRenderer,
-      radius: 1.35,
-      stroke: false,
-      fill: true,
-      fillOpacity: 0.70,
-      fillColor: "rgba(255,250,245,1)",
-      interactive: false
-    }).addTo(lightsLayer);
-    return;
-  }
 
   L.circleMarker(latlng, {
-    renderer: canvasRenderer,
+    radius: isMine ? 2.6 : 1.35,
+    stroke: false,
+    fill: true,
+    fillOpacity: isMine ? 0.95 : 0.70,
+    fillColor: "rgba(255,250,245,1)",
+    interactive: isMine
+  }).addTo(lightsLayer);
+
+}
+
+  L.circleMarker(latlng, {
     radius: 2.6,
     stroke: false,
     fill: true,
