@@ -50,44 +50,34 @@
       font-family: system-ui, -apple-system, "Inter", sans-serif;
     }
 
-.wrap{
-  width:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  padding:60px 0;
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 0;
 }
 
-.content{
-  width:100%;
-  max-width:1000px;
+.content {
+  width: 100%;
+  max-width: 1000px;
 }
 
 .teleprompter,
-.mapWrap{
-  width:100%;
-  border-radius:22px;
-  border:1px solid rgba(255,255,255,0.08);
+.mapWrap {
+  width: 100%;
+  max-width: 1000px;
+  margin-bottom: 40px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.08);
   box-shadow: 0 20px 60px rgba(0,0,0,0.45);
 }
 
-.teleprompter{
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.06),
-    rgba(255,255,255,0.03)
-  );
-  padding:30px 40px;
-  margin-bottom:40px;
+.teleprompter {
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+  padding: 30px 30px;  
 }
 
-.mapWrap{
-  position:relative;
-  overflow:hidden;
-  background:#0a0b10;
-}
-
-#map{
+#map {
   width:100%;
   height:520px;
 }
@@ -196,8 +186,6 @@
       <button id="tp-next" class="tp-btn">→</button>
     </div>
   </div>
- </div>
-
   <div class="mapWrap">
     <div class="hud">
       <button id="btnWorld"></button>
@@ -206,11 +194,10 @@
     <div id="map"></div>
     <div class="mapDarkOverlay"></div>
   </div>
-
+</div>
   <p id="privacyHint" class="privacy-hint"></p>
   <p id="status" class="status"></p>
   <p id="hint" class="hint"></p>
-
 </div>
 <script>
 
@@ -637,7 +624,7 @@ const tileUrlLabels   = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{
 const tileUrlNoLabels = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
 
 const baseWithLabels = L.tileLayer(
-  'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+  'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',
   {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
     maxZoom: 18,
