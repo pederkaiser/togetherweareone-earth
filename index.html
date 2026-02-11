@@ -949,6 +949,8 @@ function waitTiles(layer){
   });
 }
 
+console.log("Export points:", allLightPoints);
+  
 // WICHTIG: Export-Lichter als SVG (kein Canvas Renderer) -> verhindert "Versatz" in leaflet-image
 function buildExportLightsLayer(points, mySession) {
   const exportLayer = L.layerGroup();
