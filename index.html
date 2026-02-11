@@ -1237,9 +1237,15 @@ function waitTiles(layer){
 document.getElementById("btnCard").addEventListener("click", async () => {
   try {
     setStatus("status_export");
-
     goWorld(false);
-    await waitMoveEnd(map);
+
+await new Promise(resolve => {
+  map.once("moveend", () => {
+    requestAnimationFrame(() =>
+      requestAnimationFrame(resolve)
+    );
+  });
+});
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
     if (map.hasLayer(voyagerTiles)) map.removeLayer(voyagerTiles);
