@@ -50,33 +50,37 @@
       font-family: system-ui, -apple-system, "Inter", sans-serif;
     }
 
-    .wrap{
-  width:100%;
+.wrap{
   max-width:1000px;
   margin:0 auto;
-  padding:24px 16px 40px 16px;
-  box-sizing:border-box;
+  padding:40px 0 60px 0;  /* KEIN seitliches Padding */
 }
 
 .teleprompter,
 .mapWrap{
   width:100%;
+  max-width:1000px;
+  margin:0 auto 30px auto;
   border-radius:22px;
   border:1px solid rgba(255,255,255,0.08);
   box-shadow: 0 20px 60px rgba(0,0,0,0.45);
-  backdrop-filter: blur(12px);
 }
 
 .teleprompter{
-  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-  padding:26px 22px;
-  margin-bottom:28px;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.06),
+    rgba(255,255,255,0.03)
+  );
+  padding:30px 40px;   
+  backdrop-filter: blur(14px);
 }
 
 .mapWrap{
-  background:#0a0b10;
-  overflow:hidden;
   position:relative;
+  overflow:hidden;
+  background:#0a0b10;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
 }
 
 #map{
@@ -92,11 +96,7 @@
   pointer-events:none;
   position:absolute;
   inset:0;
-  background:
-    radial-gradient(900px 500px at 50% 10%,
-      rgba(0,0,0,0.3),
-      rgba(0,0,0,0.8) 70%);
-  mix-blend-mode: multiply;
+  background: rgba(0,0,0,0.35);   /* heller als vorher */
 }
     
 .leaflet-container {
@@ -631,7 +631,7 @@ const tileUrlLabels   = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{
 const tileUrlNoLabels = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
 
 const baseWithLabels = L.tileLayer(
-  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
   {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
     maxZoom: 18,
