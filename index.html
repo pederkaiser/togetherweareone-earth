@@ -1217,37 +1217,33 @@ async function loadLights(){
     lightsLayer.clearLayers();
 
     let mine = null;
+
     for(const row of (data || [])){
       const isMine = (row.session === session);
       if(isMine) mine = row;
 
-      if (isMine && myExactLatLng) addLight([myExactLatLng.lat, myExactLatLng.lng], true);
-      else addLight([row.lat, row.lng], isMine);
+      if (isMine && myExactLatLng)
+        addLight([myExactLatLng.lat, myExactLatLng.lng], true);
+      else
+        addLight([row.lat, row.lng], isMine);
     }
 
     allLightPoints = data || [];
 
     const hintEl = document.getElementById("hint");
+    const actions = document.querySelector(".map-actions");
+
     if (mine) {
       if (hintEl) hintEl.style.display = "none";
       setStatus("status_set");
+      if (actions) actions.style.opacity = "1";
     } else {
       if (hintEl) hintEl.style.display = "block";
       setStatus("status_empty");
-     const actions = document.querySelector(".map-actions");
-
-if (mine) {
-  if (hintEl) hintEl.style.display = "none";
-  setStatus("status_set");
-  if (actions) actions.style.opacity = "1";
-} else {
-  if (hintEl) hintEl.style.display = "block";
-  setStatus("status_empty");
-  if (actions) actions.style.opacity = "0.5";
-}
+      if (actions) actions.style.opacity = "0.5";
     }
 
-  }catch(e){
+  } catch(e){
     console.error(e);
     setStatus("status_error_load");
   }
