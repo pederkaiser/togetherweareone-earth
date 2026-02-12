@@ -1276,35 +1276,27 @@ map.on('click', async (e) => {
 /* -------------------------
    8) Export
 -------------------------- */
-function waitMoveEnd(m) {
-  return new Promise(resolve => {
-    let done = false;
-    const finish = () => {
-      if(done) return;
-      done = true;
-      m.off("moveend", finish);
-      resolve();
-    };
-    m.once("moveend", finish);
-    setTimeout(finish, 450);
-  });
-}
 
-function waitTiles(layer){
-  return new Promise(resolve => {
-    let done = false;
-    const finish = () => {
-      if(done) return;
-      done = true;
-      layer.off("load", finish);
-      requestAnimationFrame(() => requestAnimationFrame(resolve));
-    };
-    layer.once("load", finish);
-    setTimeout(finish, 1800);
-  });
-}
+document.getElementById("btnCard").addEventListener("click", async () => {
+  try {
 
-if (map.has
+    setStatus("status_export");
+
+    // 🌍 Welt exakt fitten
+    goWorld(false);
+    await waitMoveEnd(map);
+    map.invalidateSize(true);
+
+    await new Promise(r =>
+      requestAnimationFrame(() =>
+        requestAnimationFrame(r)
+      )
+    );
+
+    if (map.hasLayer(voyagerTiles)) {
+      map.removeLayer(voyagerTiles);
+    }
+
     exportTiles.addTo(map);
     await waitTiles(exportTiles);
 
@@ -1313,6 +1305,7 @@ if (map.has
     const exportLayer = L.layerGroup();
     for (const row of allLightPoints) {
       const isMine = row.session === session;
+
       L.circleMarker([row.lat, row.lng], {
         radius: isMine ? 2.6 : 1.35,
         stroke: false,
@@ -1321,9 +1314,14 @@ if (map.has
         fillColor: "rgba(255,250,245,1)"
       }).addTo(exportLayer);
     }
+
     exportLayer.addTo(map);
 
-    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await new Promise(r =>
+      requestAnimationFrame(() =>
+        requestAnimationFrame(r)
+      )
+    );
 
     const tiles = document.querySelectorAll(".leaflet-tile");
     tiles.forEach(t => t.style.filter = "none");
@@ -1331,9 +1329,15 @@ if (map.has
     const overlay = document.querySelector(".mapDarkOverlay");
     if (overlay) overlay.style.display = "none";
 
-    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await new Promise(r =>
+      requestAnimationFrame(() =>
+        requestAnimationFrame(r)
+      )
+    );
 
     leafletImage(map, function(err, canvas){
+
+      // restore
       tiles.forEach(t => t.style.filter = "");
       if (overlay) overlay.style.display = "";
 
