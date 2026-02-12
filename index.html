@@ -1152,7 +1152,12 @@ function addLight(latlng, isMine=false){
 }
 
 map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: false });
-function goWorld(){ map.setView(WORLD_VIEW.center, WORLD_VIEW.zoom, { animate: false }); }
+function goWorld(animate = false){
+  map.fitBounds(WORLD_BOUNDS, {
+    animate,
+    padding: [0, 0]
+  });
+}
 
 map.whenReady(() => {
   afterTwoFrames(() => {
@@ -1299,14 +1304,7 @@ function waitTiles(layer){
   });
 }
 
-document.getElementById("btnCard").addEventListener("click", async () => {
-  try {
-    setStatus("status_export");
-
-    goWorld();
-    await waitMoveEnd(map);
-
-    if (map.hasLayer(voyagerTiles)) map.removeLayer(voyagerTiles);
+if (map.has
     exportTiles.addTo(map);
     await waitTiles(exportTiles);
 
